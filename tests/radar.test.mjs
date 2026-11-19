@@ -47,11 +47,19 @@ test('radar shows post-Nature values above the original base numbers', () => {
     ['Sp. Atk','spa'],['Sp. Def','spd'],['Speed','spe']]) {
     const label=statLabels.find(s=>s.includes('>'+name+'</text>'));
     assert.ok(label,'Missing '+name);
-    const adjustedLabel=label.match(/class="stat-radar-label-effective[^"]*" y="11">([^<]+)<\/text>/)?.[1];
-    const baseLabel=label.match(/class="stat-radar-label-base" y="25">([^<]+)<\/text>/)?.[1];
-    assert.equal(adjustedLabel?.replace(/[↑↓]/g,''),String(build.effectiveStats[key]),name+' adjusted value');
-    assert.equal(baseLabel,String(build.baseStats[key]),name+' base value beneath it');
-    assert.ok(svg.includes(name+': after Nature '+build.effectiveStats[key]+', base '+build.baseStats[key]));
+    const numberCount=(label.match(/stat-radar-label-(?:effective|base|single)/g)||[]).length;
+    if(build.effectiveStats[key]===build.baseStats[key]) {
+      assert.equal(numberCount,1,name+' should show only one number');
+      assert.match(label,new RegExp('class="stat-radar-label-single" y="15">'+build.baseStats[key]+'<'));
+      assert.ok(svg.includes(name+': base '+build.baseStats[key]));
+    } else {
+      assert.equal(numberCount,2,name+' should show two numbers');
+      const adjustedLabel=label.match(/class="stat-radar-label-effective[^"]*" y="11">([^<]+)<\/text>/)?.[1];
+      const baseLabel=label.match(/class="stat-radar-label-base" y="25">([^<]+)<\/text>/)?.[1];
+      assert.equal(adjustedLabel?.replace(/[↑↓]/g,''),String(build.effectiveStats[key]),name+' adjusted value');
+      assert.equal(baseLabel,String(build.baseStats[key]),name+' base value beneath it');
+      assert.ok(svg.includes(name+': after Nature '+build.effectiveStats[key]+', base '+build.baseStats[key]));
+    }
   }
   assert.equal(build.baseStats.spa,109);
   assert.equal(build.effectiveStats.spa,119);
@@ -59,6 +67,15 @@ test('radar shows post-Nature values above the original base numbers', () => {
   assert.equal(build.effectiveStats.spe,54);
   assert.ok(statLabels.some(s=>s.includes('>↑119</text>')&&s.includes('>109</text>')));
   assert.ok(statLabels.some(s=>s.includes('>↓54</text>')&&s.includes('>61</text>')));
+});
+
+test('without Nature changes every radar axis has a single base value', () => {
+  const base={hp:95,atk:100,def:85,spa:90,spd:80,spe:85};
+  const svg=renderStatRadar(base);
+  assert.equal((svg.match(/class="stat-radar-label-single"/g)||[]).length,6);
+  assert.doesNotMatch(svg,/class="stat-radar-label-effective/);
+  assert.doesNotMatch(svg,/class="stat-radar-label-base"/);
+  assert.match(svg,/Sp\. Atk: base 90/);
 });
 
 test('radar preserves Speed at bottom and Sp. Attack at upper-left', () => {
