@@ -189,3 +189,40 @@ a{color:inherit}
 @media(max-width:850px){.workspace{grid-template-columns:1fr;gap:38px;padding-top:43px}.result-column{position:static;max-width:650px;width:100%;margin:auto}.result-header{margin-top:6px}.hero{padding:58px 0 47px}.hero h1{letter-spacing:-3px}.input-column{max-width:750px;width:100%;margin:auto}.result-frame{min-height:auto}}
 @media(max-width:560px){.page{padding:0 17px}.site-header{height:73px}.brand{font-size:13px;letter-spacing:-.45px;gap:8px}.brand-mark{width:28px;height:28px}.brand-mark:before{top:12px}.brand-mark span{width:10px;height:10px}.header-link{font-size:11px}.hero{padding:48px 0 39px}.hero h1{font-size:clamp(42px,11.5vw,59px);letter-spacing:-2.6px;margin:19px 0}.hero p{font-size:14px;line-height:1.65}.eyebrow{font-size:9px}.hero-meta{font-size:9px;gap:10px;margin-top:26px}.hero-meta strong{font-size:12px}.meta-divider{height:12px}.workspace{padding:35px 0 55px}.section-heading h2{font-size:25px}.input-panel{padding:21px 16px}.ennea-grid{gap:7px}.ennea-score{padding:8px}.field-grid.two{gap:8px}.field input,.field select{font-size:12px;padding:11px 8px}.action-bar{flex-direction:column;align-items:stretch}.primary-button{width:100%}.action-aside{text-align:center}.ability-list,.moves{gap:7px}.ability-box,.move{padding:10px}.footer{font-size:8px;line-height:1.6}.creature-illustration{height:174px}.result-frame{border-radius:14px}.stat-row{grid-template-columns:67px 1fr 70px;gap:7px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+
+/* Real Pokémon matches — bonus section beneath the personality analysis */
+.relatives{border-top:1px solid #405750;background:#111b20}
+.relatives-content{padding:25px 22px 25px}
+.relatives-heading{padding-bottom:21px;border-bottom:1px solid #314344}
+.relatives-index,.relative-overline{font:10px 'DM Mono',monospace;color:var(--accent);letter-spacing:1px}
+.relatives-heading h4{font:700 27px/1.15 'Space Grotesk',sans-serif;letter-spacing:-1px;margin:9px 0 7px}
+.relatives-heading h4 em{font-style:normal;color:var(--accent)}
+.relatives-heading p{font-size:12px;color:#9eb4ab;line-height:1.65;margin:0}
+.relative-group{margin-top:23px}
+.relative-group-heading h5{font:700 19px 'Space Grotesk',sans-serif;margin:6px 0 4px;letter-spacing:-.5px}
+.relative-group-heading p{font-size:11px;color:#99aea8;line-height:1.6;margin:0 0 12px}
+.relative-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:0;margin:0;list-style:none}
+.relative-card{display:flex;align-items:center;gap:9px;min-width:0;border:1px solid #334648;border-radius:10px;background:#1a292d;padding:10px 9px}
+.relative-art{flex:0 0 62px;height:69px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#3b504f80,transparent 72%);overflow:hidden}
+.relative-art img{height:65px;width:65px;object-fit:contain;filter:drop-shadow(0 6px 7px #0005)}
+.relative-image-fallback{font-size:29px;color:#78958c}
+.relative-card-copy{min-width:0;flex:1}
+.relative-card-copy strong{display:block;overflow-wrap:anywhere;font:700 12px/1.2 'Space Grotesk',sans-serif;color:#ebf1e9}
+.relative-types{display:flex;gap:4px;flex-wrap:wrap;margin:7px 0 5px}
+.relative-type{font:700 9px 'DM Mono',monospace;color:#14211e;background:var(--relative-type);border-radius:4px;padding:3px 5px}
+.relative-detail{display:block;font:9px/1.5 'DM Mono',monospace;color:#9fb0a6}
+.relative-empty{padding:13px;background:#1b292d;border:1px dashed #3d5050;border-radius:8px;color:#9cafa9;font-size:11px;line-height:1.65}
+.relatives-source{border-top:1px solid #344746;margin:24px 0 0;padding-top:14px;font:10px/1.8 'DM Mono',monospace;color:#8ca198}
+.relatives-source a{color:var(--accent);text-decoration:underline;text-decoration-color:#647b48;text-underline-offset:3px}
+.relatives-loading,.relatives-unavailable{padding:30px 22px;color:#b5c7bb;font-size:12px;line-height:1.7;text-align:center}
+.relatives-loader{display:inline-block;border:2px solid #3f5c54;border-top-color:var(--accent);width:25px;height:25px;border-radius:50%;animation:relative-spin .8s linear infinite}
+@keyframes relative-spin{to{transform:rotate(360deg)}}
+.relatives-loading p{margin:11px 0 0}
+.relatives-unavailable strong{display:block;color:var(--text);font:700 15px 'Space Grotesk',sans-serif}
+.relatives-unavailable p{max-width:310px;margin:6px auto 13px}
+.relatives-retry{padding:9px 14px;border-radius:7px;background:#233731;border:1px solid #567b5e;color:var(--accent);font-size:12px}
+@media(max-width:1070px){.relatives-content{padding:23px 16px}.relative-art{flex-basis:51px;height:60px}.relative-art img{height:58px;width:58px}.relative-card{gap:6px;padding:9px 7px}.relative-card-copy strong{font-size:11px}}
+@media(max-width:850px){.relative-art{flex-basis:65px;height:72px}.relative-art img{width:69px;height:69px}.relative-card{gap:10px;padding:10px}.relative-card-copy strong{font-size:13px}}
+@media(max-width:450px){.relatives-content{padding:23px 14px}.relative-grid{gap:7px}.relative-card{flex-direction:column;align-items:flex-start;gap:4px;min-height:154px}.relative-art{align-self:center;flex:none;height:71px;width:100%}.relative-art img{height:70px;width:80px}.relative-card-copy{width:100%}.relative-card-copy strong{font-size:12px}.relative-type{font-size:8px;padding:3px 4px}}
+@media(prefers-reduced-motion:reduce){.relatives-loader{animation:none}}
