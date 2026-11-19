@@ -1,10 +1,12 @@
 // Game-design mappings. These are thematic interpretations, not psychological diagnoses.
+// Type badge colors sampled from Pokémon Scarlet & Violet's main-series type palette.
+// Reference: https://bulbapedia.bulbagarden.net/wiki/Help:Color_templates
 export const TYPE_COLORS = {
-  Normal: '#A8A29E', Fire: '#F97352', Water: '#5B9FE7', Electric: '#F5C84C',
-  Grass: '#68BA85', Ice: '#78CBE6', Fighting: '#D67C65', Poison: '#B17AD2',
-  Ground: '#D7AC75', Flying: '#94B6E7', Psychic: '#E78DB8', Bug: '#93B85C',
-  Rock: '#BAA482', Ghost: '#9683CE', Dragon: '#8277DF', Dark: '#74718E',
-  Steel: '#92A8BD', Fairy: '#E8A9D5'
+  Normal: '#9FA19F', Fire: '#E62829', Water: '#2980EF', Electric: '#FAC000',
+  Grass: '#3FA129', Ice: '#3DCEF3', Fighting: '#FF8000', Poison: '#9141CB',
+  Ground: '#915121', Flying: '#81B9EF', Psychic: '#EF4179', Bug: '#91A119',
+  Rock: '#AFA981', Ghost: '#704170', Dragon: '#5060E1', Dark: '#624D4E',
+  Steel: '#60A1B8', Fairy: '#EF70EF'
 };
 
 export const PAIR_TYPES = {
