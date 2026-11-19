@@ -38,10 +38,16 @@ const AXIS_LABELS = [
   { x: 47, y: 87 }
 ];
 
-export function renderStatRadar(baseStats) {
+export function renderStatRadar(baseStats, effectiveStats = baseStats) {
   const values = RADAR_ORDER.map(index => baseStats?.[STAT_KEYS[index]]);
   if (values.some(value => !Number.isFinite(value) || value < 0 || value > RADAR_MAX)) {
     throw new Error('The radar chart requires six valid base stats.');
+  }
+  const afterNature = RADAR_ORDER.map(index => effectiveStats?.[STAT_KEYS[index]]);
+  // A Nature boost can exceed the 140-point base cap (up to 154); the radar
+  // polygon intentionally stays on the fixed 140-point BASE stat scale.
+  if (afterNature.some(value => !Number.isInteger(value) || value < 0 || value > 160)) {
+    throw new Error('The radar chart requires six valid post-Nature stats.');
   }
 
   const grid = [35, 70, 105, 140].map((level, i) =>
@@ -60,18 +66,24 @@ export function renderStatRadar(baseStats) {
     return '<circle class="stat-radar-point" cx="'+x+'" cy="'+y+'" r="3.6"/>';
   }).join('');
 
-  const labels = values.map((value, i) =>
-    '<g class="stat-radar-label" transform="translate('+AXIS_LABELS[i].x+' '+AXIS_LABELS[i].y+')">'+
-      '<text class="stat-radar-label-name" y="0">'+STAT_NAMES[RADAR_ORDER[i]]+'</text>'+
-      '<text class="stat-radar-label-value" y="16">'+value+'</text>'+
-    '</g>'
-  ).join('');
+  const labels = values.map((value, i) => {
+    const adjusted = afterNature[i];
+    const direction = adjusted > value ? ' stat-boost' : adjusted < value ? ' stat-drop' : '';
+    const arrow = adjusted > value ? '↑' : adjusted < value ? '↓' : '';
+    return '<g class="stat-radar-label" transform="translate('+AXIS_LABELS[i].x+' '+AXIS_LABELS[i].y+')">'+
+      '<text class="stat-radar-label-name" y="-4">'+STAT_NAMES[RADAR_ORDER[i]]+'</text>'+
+      '<text class="stat-radar-label-effective'+direction+'" y="11">'+arrow+adjusted+'</text>'+
+      '<text class="stat-radar-label-base" y="25">'+value+'</text>'+
+    '</g>';
+  }).join('');
 
-  const description = RADAR_ORDER.map((index, i) => STAT_NAMES[index] + ' ' + values[i]).join(', ');
+  const description = RADAR_ORDER.map((index, i) =>
+    STAT_NAMES[index] + ': after Nature ' + afterNature[i] + ', base ' + values[i]
+  ).join('; ');
   return '<svg class="stat-radar" viewBox="0 0 360 337" xmlns="http://www.w3.org/2000/svg" role="img" '+
     'aria-labelledby="stat-radar-title stat-radar-description">'+
-    '<title id="stat-radar-title">Six-stat base profile radar chart</title>'+
-    '<desc id="stat-radar-description">'+description+'. Scale: zero to 140 on each axis.</desc>'+
+    '<title id="stat-radar-title">Six-stat radar, post-Nature values above base values</title>'+
+    '<desc id="stat-radar-description">'+description+'. Base stat polygon scale: zero to 140 on each axis.</desc>'+
     '<g class="stat-radar-grid">'+grid+axes+'</g>'+
     '<polygon class="stat-radar-shape" points="'+radarPolygon(values)+'"/>'+
     '<g class="stat-radar-vertices">'+vertices+'</g>'+
