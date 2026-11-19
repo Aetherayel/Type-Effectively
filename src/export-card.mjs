@@ -29,7 +29,7 @@ export function buildCardSvg(build) {
   // The stat renderer validates each numerical value and gives all six
   // axes the same arrangement as the onscreen card.
   const embeddedRadar=renderStatRadar(build.baseStats,build.effectiveStats)
-    .replace('<svg class="stat-radar"','<svg x="66" y="426" width="828" height="775" class="stat-radar"');
+    .replace('<svg class="stat-radar"','<svg x="90" y="426" width="780" height="730" class="stat-radar"');
 
   const p=TYPE_COLORS[build.types[0]],s=TYPE_COLORS[build.types[1]||build.types[0]];
   const role=build.role.primary.name+(build.role.secondary?' / '+build.role.secondary.name:'');
