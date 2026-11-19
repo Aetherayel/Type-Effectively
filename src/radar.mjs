@@ -30,7 +30,7 @@ export function radarPolygon(values) {
 }
 
 const AXIS_LABELS = [
-  { x: 180, y: 15 },
+  { x: 180, y: 20 },
   { x: 313, y: 87 },
   { x: 313, y: 230 },
   { x: 180, y: 305 },
