@@ -183,12 +183,36 @@ a{color:inherit}
 .move .mini-label{font-size:9px}
 .move strong{font:700 14px 'Space Grotesk',sans-serif}
 .move p{font-size:10px;color:#91a7a0;line-height:1.5;margin:7px 0 0}
+/* Defensive matchups use the game's type effectiveness, not personality traits. */
+.matchup-panel{margin-top:24px;padding-top:21px;border-top:1px solid #304246}
+.matchup-explain{margin:-2px 0 15px;font-size:11px;line-height:1.6;color:#a1b7b0}
+.matchup-grid{display:grid;gap:10px}
+.matchup-row{display:grid;grid-template-columns:113px minmax(0,1fr);align-items:start;gap:9px}
+.matchup-label{padding-top:7px;font:10px/1.4 'DM Mono',monospace;color:#b5c5bc}
+.matchup-danger .matchup-label{color:#f9b5a6}
+.matchup-immune .matchup-label{color:#b7e6d2}
+.matchup-types{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.matchup-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 7px 5px 9px;
+  border:1px solid color-mix(in srgb,var(--matchup-type) 57%,#223238);
+  border-radius:6px;
+  background:color-mix(in srgb,var(--matchup-type) 20%,#122127);
+  font:10px 'DM Mono',monospace;color:#edf8f3
+}
+.matchup-chip strong{font-weight:700}
+.matchup-chip>span{font-size:9px;color:#cbded6}
+.matchup-none{padding-top:7px;color:#708b84;font:10px 'DM Mono',monospace}
+.matchup-caveat{margin:14px 0 0;color:#78958b;font:10px/1.65 'DM Mono',monospace}
+
 .explain{border-top:1px solid #304246;margin-top:24px;padding-top:17px}
 .explain summary{cursor:pointer;font:700 12px 'Space Grotesk',sans-serif;color:var(--accent)}
 .explain p{font-size:11px;color:#a5b8b1;line-height:1.7;margin:11px 0 0}
 .explain ul{color:#a5b8b1;font-size:11px;line-height:1.7;padding-left:18px}
 .warning-note{margin-top:13px;background:#2a2a21;border:1px solid #62583a;border-radius:8px;padding:12px;font-size:11px;line-height:1.65;color:#e8d7ad}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:23px}
+.result-actions .primary-export{grid-column:1/-1;background:color-mix(in srgb,var(--pcolor) 15%,#20352e);border-color:color-mix(in srgb,var(--pcolor) 45%,#4e665d)}
+.result-actions button:disabled{opacity:.6;cursor:progress}
 .outline-button{border:1px solid #4e665d;background:#22332f;color:var(--accent);border-radius:9px;padding:12px 8px;font-weight:700;font-size:12px}
 .outline-button:hover{border-color:var(--accent);background:#2d4536}
 .footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid var(--line-soft);padding:28px 0 36px;color:#768d88;font-size:9px;letter-spacing:.6px}
@@ -254,4 +278,10 @@ a{color:inherit}
   .pokemon-intro{padding:14px 12px 17px}
   .result-body{padding:19px 12px 22px}
   .card-kicker,.result-id{font-size:8px}
+}
+
+@media(max-width:450px){
+  .matchup-row{grid-template-columns:99px minmax(0,1fr);gap:6px}
+  .matchup-label{font-size:9px}
+  .matchup-chip{font-size:9px;gap:5px;padding:5px 6px}
 }
