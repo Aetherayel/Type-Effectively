@@ -3,6 +3,7 @@ import {
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs';
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
+import { renderRelatives } from './relatives-ui.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -253,6 +254,8 @@ function renderCard(build) {
   $('result-status').innerHTML='<span></span> BUILD COMPLETE';
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
+  // Optional real-Pokémon comparisons load only after the base build is complete.
+  void renderRelatives(build,$('result-container'));
 }
 function buildSummary(b) {
   return [
