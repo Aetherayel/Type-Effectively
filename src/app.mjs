@@ -25,10 +25,12 @@ function escapeHtml(text) {
 function sliderMarkup(prefix,index,title,left,right,value=50) {
   const id=prefix+'-'+index;
   const poles=left && right ? '<div class="range-poles"><span>'+left+'</span><span>'+right+'</span></div>' : '';
+  const mbti=prefix==='mbti';
+  const poleControl=mbti?'<select class="pole-select" id="'+id+'-pole" aria-label="'+title+' reported preference"><option value="left">'+left+'</option><option value="right" selected>'+right+'</option></select>':'';
   return '<div class="range-field">' +
-    '<label class="range-top" for="'+id+'"><strong>'+title+'</strong><span class="range-percent" id="'+id+'-readout">'+value+'%</span></label>' +
+    '<label class="range-top" for="'+id+'"><strong>'+title+'</strong><span class="range-percent" id="'+id+'-readout">50% · balanced</span></label>' +
     '<div class="range-bottom"><input class="range-control" id="'+id+'" type="range" min="0" max="100" step="1" value="'+value+'" data-score="'+prefix+'"/>' +
-    '<input class="range-number" type="number" min="0" max="100" step="1" value="'+value+'" id="'+id+'-number" aria-label="'+title+' percentage" data-number-for="'+id+'"/></div>'+poles+'</div>';
+    '<input class="range-number" type="number" min="'+(mbti?'50':'0')+'" max="100" step="1" value="'+value+'" id="'+id+'-number" aria-label="'+title+' percentage" data-number-for="'+id+'"/>'+poleControl+'</div>'+poles+'</div>';
 }
 function enneagramMarkup(n) {
   return '<div class="ennea-score"><div class="ennea-head"><span>TYPE '+n+'</span><strong id="ennea-'+(n-1)+'-readout">50</strong></div>' +
@@ -51,13 +53,22 @@ function setupFields() {
   }));
   document.querySelectorAll('[data-number-for]').forEach(el=>el.addEventListener('input',()=>{
     if (el.value==='') return;
-    const num=Math.min(100,Math.max(0,Number(el.value)));
-    if (!Number.isFinite(num)) return;
     const ref=el.dataset.numberFor;
+    const isMbti=ref.startsWith('mbti-');
+    const num=Math.min(100,Math.max(isMbti?50:0,Number(el.value)));
+    if (!Number.isFinite(num)) return;
     state.touched[ref.split('-')[0]==='ennea'?'enneagram':ref.split('-')[0]]=true;
     state.demo=false;
-    syncSlider(ref,Math.round(num));
+    const score=isMbti?($(ref+'-pole').value==='right'?num:100-num):num;
+    syncSlider(ref,Math.round(score));
     updateDerived();
+  }));
+  document.querySelectorAll('.pole-select').forEach(el=>el.addEventListener('change',()=>{
+    const ref=el.id.replace('-pole','');
+    const percent=Number($(ref+'-number').value);
+    const score=el.value==='right'?percent:100-percent;
+    state.touched.mbti=true;state.demo=false;
+    syncSlider(ref,score);updateDerived();
   }));
   $('ennea-ranking').addEventListener('input',()=>{state.touched.enneagram=true;state.demo=false;updateDerived();});
   $('mbti-override').addEventListener('change',()=>{state.demo=false;updateDerived();});
@@ -67,9 +78,11 @@ function setupFields() {
 function syncSlider(id,value) {
   const v=Math.max(0,Math.min(100,Math.round(Number(value))));
   $(id).value=String(v);
-  $(id+'-number').value=String(v);
+  const isMbti=id.startsWith('mbti-');
+  $(id+'-number').value=String(isMbti?Math.max(v,100-v):v);
+  if(isMbti) $(id+'-pole').value=v>=50?'right':'left';
   const readout=$(id+'-readout');
-  if (id.startsWith('mbti-')) {
+  if (isMbti) {
     const index=Number(id.split('-')[1]);
     const [,,right]=mbtiAxes[index];
     const left=mbtiAxes[index][1];
