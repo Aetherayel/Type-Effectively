@@ -202,36 +202,32 @@ function statRows(build) {
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
-  const typeStack=build.types.map((type,index)=>
-    '<span class="elemental-type elemental-type-'+(index===0?'first':'second')+'">'+escapeHtml(type)+'</span>'
-  ).join('');
   const warningHtml=build.warnings.length?'<div class="warning-note"><strong>Estimated input:</strong><br />'+build.warnings.map(escapeHtml).join('<br />')+'</div>':'';
   const moveHtml=build.moves.map((move,i)=>'<div class="move"><span class="mini-label">'+escapeHtml(move.category)+'</span><strong>'+escapeHtml(move.name)+'</strong><p>'+escapeHtml(move.why)+'</p></div>').join('');
   const roleSecondary=build.role.secondary?' / '+build.role.secondary.name:'';
   $('result-container').innerHTML=
     '<article class="result-card'+(build.monotype?' monotype':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
     '<div class="pokemon-header">'+
-      '<div class="card-topline"><span class="card-kicker">YOUR PERSONALITY SPECIMEN</span><span class="result-id">#'+build.tritype+' / '+build.mbti+'</span></div>'+
-      '<div class="elemental-stage">'+
-        '<div class="elemental-type-stack" aria-label="Pokémon typing">'+typeStack+'</div>'+
-        '<div class="radar-panel">'+renderStatRadar(build.baseStats)+'</div>'+
+      '<div class="pokemon-type-accent" aria-hidden="true"></div>'+
+      '<div class="pokemon-intro">'+
+        '<div class="card-topline"><span class="card-kicker">PERSONALITY POKÉMON</span><span class="result-id">#'+build.tritype+' / '+escapeHtml(build.identity)+'</span></div>'+
+        '<h3>'+escapeHtml(build.title)+'</h3>'+
+        '<div class="pokemon-identity-row">'+
+          '<div class="type-chips">'+build.types.map(typeChip).join('')+'</div>'+
+          '<span class="pokemon-subtitle">'+escapeHtml(build.nature)+' Nature · '+build.core+'w'+build.wing+' · '+escapeHtml(build.role.primary.name+roleSecondary)+'</span>'+
+        '</div>'+
       '</div>'+
-      '<div class="radar-caption"><span>SIX BASE STATS</span><span>535 BST / MAX 140 PER STAT</span></div>'+
-    '</div>'+
-    '<div class="pokemon-intro">'+
-      '<h3>'+escapeHtml(build.title)+'</h3>'+
-      '<p class="pokemon-subtitle">'+escapeHtml(build.coreName)+' core · '+build.tritype+' tritype · '+escapeHtml(build.role.specialization)+'</p>'+
-      '<div class="type-chips">'+build.types.map(typeChip).join('')+'</div>'+
-    '</div>'+
-    '<div class="identity-strip">'+
-      '<div class="identity-cell"><span class="mini-label">Personality</span><strong>'+escapeHtml(build.identity)+'</strong></div>'+
-      '<div class="identity-cell"><span class="mini-label">Nature</span><strong>'+escapeHtml(build.nature)+'</strong></div>'+
-      '<div class="identity-cell"><span class="mini-label">Enneagram</span><strong>'+build.core+'w'+build.wing+'</strong></div>'+
     '</div>'+
     '<div class="result-body">'+
-      '<div class="result-section-title"><h4>Base stats</h4><span>535 BST · NATURE AFTER</span></div>'+
-      '<div class="stat-rows">'+statRows(build)+'</div>'+
-      '<div class="bst-footer"><span>BASE TOTAL <strong>535 / 535</strong></span><span>↑ '+escapeHtml(build.natureBoost.toUpperCase())+' / ↓ '+escapeHtml(build.natureDrop.toUpperCase())+'</span></div>'+
+      '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
+      '<div class="stat-visual">'+renderStatRadar(build.baseStats,build.effectiveStats)+
+        '<div class="stat-legend"><span><strong>TOP</strong> After Nature</span><span><strong>BOTTOM</strong> Base</span></div>'+
+      '</div>'+
+      '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
+      '<details class="stat-details"><summary>Detailed stats <span>View base values and adjustments</span></summary>'+
+        '<div class="stat-rows">'+statRows(build)+'</div>'+
+        '<div class="bst-footer"><span>BASE TOTAL <strong>535 / 535</strong></span><span>↑ '+escapeHtml(build.natureBoost.toUpperCase())+' / ↓ '+escapeHtml(build.natureDrop.toUpperCase())+'</span></div>'+
+      '</details>'+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
         '<p>'+escapeHtml(ROLE_DESCRIPTIONS[build.role.primary.name])+'</p>'+
         '<div class="role-subline">'+escapeHtml(build.role.specialization.toUpperCase())+' SPREAD · '+build.role.primary.score+'% ROLE FIT</div>'+
