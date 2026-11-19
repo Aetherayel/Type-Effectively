@@ -248,23 +248,27 @@ export function generateBuild(input) {
   const blend=STAT_KEYS.map((_,i)=>.7*oa[i]+.2*ea[i]+.1*ma[i]);
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
-  const types=[pairType(core,second),pairType(core,third)];
+  const pairTypes=[pairType(core,second),pairType(core,third)];
+  const types=[...new Set(pairTypes)]; // Matching pair types produce a monotype, not an invalid duplicate type.
   const hiddenType=pairType(second,third);
-  const role=classifyRole(effectiveStats,types);
-  const ability=chooseAbility(role.primary.name,types,effectiveStats,second);
+  const toolkitTypes=types.length===1?[types[0],types[0]]:types;
+  const role=classifyRole(effectiveStats,toolkitTypes);
+  const ability=chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
   let hiddenAbility=HIDDEN_ABILITY_BY_TYPE[hiddenType];
   if (hiddenAbility===ability.name) {
     hiddenAbility=ABILITIES.find(a=>a.name!==ability.name&&a.types.includes(hiddenType))?.name || 'Pressure';
   }
-  const moves=chooseMoves(types,role.primary.name,effectiveStats,core);
-  const identity=mbti + (mbtiScores[4] >= 50?'-T':'-A');
+  const moveTypes=types.length===1?[types[0],hiddenType]:types;
+  const moves=chooseMoves(moveTypes,role.primary.name,effectiveStats,core);
+  if (types.length===1) moves[1].category=hiddenType+' coverage (hidden pairing)';
+  const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
   return {
     mbti, identity, nature,
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
     tritype, suggestedTritype, suggestedType, wing:selectedWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'The '+archetype,
-    types,hiddenType,ability,hiddenAbility,moves,role,
+    types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,
     baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings
