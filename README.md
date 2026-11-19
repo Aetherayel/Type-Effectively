@@ -71,11 +71,11 @@ To update the index, run `npm run refresh:pokedex`, review the generated diff, a
 
 ## Downloadable card and defensive matchups
 
-**Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, standard Ability, six-stat radar, **held item, its real in-game effect, a dry punchline, and a brief personality rationale**, but **not the original questionnaire percentages or full input data**. No screenshot service, external image request, or new library is needed to export it.
+**Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **Raw questionnaire percentages and full input data are never exported.** The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
 
 ### Held items: a little too much personality
 
-The optional-feeling but deterministic **Held item** section is a humorous metaphor about coping strategies, not another psychological test or a battle modifier. It shows the item's real in-game effect, one dry caption, and a short **Why you got this** explanation tied to the individual's strongest input tendencies and battle role. It appears on both the results screen and the downloadable PNG.
+The optional-feeling but deterministic **Held item** section is a humorous metaphor about coping strategies, not another psychological test or a battle modifier. It shows the item's real in-game effect, one dry caption, and a short **Why you got this** explanation tied to the individual's strongest input tendencies and battle role. The results screen shows the full explanation alongside an authentic held-item sprite. The PNG includes the item icon, name and dry line, but omits its effect and reasoning so the card remains compact.
 
 The catalog contains **72 different real held items, eight per family**: control & certainty, protection & boundaries, endurance & recovery, ambition & performance, risk & improvisation, adaptability & escape, preparation & contingency, persistence & repetition, and support & relationships. No item is restricted to one MBTI or tritype. Varying the Big Five scores can produce different items even within the same tritype; identical complete inputs always produce identical selections. When Big Five was not entered, the explanation never pretends that neutral placeholder values were measured traits.
 
@@ -85,7 +85,7 @@ The **Type matchups** section evaluates incoming attacks against the generated o
 
 Every build is calculated locally in the browser. Nothing is written to a database and nothing is automatically stored in local storage. The PNG download exports a result summary without the original questionnaire scores. The optional **Copy share link** action encodes the entered results in the URL **fragment** (the portion after `#`); fragment contents are not sent in ordinary HTTP requests. Anyone who receives that link **can read the personality scores encoded in it**. Don't share a link you want to keep private.
 
-The page loads Google Fonts for typography and Pokémon artwork from the GitHub-hosted PokéAPI sprite collection. These third-party requests can expose normal network metadata such as IP address, but **do not include questionnaire scores**. The optional Pokédex snapshot is loaded from the same static website.
+The page loads Google Fonts for typography, Pokémon artwork and held-item icons from the GitHub-hosted PokéAPI sprite collection. PNG export loads only the selected item sprite (without questionnaire data) before drawing it onto a local canvas; the fallback icon is used when a sprite cannot be fetched. These third-party requests can expose normal network metadata such as IP address, but **do not include questionnaire scores**. The optional Pokédex snapshot is loaded from the same static website.
 
 ## Publishing via GitHub Pages
 
@@ -104,6 +104,7 @@ src/app.mjs               Browser form, overrides, cards, sharing
 src/matchups.mjs          Defensive type-chart calculations
 src/held-items-data.mjs   72 curated real items and personality affinity profiles
 src/held-items.mjs        Deterministic item selection and explanations
+src/item-sprites.mjs       Verified held-item sprite URLs and safe export loading
 src/export-card.mjs       Local SVG-to-PNG result card export
 src/relatives.mjs         Pure type, stat, and ability matchers
 src/relatives-ui.mjs      Bonus Pokémon cards and artwork fallbacks
