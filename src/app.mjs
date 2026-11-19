@@ -254,6 +254,16 @@ function renderCard(build) {
         '<div class="ability-box"><span class="mini-label">Standard ability</span><strong>'+escapeHtml(build.ability.name)+'</strong><p>'+escapeHtml(build.ability.desc)+'</p></div>'+
         '<div class="ability-box hidden-ability"><span class="mini-label">Hidden ability · '+escapeHtml(build.hiddenType)+'</span><strong>'+escapeHtml(build.hiddenAbility)+'</strong><p>Derived from the relationship between fixes '+build.second+' and '+build.third+'. Alternative ability, not active simultaneously.</p></div>'+
       '</div>'+
+      '<section class="held-item-section" aria-label="Thematic held item">'+
+        '<div class="result-section-title"><h4>Held item</h4><span>PERSONALITY FLAVOR</span></div>'+
+        '<div class="held-item-card">'+
+          '<div class="held-item-heading"><strong>'+escapeHtml(build.heldItem.name)+'</strong><span>'+escapeHtml(build.heldItem.familyLabel)+'</span></div>'+
+          '<p class="held-item-effect">'+escapeHtml(build.heldItem.effect)+'</p>'+
+          '<p class="held-item-quip">“'+escapeHtml(build.heldItem.quip)+'”</p>'+
+          '<div class="held-item-why"><span class="mini-label">WHY YOU GOT THIS</span>'+escapeHtml(build.heldItem.why)+'</div>'+
+        '</div>'+
+        '<p class="held-item-caveat">A personality metaphor, not an active battle modifier.</p>'+
+      '</section>'+
       '<div class="result-section-title"><h4>Signature moveset</h4><span>04 MOVES</span></div>'+
       '<div class="moves">'+moveHtml+'</div>'+
       renderMatchups(build.types)+
@@ -263,6 +273,7 @@ function renderCard(build) {
         'The '+escapeHtml(build.hiddenType)+' hidden pairing influences the Hidden Ability.</p>'+
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Abilities and moves are then matched to the role and personality themes, not necessarily to any official species learnset.</p>'+
+        '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. The item is for humor and does not modify calculated stats or type matchups.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
@@ -298,6 +309,7 @@ function buildSummary(b) {
     'Role: '+b.role.primary.name+(b.role.secondary?' / '+b.role.secondary.name:''),
     'BST 535: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
     'Ability: '+b.ability.name+' · Hidden: '+b.hiddenAbility,
+    'Held item: '+b.heldItem.name+' — '+b.heldItem.quip,
     'Moves: '+b.moves.map(m=>m.name).join(' / '),
     'Unofficial personality Pokémon, not scientific assessment.'
   ].join('\n');
