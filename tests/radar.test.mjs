@@ -47,10 +47,10 @@ test('radar shows post-Nature values above the original base numbers', () => {
     ['Sp. Atk','spa'],['Sp. Def','spd'],['Speed','spe']]) {
     const label=statLabels.find(s=>s.includes('>'+name+'</text>'));
     assert.ok(label,'Missing '+name);
-    const effectivePosition=label.indexOf('>'+build.effectiveStats[key]+'</text>');
-    const basePosition=label.indexOf('>'+build.baseStats[key]+'</text>',effectivePosition+1);
-    assert.ok(effectivePosition>=0,name+' after-Nature stat missing');
-    assert.ok(basePosition>effectivePosition,name+' base stat must appear underneath');
+    const adjustedLabel=label.match(/class="stat-radar-label-effective[^"]*" y="11">([^<]+)<\/text>/)?.[1];
+    const baseLabel=label.match(/class="stat-radar-label-base" y="25">([^<]+)<\/text>/)?.[1];
+    assert.equal(adjustedLabel?.replace(/[↑↓]/g,''),String(build.effectiveStats[key]),name+' adjusted value');
+    assert.equal(baseLabel,String(build.baseStats[key]),name+' base value beneath it');
     assert.ok(svg.includes(name+': after Nature '+build.effectiveStats[key]+', base '+build.baseStats[key]));
   }
   assert.equal(build.baseStats.spa,109);
