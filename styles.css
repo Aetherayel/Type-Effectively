@@ -161,6 +161,7 @@ a{color:inherit}
 .stat-radar-label-effective.stat-boost{fill:#b8f286}
 .stat-radar-label-effective.stat-drop{fill:#ffc5a1}
 .stat-radar-label-base{font:11px 'DM Mono',monospace;fill:#9db3ac}
+.stat-radar-label-single{font:700 14px 'DM Mono',monospace;fill:#f5fff9}
 .stat-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 18px;color:#a7bcb5;font:10px 'DM Mono',monospace}
 .stat-legend strong{color:#eaf7ec;font-weight:700}
 .nature-summary{margin:12px 0 14px;color:#a2b7b1;font:11px/1.7 'DM Mono',monospace;text-align:center}
@@ -269,6 +270,7 @@ a{color:inherit}
   .stat-visual{padding:4px 1px 12px}
   .stat-radar-label-name{font-size:13px}
   .stat-radar-label-effective{font-size:14px}
+  .stat-radar-label-single{font-size:14px}
   .stat-radar-label-base{font-size:11px}
   .stat-legend{font-size:9px}
   .nature-summary{font-size:10px}
