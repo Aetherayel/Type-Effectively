@@ -58,8 +58,6 @@ The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Con
 | ESFP-T · 714 | Electric / Ghost | Jolly | Ice |
 | Any type · 351 | Steel (mono) | Depends on type | Psychic |
 
-Use the two example buttons to populate and experiment with complete test-score profiles.
-
 ## Pokémon Relatives: real Pokémon comparisons
 
 Once your build is generated, a bonus section loads the versioned [local Pokédex index](data/pokedex.json), created from the public [PokéAPI CSV database](https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv). It includes **1,351 species entries and alternate forms** from the November 19, 2026 snapshot, including species identifiers, names, types, six base stats, and standard/hidden abilities. This remains static until the index is regenerated and committed.
