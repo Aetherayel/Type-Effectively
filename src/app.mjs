@@ -221,7 +221,7 @@ function renderCard(build) {
     '<div class="result-body">'+
       '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
       '<div class="stat-visual">'+renderStatRadar(build.baseStats,build.effectiveStats)+
-        '<div class="stat-legend"><span><strong>TOP</strong> After Nature</span><span><strong>BOTTOM</strong> Base</span></div>'+
+        '<div class="stat-legend"><span><strong>ONE</strong> Base stat</span><span><strong>↑ ↓</strong> Nature above base</span></div>'+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
       '<details class="stat-details"><summary>Detailed stats <span>View base values and adjustments</span></summary>'+
