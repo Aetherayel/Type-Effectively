@@ -4,11 +4,34 @@ import { renderStatRadar } from './radar.mjs';
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
 export const CARD_WIDTH = 960;
-export const CARD_HEIGHT = 1320;
+export const CARD_HEIGHT = 1660;
 
 const esc = value => String(value).replace(/[&<>"']/g,char=>({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'
 }[char]));
+
+// SVG has no automatic wrapping. Use line-broken tspans rather than a
+// foreignObject, which would be unreliable in canvas exports on mobile.
+function wrapText(value,maxCharacters=76) {
+  const words=String(value).split(/\s+/);
+  const lines=[];
+  let line='';
+  for(const word of words) {
+    if(line && (line.length+1+word.length)>maxCharacters) {
+      lines.push(line);
+      line=word;
+    } else line=line?line+' '+word:word;
+  }
+  if(line)lines.push(line);
+  return lines;
+}
+function svgLines(value,{x=76,y,size=18,lineHeight=26,maxCharacters=76,fill='#c5dbd2',weight=400,italic=false}) {
+  return '<text font-size="'+size+'" font-weight="'+weight+'" fill="'+fill+'"'+
+    (italic?' font-style="italic"':'')+'>'+
+    wrapText(value,maxCharacters).map((line,i)=>
+      '<tspan x="'+x+'" y="'+(y+i*lineHeight)+'">'+esc(line)+'</tspan>'
+    ).join('')+'</text>';
+}
 
 function typeBadges(types) {
   let x=76;
@@ -25,6 +48,9 @@ export function buildCardSvg(build) {
   if (!build || !Array.isArray(build.types) || !build.types.length ||
       build.types.length>2 || build.types.some(t=>!TYPE_COLORS[t])) {
     throw new Error('Cannot export a build without valid Pokémon typing.');
+  }
+  if(!build.heldItem?.name || !build.heldItem?.effect || !build.heldItem?.quip || !build.heldItem?.why) {
+    throw new Error('Cannot export a build without its held item.');
   }
   // The stat renderer validates each numerical value and gives all six
   // axes the same arrangement as the onscreen card.
@@ -45,7 +71,7 @@ export function buildCardSvg(build) {
       <stop offset="0%" stop-color="#1b3035"/>
       <stop offset="100%" stop-color="#111e23"/>
     </linearGradient>
-    <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1270" rx="30"/></clipPath>
+    <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1610" rx="30"/></clipPath>
   </defs>
   <style>
     text{font-family:Arial,Helvetica,sans-serif}
@@ -66,7 +92,7 @@ export function buildCardSvg(build) {
     .stat-radar-label-base{font-size:11px;fill:#9db9b1}
   </style>
   <rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="#0b161b"/>
-  <rect x="28" y="25" width="904" height="1270" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
+  <rect x="28" y="25" width="904" height="1610" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
   <g clip-path="url(#rounded-card)">
     <rect x="28" y="25" width="904" height="16" fill="url(#type-gradient)"/>
   </g>
@@ -80,9 +106,16 @@ export function buildCardSvg(build) {
   <text x="882" y="412" text-anchor="end" class="overline">535 BST</text>
   ${embeddedRadar}
   <text x="480" y="1203" text-anchor="middle" font-size="18" fill="#a9c2ba">${esc(build.nature)} Nature · +10% ${esc(build.natureBoost.toUpperCase())} / −10% ${esc(build.natureDrop.toUpperCase())}</text>
-  <line x1="76" x2="884" y1="1230" y2="1230" stroke="#4b6964"/>
-  <text x="76" y="1267" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
-  <text x="884" y="1267" text-anchor="end" font-size="11" fill="#8da69e">${esc(footer)}</text>
+  <line x1="76" x2="884" y1="1234" y2="1234" stroke="#4b6964"/>
+  <text x="76" y="1273" class="overline">HELD ITEM</text>
+  <text x="884" y="1273" text-anchor="end" font-size="15" fill="#90b9a4">${esc(build.heldItem.familyLabel.toUpperCase())}</text>
+  <text x="76" y="1320" font-size="34" font-weight="700" fill="#eaf8f0">${esc(build.heldItem.name)}</text>
+  ${svgLines(build.heldItem.effect,{y:1360,maxCharacters:78,size:18,lineHeight:24})}
+  ${svgLines('“'+build.heldItem.quip+'”',{y:1441,maxCharacters:73,size:20,lineHeight:25,fill:'#f1faed',italic:true})}
+  ${svgLines('WHY: '+build.heldItem.why,{y:1508,maxCharacters:98,size:15,lineHeight:21,fill:'#a9c7b5'})}
+  <line x1="76" x2="884" y1="1561" y2="1561" stroke="#4b6964"/>
+  <text x="76" y="1597" font-size="18" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
+  <text x="76" y="1621" font-size="12" fill="#8da69e">${esc(footer)}</text>
 </svg>`;
 }
 
