@@ -1,10 +1,11 @@
 import { TYPE_COLORS } from './data.mjs';
 import { renderStatRadar } from './radar.mjs';
+import { loadItemSprite } from './item-sprites.mjs';
 
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
 export const CARD_WIDTH = 960;
-export const CARD_HEIGHT = 1660;
+export const CARD_HEIGHT = 1700;
 
 const esc = value => String(value).replace(/[&<>"']/g,char=>({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'
@@ -44,23 +45,36 @@ function typeBadges(types) {
   }).join('');
 }
 
+function moveTiles(moves) {
+  if(!Array.isArray(moves)||moves.length!==4||moves.some(move=>!move?.name))
+    throw new Error('The export needs four signature moves.');
+  return moves.map((move,i)=>{
+    const x=76+(i%2)*409, y=1251+Math.floor(i/2)*91;
+    const category=String(move.category||'').toUpperCase();
+    const label=category.length>28?category.slice(0,27)+'…':category;
+    return '<rect x="'+x+'" y="'+y+'" width="399" height="80" rx="11" fill="#1b3034" stroke="#3b5854"/>'+
+      '<text x="'+(x+18)+'" y="'+(y+24)+'" font-size="13" font-weight="700" letter-spacing="1" fill="#9eb9b0">'+esc(label)+'</text>'+
+      svgLines(move.name,{x:x+18,y:y+54,maxCharacters:26,size:24,fill:'#f1faf4',weight:700});
+  }).join('');
+}
+
 export function buildCardSvg(build) {
   if (!build || !Array.isArray(build.types) || !build.types.length ||
-      build.types.length>2 || build.types.some(t=>!TYPE_COLORS[t])) {
+      build.types.length>2 || build.types.some(type=>!TYPE_COLORS[type])) {
     throw new Error('Cannot export a build without valid Pokémon typing.');
   }
-  if(!build.heldItem?.name || !build.heldItem?.effect || !build.heldItem?.quip || !build.heldItem?.why) {
-    throw new Error('Cannot export a build without its held item.');
+  if(!build.heldItem?.name || !build.heldItem?.quip ||
+      !build.ability?.name || !build.hiddenAbility) {
+    throw new Error('Cannot export a build without its abilities and held item.');
   }
-  // The stat renderer validates each numerical value and gives all six
-  // axes the same arrangement as the onscreen card.
-  const embeddedRadar=renderStatRadar(build.baseStats,build.effectiveStats)
-    .replace('<svg class="stat-radar"','<svg x="90" y="426" width="780" height="730" class="stat-radar"');
+  // Preserve the exact six-axis chart and Nature numbers from the result card.
+  const radar=renderStatRadar(build.baseStats,build.effectiveStats)
+    .replace('<svg class="stat-radar"','<svg x="145" y="386" width="670" height="627" class="stat-radar"');
 
   const p=TYPE_COLORS[build.types[0]],s=TYPE_COLORS[build.types[1]||build.types[0]];
   const role=build.role.primary.name+(build.role.secondary?' / '+build.role.secondary.name:'');
   const identity=build.identity+' · #'+build.tritype;
-  const footer='Unofficial fan project · No questionnaire scores included';
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}">
   <defs>
     <linearGradient id="type-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -71,7 +85,7 @@ export function buildCardSvg(build) {
       <stop offset="0%" stop-color="#1b3035"/>
       <stop offset="100%" stop-color="#111e23"/>
     </linearGradient>
-    <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1610" rx="30"/></clipPath>
+    <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1649" rx="30"/></clipPath>
   </defs>
   <style>
     text{font-family:Arial,Helvetica,sans-serif}
@@ -92,7 +106,7 @@ export function buildCardSvg(build) {
     .stat-radar-label-base{font-size:11px;fill:#9db9b1}
   </style>
   <rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="#0b161b"/>
-  <rect x="28" y="25" width="904" height="1610" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
+  <rect x="28" y="25" width="904" height="1649" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
   <g clip-path="url(#rounded-card)">
     <rect x="28" y="25" width="904" height="16" fill="url(#type-gradient)"/>
   </g>
@@ -102,26 +116,37 @@ export function buildCardSvg(build) {
   ${typeBadges(build.types)}
   <text x="76" y="333" class="subline">${esc(build.nature)} · ${esc(role)} · ${esc(build.ability.name)}</text>
   <line x1="76" x2="884" y1="364" y2="364" stroke="#4b6964"/>
-  <text x="76" y="412" class="overline">BASE STATS</text>
-  <text x="882" y="412" text-anchor="end" class="overline">535 BST</text>
-  ${embeddedRadar}
-  <text x="480" y="1203" text-anchor="middle" font-size="18" fill="#a9c2ba">${esc(build.nature)} Nature · +10% ${esc(build.natureBoost.toUpperCase())} / −10% ${esc(build.natureDrop.toUpperCase())}</text>
-  <line x1="76" x2="884" y1="1234" y2="1234" stroke="#4b6964"/>
-  <text x="76" y="1273" class="overline">HELD ITEM</text>
-  <text x="884" y="1273" text-anchor="end" font-size="15" fill="#90b9a4">${esc(build.heldItem.familyLabel.toUpperCase())}</text>
-  <text x="76" y="1320" font-size="34" font-weight="700" fill="#eaf8f0">${esc(build.heldItem.name)}</text>
-  ${svgLines(build.heldItem.effect,{y:1360,maxCharacters:78,size:18,lineHeight:24})}
-  ${svgLines('“'+build.heldItem.quip+'”',{y:1441,maxCharacters:73,size:20,lineHeight:25,fill:'#f1faed',italic:true})}
-  ${svgLines('WHY: '+build.heldItem.why,{y:1508,maxCharacters:98,size:15,lineHeight:21,fill:'#a9c7b5'})}
-  <line x1="76" x2="884" y1="1561" y2="1561" stroke="#4b6964"/>
-  <text x="76" y="1597" font-size="18" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
-  <text x="76" y="1621" font-size="12" fill="#8da69e">${esc(footer)}</text>
+  <text x="76" y="399" class="overline">BASE STATS</text>
+  <text x="882" y="399" text-anchor="end" class="overline">535 BST</text>
+  ${radar}
+  <text x="480" y="1052" text-anchor="middle" font-size="18" fill="#a9c2ba">${esc(build.nature)} Nature · +10% ${esc(build.natureBoost.toUpperCase())} / −10% ${esc(build.natureDrop.toUpperCase())}</text>
+  <line x1="76" x2="884" y1="1073" y2="1073" stroke="#4b6964"/>
+  <text x="76" y="1106" class="overline">ABILITIES</text>
+  <rect x="76" y="1122" width="395" height="81" rx="11" fill="#1b3034" stroke="#3b5854"/>
+  <rect x="487" y="1122" width="397" height="81" rx="11" fill="#1b3034" stroke="#3b5854"/>
+  <text x="96" y="1149" font-size="13" letter-spacing="1" fill="#9eb9b0">STANDARD</text>
+  <text x="507" y="1149" font-size="13" letter-spacing="1" fill="#9eb9b0">HIDDEN</text>
+  <text x="96" y="1183" font-size="26" font-weight="700" fill="#f1faf4">${esc(build.ability.name)}</text>
+  <text x="507" y="1183" font-size="26" font-weight="700" fill="#f1faf4">${esc(build.hiddenAbility)}</text>
+  <text x="76" y="1238" class="overline">SIGNATURE MOVES</text>
+  ${moveTiles(build.moves)}
+  <text x="76" y="1459" class="overline">HELD ITEM</text>
+  <rect x="76" y="1477" width="808" height="119" rx="13" fill="#1e322e" stroke="#4d7361"/>
+  <rect x="89" y="1490" width="82" height="82" rx="11" fill="#12282b" stroke="#426859"/>
+  <text x="130" y="1547" text-anchor="middle" font-size="45" fill="#93b89f">◇</text>
+  <text x="192" y="1521" font-size="31" font-weight="700" fill="#f1faf1">${esc(build.heldItem.name)}</text>
+  ${svgLines('“'+build.heldItem.quip+'”',{x:192,y:1557,maxCharacters:65,size:18,lineHeight:23,fill:'#d6edda',italic:true})}
+  <line x1="76" x2="884" y1="1612" y2="1612" stroke="#4b6964"/>
+  <text x="76" y="1640" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
+  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · No questionnaire scores included</text>
 </svg>`;
 }
 
-// Native browser Canvas export avoids DOM screenshot libraries or remote assets.
+// Canvas export avoids screenshot libraries. Only the optional item icon is
+// retrieved from the verified PokéAPI sprite library (no user scores sent).
 // Returns only after a real PNG blob was produced; callers report failures.
 export async function downloadCardPng(build) {
+  const spritePromise=loadItemSprite(build.heldItem.name);
   const svg=buildCardSvg(build);
   const svgUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   const image=new Image();
@@ -137,6 +162,14 @@ export async function downloadCardPng(build) {
     const context=canvas.getContext('2d');
     if (!context) throw new Error('Canvas export is unavailable in this browser.');
     context.drawImage(image,0,0,CARD_WIDTH,CARD_HEIGHT);
+    // Pixel-art sprite is drawn separately. Remote <image> inside SVG would
+    // taint Canvas or be rejected by mobile browsers.
+    const sprite=await spritePromise;
+    if(sprite) {
+      context.imageSmoothingEnabled=false;
+      context.drawImage(sprite,96,1497,68,68);
+      context.imageSmoothingEnabled=true;
+    }
     const png=await new Promise((resolve,reject)=>
       canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG export failed.')),'image/png')
     );
