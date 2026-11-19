@@ -7,6 +7,7 @@ import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { downloadCardPng } from './export-card.mjs';
+import { itemSpriteUrl } from './item-sprites.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -257,9 +258,15 @@ function renderCard(build) {
       '<section class="held-item-section" aria-label="Thematic held item">'+
         '<div class="result-section-title"><h4>Held item</h4><span>PERSONALITY FLAVOR</span></div>'+
         '<div class="held-item-card">'+
-          '<div class="held-item-heading"><strong>'+escapeHtml(build.heldItem.name)+'</strong><span>'+escapeHtml(build.heldItem.familyLabel)+'</span></div>'+
-          '<p class="held-item-effect">'+escapeHtml(build.heldItem.effect)+'</p>'+
-          '<p class="held-item-quip">“'+escapeHtml(build.heldItem.quip)+'”</p>'+
+          '<div class="held-item-content">'+
+            '<div class="held-item-art" aria-hidden="true"><span class="held-item-fallback">◇</span>'+
+              '<img id="held-item-sprite" src="'+escapeHtml(itemSpriteUrl(build.heldItem.name))+'" alt="" width="72" height="72" decoding="async"></div>'+
+            '<div class="held-item-copy">'+
+              '<div class="held-item-heading"><strong>'+escapeHtml(build.heldItem.name)+'</strong><span>'+escapeHtml(build.heldItem.familyLabel)+'</span></div>'+
+              '<p class="held-item-effect">'+escapeHtml(build.heldItem.effect)+'</p>'+
+              '<p class="held-item-quip">“'+escapeHtml(build.heldItem.quip)+'”</p>'+
+            '</div>'+
+          '</div>'+
           '<div class="held-item-why"><span class="mini-label">WHY YOU GOT THIS</span>'+escapeHtml(build.heldItem.why)+'</div>'+
         '</div>'+
         '<p class="held-item-caveat">A personality metaphor, not an active battle modifier.</p>'+
@@ -297,6 +304,7 @@ function renderCard(build) {
       button.textContent='Download card ↓';
     }
   });
+  $('held-item-sprite')?.addEventListener('error',event=>event.currentTarget.remove());
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
   // Optional real-Pokémon comparisons load only after the base build is complete.

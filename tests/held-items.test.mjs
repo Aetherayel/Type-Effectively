@@ -101,30 +101,42 @@ test('a held item is selected from the complete build and can be independently c
   assert.throws(()=>chooseHeldItem({}),/complete personality build/);
 });
 
-test('held item name, effect, explanation and joke survive a score-free PNG export',()=>{
+test('compact exported card includes item name and dry joke, not the long explanation',()=>{
   const build=generateBuild(architectInput);
   const svg=buildCardSvg(build);
   assert.match(svg,/HELD ITEM/);
   assert.ok(svg.includes(build.heldItem.name));
-  assert.ok(svg.includes(build.heldItem.effect.replace(/&/g,'&amp;')));
   assert.ok(svg.includes(build.heldItem.quip));
-  assert.ok(svg.includes('WHY:'));
-  assert.match(svg,/No questionnaire scores included/);
+  assert.doesNotMatch(svg,/WHY:|WHY YOU GOT THIS/);
+  assert.ok(!svg.includes(build.heldItem.why));
+  assert.ok(!svg.includes(build.heldItem.effect));
+  assert.match(svg,/STANDARD/);
+  assert.match(svg,/HIDDEN/);
+  assert.ok(svg.includes(build.ability.name));
+  assert.ok(svg.includes(build.hiddenAbility));
+  assert.match(svg,/SIGNATURE MOVES/);
+  for(const move of build.moves) assert.ok(svg.includes(move.name),move.name);
+  assert.match(svg,/Only entered OCEAN scores are shown/);
   assert.doesNotMatch(svg,/mbtiScores|enneagramScores|bigFive|#build=/);
   const source=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
   assert.ok(source.includes('build.heldItem.effect'));
   assert.ok(source.includes('build.heldItem.quip'));
   assert.ok(source.includes('build.heldItem.why'));
+  assert.ok(source.includes('id="held-item-sprite"'));
+  assert.ok(source.includes('itemSpriteUrl(build.heldItem.name)'));
 });
 
-test('held item export escapes potentially unsafe display data',()=>{
+test('export escapes held item jokes, ability names and move text',()=>{
   const b=generateBuild(architectInput);
-  const svg=buildCardSvg({...b,heldItem:{...b.heldItem,
-    name:'<script>bad()</script>',quip:'A & B',why:'<test> & free',
-    effect:'Control < chaos & uncertainty'
-  }});
-  assert.doesNotMatch(svg,/<script>|<test>/);
+  const svg=buildCardSvg({...b,
+    heldItem:{...b.heldItem,name:'<script>bad()</script>',quip:'A & B',why:'private rationale'},
+    hiddenAbility:'Power & Peace',
+    moves:b.moves.map((move,i)=>i===0?{...move,name:'<malicious> & fade'}:move)
+  });
+  assert.doesNotMatch(svg,/<script>|<malicious>/);
   assert.ok(svg.includes('&lt;script&gt;'));
   assert.ok(svg.includes('A &amp; B'));
-  assert.ok(svg.includes('&lt;test&gt; &amp; free'));
+  assert.ok(svg.includes('Power &amp; Peace'));
+  assert.ok(svg.includes('&lt;malicious&gt; &amp; fade'));
+  assert.ok(!svg.includes('private rationale'));
 });

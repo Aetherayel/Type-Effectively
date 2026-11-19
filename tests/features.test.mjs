@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { TYPE_COLORS, DEMOS } from '../src/data.mjs';
 import { generateBuild } from '../src/engine.mjs';
 import { TYPE_EFFECTIVENESS, ALL_TYPES, getDefensiveMatchups } from '../src/matchups.mjs';
-import { buildCardSvg, CARD_HEIGHT, CARD_WIDTH } from '../src/export-card.mjs';
+import { buildCardSvg, CARD_HEIGHT, CARD_WIDTH, oceanHeaderText } from '../src/export-card.mjs';
 
 const get=(types,kind)=>getDefensiveMatchups(types)[kind].map(item=>item.type).sort();
 
@@ -80,10 +80,26 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,/109/);
   assert.match(svg,/↓54/);
   assert.equal((svg.match(/class="stat-radar-label-name"/g)||[]).length,6);
-  assert.match(svg,/No questionnaire scores included/);
+  assert.match(svg,/Only entered OCEAN scores are shown/);
+  assert.match(svg,/>O80 · C90 · E20 · A60 · N15<\/text>/);
   assert.doesNotMatch(svg,/mbtiScores|enneagramScores|bigFive|enneagramRanking|#build=/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
   assert.throws(()=>buildCardSvg({...sample,types:['Fake']}),/valid Pokémon typing/);
+});
+
+test('OCEAN header distinguishes entered scores from estimated placeholders',()=>{
+  assert.deepEqual(sample.oceanScores,[80,90,20,60,15]);
+  assert.equal(oceanHeaderText(sample),'O80 · C90 · E20 · A60 · N15');
+  const svg=buildCardSvg(sample);
+  assert.match(svg,/<text x="878" y="140" text-anchor="end"[^>]*>O80 · C90 · E20 · A60 · N15<\/text>/);
+
+  const estimated=generateBuild({typeOverride:'INTJ',tritypeOverride:'593'});
+  assert.equal(estimated.oceanScores,null);
+  assert.equal(oceanHeaderText(estimated),'OCEAN · Estimated');
+  const estimatedSvg=buildCardSvg(estimated);
+  assert.match(estimatedSvg,/>OCEAN · Estimated<\/text>/);
+  assert.doesNotMatch(estimatedSvg,/>O50 · C50 · E50 · A50 · N50<\/text>/);
+  assert.throws(()=>oceanHeaderText({oceanScores:[10,20,30]}),/five valid scores/);
 });
 
 test('export card escapes untrusted display text rather than embedding markup',()=>{
