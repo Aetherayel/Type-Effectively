@@ -274,8 +274,9 @@ export function generateBuild(input) {
   const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
   return {
     mbti, identity, nature,
-    // Export only measured OCEAN values; null distinguishes missing input from neutral 50s.
-    oceanScores:input.bigFive ? [...ocean] : null,
+    // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
+    // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
+    oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
     tritype, suggestedTritype, suggestedType, wing:selectedWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'The '+archetype,

@@ -116,7 +116,7 @@ test('compact exported card includes item name and dry joke, not the long explan
   assert.ok(svg.includes(build.hiddenAbility));
   assert.match(svg,/SIGNATURE MOVES/);
   for(const move of build.moves) assert.ok(svg.includes(move.name),move.name);
-  assert.match(svg,/Only entered OCEAN scores are shown/);
+  assert.match(svg,/OCEAN shown only as high \/ low/);
   assert.doesNotMatch(svg,/mbtiScores|enneagramScores|bigFive|#build=/);
   const source=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
   assert.ok(source.includes('build.heldItem.effect'));
