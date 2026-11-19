@@ -28,7 +28,7 @@ a{color:inherit}
 .brand-mark span{width:12px;height:12px;border:2px solid var(--accent);background:var(--bg);border-radius:50%;position:relative;z-index:1}
 .header-link{color:var(--muted);font-size:13px;text-decoration:none;transition:color .2s}.header-link:hover{color:var(--accent)}
 .hero{padding:76px 0 64px;border-bottom:1px solid var(--line-soft)}
-.eyebrow,.section-kicker,.step-number,.empty-overline,.empty-detail,.hero-meta,.live-label,.footer,.demo-band>span,.stat-name,.card-kicker,.mini-label,.result-id,.field>span,.test-line span,.action-aside,.small-link,.mini-note{font-family:'DM Mono',monospace}
+.eyebrow,.section-kicker,.step-number,.empty-overline,.empty-detail,.hero-meta,.live-label,.footer,.stat-name,.card-kicker,.mini-label,.result-id,.field>span,.test-line span,.action-aside,.small-link,.mini-note{font-family:'DM Mono',monospace}
 .eyebrow{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:1.25px;color:var(--accent)}
 .status-pip{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px #d9f37577}
 .eyebrow-num{margin-left:8px;color:#607074}
@@ -100,11 +100,6 @@ a{color:inherit}
 .action-aside{color:#829691;font-size:10px;line-height:1.8;text-align:right}
 .form-error{background:#4f2a2a;border:1px solid #d67f78;color:#ffe1d8;padding:12px 15px;border-radius:10px;margin-top:16px;font-size:13px}
 .hidden{display:none!important}
-.demo-band{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:24px;border-top:1px solid var(--line-soft);padding-top:20px}
-.demo-band>span{font-size:10px;color:#859c98;letter-spacing:.5px;margin-right:8px}
-.demo-band button{background:transparent;border:1px dashed #465856;color:#cbd8d3;font-size:12px;border-radius:8px;padding:9px 11px}
-.demo-band button:hover{color:var(--accent);border-color:var(--accent)}
-.demo-band button span{color:var(--accent);margin-left:4px}
 .result-column{position:sticky;top:20px}
 .live-label{display:flex;align-items:center;gap:7px;white-space:nowrap;color:#a3b5ae;font-size:10px;letter-spacing:.5px;padding-bottom:4px}
 .live-label span{width:7px;height:7px;border-radius:50%;background:#667975}
