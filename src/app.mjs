@@ -5,6 +5,8 @@ import {
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
+import { getDefensiveMatchups } from './matchups.mjs';
+import { downloadCardPng } from './export-card.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -190,6 +192,35 @@ function typeChip(type) {
   const color=TYPE_COLORS[type]||'#98afb8';
   return '<span class="type-chip" style="background:'+color+'">'+escapeHtml(type)+'</span>';
 }
+function renderMatchups(types) {
+  const matchups=getDefensiveMatchups(types);
+  const groups=[
+    ['4× Weakness',matchups.quadWeak,'4×','danger'],
+    ['2× Weakness',matchups.weak,'2×','weak'],
+    ['½× Resistance',matchups.resist,'½×','resist'],
+    ['¼× Resistance',matchups.strongResist,'¼×','strong'],
+    ['Immunity',matchups.immune,'0×','immune']
+  ];
+  const rows=groups.map(([heading,entries,multiplier,kind])=>
+    '<div class="matchup-row matchup-'+kind+'">'+
+      '<span class="matchup-label">'+heading+'</span>'+
+      '<div class="matchup-types">'+
+        (entries.length
+          ? entries.map(({type})=>
+              '<span class="matchup-chip" style="--matchup-type:'+TYPE_COLORS[type]+'">'+
+                '<strong>'+escapeHtml(type)+'</strong><span>'+multiplier+'</span></span>'
+            ).join('')
+          : '<span class="matchup-none">None</span>')+
+      '</div>'+
+    '</div>'
+  ).join('');
+  return '<section class="matchup-panel" aria-label="Defensive type matchups">'+
+    '<div class="result-section-title"><h4>Type matchups</h4><span>DEFENSIVE PROFILE</span></div>'+
+    '<p class="matchup-explain">Incoming attack damage against '+types.map(escapeHtml).join(' / ')+' typing.</p>'+
+    '<div class="matchup-grid">'+rows+'</div>'+
+    '<p class="matchup-caveat">Typing only; abilities, items, weather and other battle effects can change these results.</p>'+
+  '</section>';
+}
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
@@ -225,6 +256,7 @@ function renderCard(build) {
       '</div>'+
       '<div class="result-section-title"><h4>Signature moveset</h4><span>04 MOVES</span></div>'+
       '<div class="moves">'+moveHtml+'</div>'+
+      renderMatchups(build.types)+
       '<details class="explain"><summary>How was this build calculated? +</summary>'+
         '<p><strong>Typing:</strong> Core '+build.core+' pairs with '+build.second+' ('+escapeHtml(build.types[0])+') and '+build.third+' ('+escapeHtml(build.types[1]||build.types[0])+'). '+
         (build.monotype?'Both pairings match, so this is a monotype; the hidden '+escapeHtml(build.hiddenType)+' pairing supplies coverage. ':'')+
@@ -233,11 +265,27 @@ function renderCard(build) {
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Abilities and moves are then matched to the role and personality themes, not necessarily to any official species learnset.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
-      '<div class="result-actions"><button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
+      '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
+      '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
       '<button type="button" id="share-build" class="outline-button">Copy share link ↗</button></div>'+
     '</div></article>';
   $('result-status').classList.add('ready');
   $('result-status').innerHTML='<span></span> BUILD COMPLETE';
+  $('download-card').addEventListener('click',async()=>{
+    const button=$('download-card');
+    if(button.disabled)return;
+    button.disabled=true;
+    button.textContent='Preparing PNG…';
+    try {
+      await downloadCardPng(build);
+      showToast('PNG card ready to save or share.');
+    } catch(error) {
+      showToast(error.message||'Could not download the card.');
+    } finally {
+      button.disabled=false;
+      button.textContent='Download card ↓';
+    }
+  });
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
   // Optional real-Pokémon comparisons load only after the base build is complete.
