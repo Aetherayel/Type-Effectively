@@ -80,26 +80,34 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,/109/);
   assert.match(svg,/↓54/);
   assert.equal((svg.match(/class="stat-radar-label-name"/g)||[]).length,6);
-  assert.match(svg,/Only entered OCEAN scores are shown/);
+  assert.match(svg,/OCEAN shown only as high \/ low/);
   assert.match(svg,/>O80 · C90 · E20 · A60 · N15<\/text>/);
   assert.doesNotMatch(svg,/mbtiScores|enneagramScores|bigFive|enneagramRanking|#build=/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
   assert.throws(()=>buildCardSvg({...sample,types:['Fake']}),/valid Pokémon typing/);
 });
 
-test('OCEAN header distinguishes entered scores from estimated placeholders',()=>{
-  assert.deepEqual(sample.oceanScores,[80,90,20,60,15]);
-  assert.equal(oceanHeaderText(sample),'O80 · C90 · E20 · A60 · N15');
+test('OCEAN header exports five binary high/low traits, never precise numbers',()=>{
+  assert.deepEqual(sample.oceanBinary,[1,1,0,1,0]);
+  assert.equal('oceanScores' in sample,false,'build should not retain raw Big Five values');
+  assert.equal(oceanHeaderText(sample),'O:H · C:H · E:L · A:H · N:L');
   const svg=buildCardSvg(sample);
-  assert.match(svg,/<text x="878" y="140" text-anchor="end"[^>]*>O80 · C90 · E20 · A60 · N15<\/text>/);
+  assert.match(svg,/<text x="878" y="140" text-anchor="end"[^>]*>O:H · C:H · E:L · A:H · N:L<\/text>/);
+  assert.doesNotMatch(svg,/O80|C90|E20|A60|N15/);
+  assert.equal(oceanHeaderText({oceanBinary:[0,0,0,0,0]}),'O:L · C:L · E:L · A:L · N:L');
+  assert.equal(oceanHeaderText({oceanBinary:[1,1,1,1,1]}),'O:H · C:H · E:H · A:H · N:H');
 
   const estimated=generateBuild({typeOverride:'INTJ',tritypeOverride:'593'});
-  assert.equal(estimated.oceanScores,null);
+  assert.equal(estimated.oceanBinary,null);
   assert.equal(oceanHeaderText(estimated),'OCEAN · Estimated');
-  const estimatedSvg=buildCardSvg(estimated);
-  assert.match(estimatedSvg,/>OCEAN · Estimated<\/text>/);
-  assert.doesNotMatch(estimatedSvg,/>O50 · C50 · E50 · A50 · N50<\/text>/);
-  assert.throws(()=>oceanHeaderText({oceanScores:[10,20,30]}),/five valid scores/);
+  assert.match(buildCardSvg(estimated),/>OCEAN · Estimated<\/text>/);
+  assert.throws(()=>oceanHeaderText({oceanBinary:[1,0,1]}),/five binary flags/);
+  assert.throws(()=>oceanHeaderText({oceanBinary:[1,0,50,1,0]}),/five binary flags/);
+});
+
+test('50 is the inclusive threshold for high; values below 50 are low',()=>{
+  const input={mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,bigFive:[49,50,51,0,100]};
+  assert.deepEqual(generateBuild(input).oceanBinary,[0,1,1,0,1]);
 });
 
 test('export card escapes untrusted display text rather than embedding markup',()=>{
