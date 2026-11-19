@@ -190,15 +190,6 @@ function typeChip(type) {
   const color=TYPE_COLORS[type]||'#98afb8';
   return '<span class="type-chip" style="background:'+color+'">'+escapeHtml(type)+'</span>';
 }
-function statRows(build) {
-  return STAT_KEYS.map((key,i)=>{
-    const base=build.baseStats[key],effective=build.effectiveStats[key];
-    const change=effective===base?'':' <small>'+(effective>base?'↑':'↓')+effective+'</small>';
-    return '<div class="stat-row"><span class="stat-name">'+STAT_NAMES[i]+'</span>'+
-      '<div class="stat-rail"><div class="stat-fill" style="width:'+(base/140*100).toFixed(2)+'%"></div></div>'+
-      '<span class="stat-value">'+base+change+'</span></div>';
-  }).join('');
-}
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
@@ -214,7 +205,7 @@ function renderCard(build) {
         '<h3>'+escapeHtml(build.title)+'</h3>'+
         '<div class="pokemon-identity-row">'+
           '<div class="type-chips">'+build.types.map(typeChip).join('')+'</div>'+
-          '<span class="pokemon-subtitle">'+escapeHtml(build.nature)+' Nature · '+build.core+'w'+build.wing+' · '+escapeHtml(build.role.primary.name+roleSecondary)+'</span>'+
+          '<span class="pokemon-subtitle">'+escapeHtml(build.nature)+' · '+escapeHtml(build.role.primary.name+roleSecondary)+' · '+escapeHtml(build.ability.name)+'</span>'+
         '</div>'+
       '</div>'+
     '</div>'+
@@ -224,10 +215,6 @@ function renderCard(build) {
         '<div class="stat-legend"><span><strong>ONE</strong> Base stat</span><span><strong>↑ ↓</strong> Nature above base</span></div>'+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
-      '<details class="stat-details"><summary>Detailed stats <span>View base values and adjustments</span></summary>'+
-        '<div class="stat-rows">'+statRows(build)+'</div>'+
-        '<div class="bst-footer"><span>BASE TOTAL <strong>535 / 535</strong></span><span>↑ '+escapeHtml(build.natureBoost.toUpperCase())+' / ↓ '+escapeHtml(build.natureDrop.toUpperCase())+'</span></div>'+
-      '</details>'+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
         '<p>'+escapeHtml(ROLE_DESCRIPTIONS[build.role.primary.name])+'</p>'+
         '<div class="role-subline">'+escapeHtml(build.role.specialization.toUpperCase())+' SPREAD · '+build.role.primary.score+'% ROLE FIT</div>'+
