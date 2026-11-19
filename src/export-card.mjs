@@ -34,6 +34,17 @@ function svgLines(value,{x=76,y,size=18,lineHeight=26,maxCharacters=76,fill='#c5
     ).join('')+'</text>';
 }
 
+// Only explicitly entered Big Five values are exported. Missing scores
+// should never look like a real five-number assessment.
+export function oceanHeaderText(build) {
+  const scores=build.oceanScores;
+  if(scores==null)return 'OCEAN · Estimated';
+  if(!Array.isArray(scores)||scores.length!==5||scores.some(value=>!Number.isFinite(value)||value<0||value>100)) {
+    throw new Error('The OCEAN card header needs five valid scores.');
+  }
+  return ['O','C','E','A','N'].map((label,i)=>label+Math.round(scores[i])).join(' · ');
+}
+
 function typeBadges(types) {
   let x=76;
   return types.map(type=>{
@@ -112,6 +123,7 @@ export function buildCardSvg(build) {
   </g>
   <text x="76" y="105" class="overline">TYPE EFFECTIVELY</text>
   <text x="878" y="105" text-anchor="end" class="overline">${esc(identity)}</text>
+  <text x="878" y="140" text-anchor="end" font-size="19" font-family="monospace" font-weight="500" fill="#9fbcb4">${esc(oceanHeaderText(build))}</text>
   <text x="76" y="192" class="title">${esc(build.title)}</text>
   ${typeBadges(build.types)}
   <text x="76" y="333" class="subline">${esc(build.nature)} · ${esc(role)} · ${esc(build.ability.name)}</text>
@@ -138,7 +150,7 @@ export function buildCardSvg(build) {
   ${svgLines('“'+build.heldItem.quip+'”',{x:192,y:1557,maxCharacters:65,size:18,lineHeight:23,fill:'#d6edda',italic:true})}
   <line x1="76" x2="884" y1="1612" y2="1612" stroke="#4b6964"/>
   <text x="76" y="1640" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
-  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · No questionnaire scores included</text>
+  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · Only entered OCEAN scores are shown</text>
 </svg>`;
 }
 
