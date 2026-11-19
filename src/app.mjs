@@ -3,6 +3,7 @@ import {
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs';
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
+import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 
 const $ = id => document.getElementById(id);
@@ -200,19 +201,22 @@ function statRows(build) {
 }
 function renderCard(build) {
   const [first,second]=build.types;
-  const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||build.hiddenType];
-  const weakStats=STAT_KEYS.filter(key=>build.natureBoost===key||build.natureDrop===key);
+  const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
+  const typeStack=build.types.map((type,index)=>
+    '<span class="elemental-type elemental-type-'+(index===0?'first':'second')+'">'+escapeHtml(type)+'</span>'
+  ).join('');
   const warningHtml=build.warnings.length?'<div class="warning-note"><strong>Estimated input:</strong><br />'+build.warnings.map(escapeHtml).join('<br />')+'</div>':'';
   const moveHtml=build.moves.map((move,i)=>'<div class="move"><span class="mini-label">'+escapeHtml(move.category)+'</span><strong>'+escapeHtml(move.name)+'</strong><p>'+escapeHtml(move.why)+'</p></div>').join('');
   const roleSecondary=build.role.secondary?' / '+build.role.secondary.name:'';
   $('result-container').innerHTML=
-    '<article class="result-card" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
+    '<article class="result-card'+(build.monotype?' monotype':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
     '<div class="pokemon-header">'+
       '<div class="card-topline"><span class="card-kicker">YOUR PERSONALITY SPECIMEN</span><span class="result-id">#'+build.tritype+' / '+build.mbti+'</span></div>'+
-      '<div class="creature-illustration" aria-label="Abstract elemental personality emblem">'+
-        '<span class="creature-orbit"></span><span class="creature-glyph"><span>'+build.types.map(t=>t[0]).join('')+'</span></span>'+
-        '<span class="orbit-label top">'+escapeHtml(build.nature.toUpperCase())+' NATURE</span>'+
-        '<span class="orbit-label bottom">535 BASE POINTS</span></div>'+
+      '<div class="elemental-stage">'+
+        '<div class="elemental-type-stack" aria-label="Pokémon typing">'+typeStack+'</div>'+
+        '<div class="radar-panel">'+renderStatRadar(build.baseStats)+'</div>'+
+      '</div>'+
+      '<div class="radar-caption"><span>SIX BASE STATS</span><span>535 BST / MAX 140 PER STAT</span></div>'+
     '</div>'+
     '<div class="pokemon-intro">'+
       '<h3>'+escapeHtml(build.title)+'</h3>'+
