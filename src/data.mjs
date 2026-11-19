@@ -168,7 +168,7 @@ export const DEMOS = {
   },
   catalyst:{
     mbti:[16,30,78,87,68],
-    enneagram:[74,24,50,83,18,28,92,31,40],
+    enneagram:[84,24,50,74,18,28,92,31,40],
     bigfive:[77,39,89,54,52],
     typeOverride:'ESFP',tritypeOverride:'714'
   }
