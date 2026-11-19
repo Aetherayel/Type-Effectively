@@ -1,5 +1,5 @@
 import {
-  DEMOS, ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
+  ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs';
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
@@ -18,7 +18,7 @@ const oceanDetails=[
   'Curiosity & imagination','Order & follow-through','Social energy & assertion',
   'Cooperation & empathy','Sensitivity to stress'
 ];
-const state={mbtiMode:'scores',enneaMode:'scores',touched:{mbti:false,enneagram:false,bigfive:false},demo:false,lastBuild:null,lastInput:null};
+const state={mbtiMode:'scores',enneaMode:'scores',touched:{mbti:false,enneagram:false,bigfive:false},lastBuild:null,lastInput:null};
 let toastTimeout;
 
 function escapeHtml(text) {
@@ -49,7 +49,7 @@ function setupFields() {
   });
   document.querySelectorAll('[data-score]').forEach(el=>el.addEventListener('input',()=>{
     state.touched[el.dataset.score==='ennea'?'enneagram':el.dataset.score]=true;
-    state.demo=false;
+    
     syncSlider(el.id,el.value);
     updateDerived();
   }));
@@ -60,7 +60,7 @@ function setupFields() {
     const num=Math.min(100,Math.max(isMbti?50:0,Number(el.value)));
     if (!Number.isFinite(num)) return;
     state.touched[ref.split('-')[0]==='ennea'?'enneagram':ref.split('-')[0]]=true;
-    state.demo=false;
+    
     const score=isMbti?($(ref+'-pole').value==='right'?num:100-num):num;
     syncSlider(ref,Math.round(score));
     updateDerived();
@@ -69,13 +69,13 @@ function setupFields() {
     const ref=el.id.replace('-pole','');
     const percent=Number($(ref+'-number').value);
     const score=el.value==='right'?percent:100-percent;
-    state.touched.mbti=true;state.demo=false;
+    state.touched.mbti=true;
     syncSlider(ref,score);updateDerived();
   }));
-  $('ennea-ranking').addEventListener('input',()=>{state.touched.enneagram=true;state.demo=false;updateDerived();});
-  $('mbti-override').addEventListener('change',()=>{state.demo=false;updateDerived();});
-  $('tritype-override').addEventListener('input',()=>{state.demo=false;updateDerived();});
-  $('wing-override').addEventListener('change',()=>{state.demo=false;});
+  $('ennea-ranking').addEventListener('input',()=>{state.touched.enneagram=true;updateDerived();});
+  $('mbti-override').addEventListener('change',()=>{updateDerived();});
+  $('tritype-override').addEventListener('input',()=>{updateDerived();});
+  $('wing-override').addEventListener('change',()=>{});
 }
 function syncSlider(id,value) {
   const v=Math.max(0,Math.min(100,Math.round(Number(value))));
@@ -305,17 +305,6 @@ function runBuild(scroll=true) {
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(error){setError(error.message||'Unable to generate this build.');}
 }
-function loadDemo(name,autoRun=true) {
-  const demo=DEMOS[name];if(!demo)return;
-  setMode('mbti','scores');setMode('ennea','scores');
-  setScores('mbti',demo.mbti);setScores('ennea',demo.enneagram);setScores('bigfive',demo.bigfive);
-  state.touched={mbti:true,enneagram:true,bigfive:true};
-  $('mbti-override').value=demo.typeOverride;
-  $('tritype-override').value=demo.tritypeOverride;
-  $('wing-override').value='';
-  state.demo=true;updateDerived();
-  if(autoRun) {runBuild(true);showToast('Example loaded. Edit any value to make it yours.');}
-}
 function clearAll() {
   setScores('mbti',[50,50,50,50,50]);
   setScores('ennea',[50,50,50,50,50,50,50,50,50]);
@@ -323,8 +312,8 @@ function clearAll() {
   state.touched={mbti:false,enneagram:false,bigfive:false};
   $('mbti-override').value='';$('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
   setMode('mbti','scores');setMode('ennea','scores');
-  state.lastBuild=null;state.lastInput=null;state.demo=false;
-  $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your scores or try a sample build to see the Pokémon your personality would create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
+  state.lastBuild=null;state.lastInput=null;
+  $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your personality details to discover the Pokémon they create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
   $('result-status').classList.remove('ready');
   $('result-status').innerHTML='<span></span> WAITING';
   setError('');
@@ -353,7 +342,6 @@ function init() {
   setupFields();
   document.querySelectorAll('[data-mbti-mode]').forEach(button=>button.addEventListener('click',()=>setMode('mbti',button.dataset.mbtiMode)));
   document.querySelectorAll('[data-ennea-mode]').forEach(button=>button.addEventListener('click',()=>setMode('ennea',button.dataset.enneaMode)));
-  document.querySelectorAll('[data-demo]').forEach(button=>button.addEventListener('click',()=>loadDemo(button.dataset.demo)));
   $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild();});
   $('reset-button').addEventListener('click',clearAll);
   updateDerived();
