@@ -105,15 +105,14 @@ test('140 base stats permit boosted Nature values above the base cap',()=>{
   assert.throws(()=>renderStatRadar(base,{...after,atk:161}),/valid post-Nature stats/);
 });
 
-test('result markup places radar in Base Stats and moves stat bars to expandable details',()=>{
+test('result markup keeps compact Nature, Battle Role and standard Ability line with no detailed stat block',()=>{
   const source=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
   const card=source.slice(source.indexOf('function renderCard('),source.indexOf('function buildSummary('));
-  assert.ok(card.indexOf('pokemon-type-accent')>=0);
+  assert.ok(card.includes('pokemon-type-accent'));
   assert.ok(card.indexOf('result-body')<card.indexOf('stat-visual'));
   assert.ok(card.includes('renderStatRadar(build.baseStats,build.effectiveStats)'));
-  assert.ok(card.indexOf('stat-visual')<card.indexOf('stat-details'));
-  assert.ok(card.indexOf('stat-details')<card.indexOf('statRows(build)'));
-  assert.doesNotMatch(card,/elemental-stage|creature-glyph|identity-strip/);
+  assert.match(card,/pokemon-subtitle.*?build\.nature.*?build\.role\.primary\.name.*?build\.ability\.name/);
+  assert.doesNotMatch(card,/stat-details|statRows\(|Detailed stats|elemental-stage|creature-glyph|identity-strip/);
 });
 
 test('radar polygons reject missing or out-of-range base stats', () => {
