@@ -1,10 +1,12 @@
 import { STAT_KEYS, STAT_NAMES } from './data.mjs';
 
-// Six evenly spaced axes, in the same order as the visible base stat table.
+// Six evenly spaced axes. Chart positions can differ from the stat table order.
 // The reference scale is 140 because the generator caps individual base stats at 140.
 export const RADAR_MAX = 140;
 export const RADAR_CENTER = Object.freeze({ x: 180, y: 164 });
 export const RADAR_RADIUS = 108;
+// Clockwise from the top: HP, Attack, Defense, Speed, Sp. Def, Sp. Atk.
+export const RADAR_ORDER = [0, 1, 2, 5, 4, 3];
 
 const round = value => Math.round(value * 100) / 100;
 
@@ -37,7 +39,7 @@ const AXIS_LABELS = [
 ];
 
 export function renderStatRadar(baseStats) {
-  const values = STAT_KEYS.map(key => baseStats?.[key]);
+  const values = RADAR_ORDER.map(index => baseStats?.[STAT_KEYS[index]]);
   if (values.some(value => !Number.isFinite(value) || value < 0 || value > RADAR_MAX)) {
     throw new Error('The radar chart requires six valid base stats.');
   }
@@ -60,12 +62,12 @@ export function renderStatRadar(baseStats) {
 
   const labels = values.map((value, i) =>
     '<g class="stat-radar-label" transform="translate('+AXIS_LABELS[i].x+' '+AXIS_LABELS[i].y+')">'+
-      '<text class="stat-radar-label-name" y="0">'+STAT_NAMES[i]+'</text>'+
+      '<text class="stat-radar-label-name" y="0">'+STAT_NAMES[RADAR_ORDER[i]]+'</text>'+
       '<text class="stat-radar-label-value" y="16">'+value+'</text>'+
     '</g>'
   ).join('');
 
-  const description = STAT_NAMES.map((name, i) => name + ' ' + values[i]).join(', ');
+  const description = RADAR_ORDER.map((index, i) => STAT_NAMES[index] + ' ' + values[i]).join(', ');
   return '<svg class="stat-radar" viewBox="0 0 360 337" xmlns="http://www.w3.org/2000/svg" role="img" '+
     'aria-labelledby="stat-radar-title stat-radar-description">'+
     '<title id="stat-radar-title">Six-stat base profile radar chart</title>'+
