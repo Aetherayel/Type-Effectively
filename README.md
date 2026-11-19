@@ -76,9 +76,9 @@ The page loads Google Fonts for typography and Pokémon artwork from the GitHub-
 
 ## Publishing via GitHub Pages
 
-The included [Pages workflow](.github/workflows/pages.yml) publishes the static site when changes land on `main`.
+GitHub Pages publishes the static site from `main` through GitHub's built-in branch-based publisher. The public app is at [Type Effectively](https://aetherayel.github.io/Type-Effectively/).
 
-In **Repository Settings → Pages**, choose **GitHub Actions** as the build/deployment source. The first successful run provides the public site URL. The repository being public is not itself proof that Pages is configured or deployed.
+The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
 ## Project structure
 
