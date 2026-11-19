@@ -242,6 +242,36 @@ a{color:inherit}
 .result-actions button:disabled{opacity:.6;cursor:progress}
 .outline-button{border:1px solid #4e665d;background:#22332f;color:var(--accent);border-radius:9px;padding:12px 8px;font-weight:700;font-size:12px}
 .outline-button:hover{border-color:var(--accent);background:#2d4536}
+/* Static, share-card-independent reference guide below the build workspace. */
+.stat-guide-jump{display:inline-block;margin:14px 4px 0;color:var(--accent);font:11px 'DM Mono',monospace;text-decoration:none}
+.stat-guide-jump:hover{text-decoration:underline;text-underline-offset:4px}
+.stat-guide{border-top:1px solid var(--line-soft);padding:54px 0 60px;scroll-margin-top:24px}
+.stat-guide-heading{display:flex;align-items:end;justify-content:space-between;gap:20px 44px;margin-bottom:23px}
+.stat-guide-heading h2{font:600 clamp(25px,3vw,33px)/1.2 'Space Grotesk',sans-serif;letter-spacing:-1px;margin:0}
+.stat-guide-heading>p{max-width:470px;color:#a2b4af;font-size:12px;line-height:1.7;margin:0}
+.stat-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.stat-guide-stat{border:1px solid #334647;border-radius:10px;background:#162228;padding:17px 17px 19px;min-width:0}
+.stat-guide-code{font:10px 'DM Mono',monospace;color:var(--accent);letter-spacing:.65px}
+.stat-guide-stat h3{font:700 17px/1.25 'Space Grotesk',sans-serif;margin:9px 0 7px;letter-spacing:-.25px}
+.stat-guide-stat p{font-size:11px;line-height:1.65;color:#a1b6ae;margin:0}
+.stat-guide-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px;margin-top:26px}
+.stat-guide-note h3{font:700 15px 'Space Grotesk',sans-serif;margin:0 0 10px}
+.stat-guide-note p{font-size:11px;line-height:1.75;color:#9eafa9;margin:0 0 10px}
+.stat-guide-note strong{font-weight:700;color:#dcece0}
+.stat-guide-footnote{border-top:1px solid var(--line-soft);padding-top:14px;margin:18px 0 0;font:10px/1.7 'DM Mono',monospace;color:#7e9790}
+@media(max-width:900px){
+  .stat-guide-heading{display:block}
+  .stat-guide-heading>p{margin-top:11px}
+  .stat-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .stat-guide{padding:38px 0 44px}
+  .stat-guide-grid{gap:8px}
+  .stat-guide-stat{padding:13px 12px 15px}
+  .stat-guide-stat h3{font-size:15px}
+  .stat-guide-notes{grid-template-columns:1fr;gap:13px;margin-top:22px}
+  .stat-guide-heading{margin-bottom:18px}
+}
 .footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;border-top:1px solid var(--line-soft);padding:28px 0 36px;color:#768d88;font-size:9px;letter-spacing:.6px}
 .footer a{color:#a5c0ad;text-decoration:none}
 .footer a:hover{color:var(--accent)}
