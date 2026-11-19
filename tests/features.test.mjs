@@ -81,7 +81,7 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,/↓54/);
   assert.equal((svg.match(/class="stat-radar-label-name"/g)||[]).length,6);
   assert.match(svg,/OCEAN shown only as high \/ low/);
-  assert.match(svg,/>O80 · C90 · E20 · A60 · N15<\/text>/);
+  assert.match(svg,/>O:H · C:H · E:L · A:H · N:L<\/text>/);
   assert.doesNotMatch(svg,/mbtiScores|enneagramScores|bigFive|enneagramRanking|#build=/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
   assert.throws(()=>buildCardSvg({...sample,types:['Fake']}),/valid Pokémon typing/);
