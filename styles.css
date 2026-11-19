@@ -178,6 +178,21 @@ a{color:inherit}
 .ability-box strong{font:700 13px 'Space Grotesk',sans-serif}
 .ability-box p{font-size:11px;line-height:1.55;color:#9cb0ab;margin:7px 0 0}
 .ability-box.hidden-ability{border-style:dashed}
+/* Held items are a small character joke, not a new stat system. */
+.held-item-section{margin:2px 0 23px}
+.held-item-card{
+  border:1px solid #3b554c;background:linear-gradient(145deg,#1e332e,#16252a 78%);
+  padding:15px 16px;border-radius:11px
+}
+.held-item-heading{display:flex;justify-content:space-between;align-items:baseline;gap:6px 13px;flex-wrap:wrap}
+.held-item-heading strong{font:700 20px/1.2 'Space Grotesk',sans-serif;color:#e9f6ed}
+.held-item-heading span{font:9px/1.5 'DM Mono',monospace;color:#96b7a5}
+.held-item-effect{margin:8px 0 0;font-size:11px/1.65;color:#aabeb6}
+.held-item-quip{font:italic 13px/1.65 'Space Grotesk',sans-serif;color:#e9f4eb;margin:13px 0;padding-left:10px;border-left:2px solid var(--accent)}
+.held-item-why{border-top:1px dashed #3b554c;padding-top:11px;font:10px/1.6 'DM Mono',monospace;color:#9eb8ac}
+.held-item-why .mini-label{margin-bottom:5px;color:#b1d6ae}
+.held-item-caveat{margin:7px 0 0;color:#718d82;font:9px/1.5 'DM Mono',monospace}
+
 .moves{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .move{background:#172429;border:1px solid #32464a;border-radius:9px;padding:12px;min-height:91px}
 .move .mini-label{font-size:9px}
