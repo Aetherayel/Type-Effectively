@@ -6,9 +6,9 @@ Ever wondered what kind of Pokémon your personality would make you?
 
 No? Well, we made the calculator anyway.
 
-**Type Effectively** turns 16Personalities, Enneagram, and Big Five results into a personalized Pokémon-style build: elemental typing, Nature, a **535 base stat total**, battle role, standard and Hidden Ability, and four signature moves.
+**Type Effectively** turns 16Personalities, Enneagram, and Big Five results into a personalized Pokémon-style build: elemental typing, Nature, a **535 base stat total**, battle role, standard and Hidden Ability, and four signature moves. A bonus **Pokémon Relatives** section compares your build against real Pokémon for exact typings, closest six-stat distributions, and matching Abilities.
 
-No sign-in. No backend. No personality data submitted to a server. Just an unreasonable amount of information about your imaginary battle potential.
+No sign-in. No backend. No personality data submitted to a server. Just an unreasonable amount of information about your imaginary battle potential. The app downloads a compact Pokédex snapshot locally; artwork is loaded directly from the PokéAPI sprite repository.
 
 ## Try it locally
 
@@ -75,11 +75,21 @@ The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Con
 
 Use the two example buttons to populate and experiment with complete test-score profiles.
 
+## Pokémon Relatives: real Pokémon comparisons
+
+Once your build is generated, a bonus section loads the versioned [local Pokédex index](data/pokedex.json), created from the public [PokéAPI CSV database](https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv). It includes **1,351 species entries and alternate forms** from the November 19, 2026 snapshot, including species identifiers, names, types, six base stats, and standard/hidden abilities. This remains static until the index is regenerated and committed.
+
+- **Type twins** require exactly the same full type set, disregarding type order. Monotypes match other monotypes. If there are no exact matches, the UI explicitly labels overlapping-type **neighbors** instead.
+- **Stat siblings** minimize a six-dimensional RMSE after scaling each real Pokémon's stat distribution to **535 BST**, plus a small penalty (`0.08 × absolute BST difference`) to distinguish overall strength differences. The distance is a comparison score, not a psychological similarity percentage.
+- **Ability relatives** match the generated standard Ability and alternate Hidden Ability by canonical PokéAPI identifier, whether that real Pokémon lists the ability in a regular or hidden slot.
+
+Results diversify by species rather than repeating multiple forms of the same Pokémon. The display uses remote [PokéAPI official-artwork images](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/official-artwork) with sprite fallbacks; it does not copy Pokémon art into this repository. Imagery and names remain the intellectual property of their respective rights holders. Failed Pokémon data/art requests must never stop the primary personality result from working.
+
 ## Privacy and sharing
 
 Every build is calculated locally in the browser. Nothing is written to a database and nothing is automatically stored in local storage. The optional **Copy share link** action encodes the entered results in the URL **fragment** (the portion after `#`); fragment contents are not sent in ordinary HTTP requests. Anyone who receives that link **can read the personality scores encoded in it**. Don't share a link you want to keep private.
 
-The page loads Google Fonts for typography; that makes a separate font request, but does not transmit questionnaire scores.
+The page loads Google Fonts for typography and Pokémon artwork from the GitHub-hosted PokéAPI sprite collection. These third-party requests can expose normal network metadata such as IP address, but **do not include questionnaire scores**. The optional Pokédex snapshot is loaded from the same static website.
 
 ## Publishing via GitHub Pages
 
@@ -95,7 +105,11 @@ styles.css                Responsive visual design
 src/data.mjs              Pair map, templates, Natures, abilities, moves
 src/engine.mjs            Pure, testable scoring + selection logic
 src/app.mjs               Browser form, overrides, cards, sharing
+src/relatives.mjs         Pure type, stat, and ability matchers
+src/relatives-ui.mjs      Bonus Pokémon cards and artwork fallbacks
+data/pokedex.json         Static Pokémon and form index (1,351 records)
 tests/engine.test.mjs     Full tritype coverage + randomized invariants
+tests/relatives.test.mjs  Real Pokémon index + comparison tests
 .github/workflows/        Static Pages deployment
 ```
 
