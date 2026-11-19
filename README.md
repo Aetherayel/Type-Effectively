@@ -10,22 +10,7 @@ No? Well, we made the calculator anyway.
 
 No sign-in. No backend. No personality data submitted to a server. Just an unreasonable amount of information about your imaginary battle potential. The app downloads a compact Pokédex snapshot locally; artwork is loaded directly from the PokéAPI sprite repository.
 
-## Try it locally
-
-Requires a modern browser. No dependencies or build tools.
-
-```bash
-python3 -m http.server 4173
-# Open http://localhost:4173
-```
-
-For automated checks (Node.js 20+):
-
-```bash
-npm test
-```
-
-The app is plain HTML, CSS, and browser-native JavaScript modules, so it works on static hosts such as GitHub Pages.
+[**Try Type Effectively in your browser**](https://aetherayel.github.io/Type-Effectively/)
 
 ## Three tests, one build
 
