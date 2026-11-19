@@ -1,0 +1,12 @@
+{
+  "name": "type-effectively",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Your personality has a moveset.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "dev": "python3 -m http.server 4173",
+    "refresh:pokedex": "node scripts/refresh-pokedex.mjs"
+  }
+}

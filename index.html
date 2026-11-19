@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#10171c" />
+  <meta name="description" content="Turn your MBTI, Enneagram, and Big Five results into a custom personality Pokémon. 535 base stat points. Zero scientific claims about your battle potential." />
+  <meta property="og:title" content="Type Effectively — your personality has a moveset" />
+  <meta property="og:description" content="Three personality tests. One extremely specific Pokémon build." />
+  <title>Type Effectively · Your personality has a moveset</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="module" src="./src/app.mjs"></script>
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Type Effectively home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>TYPE<span class="brand-accent">/</span>EFFECTIVELY</span>
+      </a>
+      <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="eyebrow"><span class="status-pip"></span> AN UNOFFICIAL PERSONALITY EXPERIMENT <span class="eyebrow-num">/ 001</span></div>
+      <h1 id="hero-title">Your personality<br />has a <em>moveset.</em></h1>
+      <p>Put three personality theories in a blender. Get one highly specific Pokémon build. Apparently introspection needed a damage calculator.</p>
+      <div class="hero-meta">
+        <span><strong>535</strong> BASE STAT POINTS</span>
+        <span class="meta-divider"></span>
+        <span><strong>18</strong> ELEMENTAL TYPES</span>
+        <span class="meta-divider"></span>
+        <span><strong>0</strong> BATTLES REQUIRED</span>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <main class="input-column">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">THE BUILD LAB</div>
+            <h2>Enter your data<span class="terminal-dot">.</span></h2>
+          </div>
+          <button class="small-link" type="button" id="reset-button">Reset inputs ↺</button>
+        </div>
+        <div class="jump-nav" aria-label="Personality sections">
+          <a href="#mbti-section"><span>01</span> Personality</a>
+          <a href="#enneagram-section"><span>02</span> Enneagram</a>
+          <a href="#bigfive-section"><span>03</span> Big Five</a>
+        </div>
+
+        <form id="build-form" novalidate>
+          <section class="panel input-panel" id="mbti-section" aria-labelledby="mbti-title">
+            <div class="panel-heading">
+              <span class="step-number">01 / MIND</span>
+              <span class="panel-icon">◈</span>
+            </div>
+            <h3 id="mbti-title">Your personality type</h3>
+            <p class="panel-subtitle">Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.</p>
+            <div class="test-line"><a href="https://www.16personalities.com/free-personality-test" target="_blank" rel="noopener noreferrer">Take the free 16Personalities test ↗</a><span>~10 min · external site</span></div>
+            <div class="mode-switch" role="group" aria-label="16Personalities input mode">
+              <button type="button" class="mode-button active" data-mbti-mode="scores" aria-pressed="true">Enter my scores</button>
+              <button type="button" class="mode-button" data-mbti-mode="type" aria-pressed="false">I know my type</button>
+            </div>
+            <div id="mbti-score-fields" class="slider-stack"></div>
+            <p class="mini-note">Select the trait shown on your report and enter its percentage. For example: 71% Extraverted = 71 + Extraverted.</p>
+            <div class="field-grid">
+              <label class="field">
+                <span>Type override <span class="muted">(optional with scores)</span></span>
+                <select id="mbti-override"><option value="">Auto-detect from scores</option></select>
+              </label>
+            </div>
+            <p class="mini-note" id="mbti-derived">An inferred type will appear here as you enter your scores.</p>
+          </section>
+
+          <section class="panel input-panel" id="enneagram-section" aria-labelledby="ennea-title">
+            <div class="panel-heading">
+              <span class="step-number">02 / MOTIVATION</span>
+              <span class="panel-icon">◇</span>
+            </div>
+            <h3 id="ennea-title">Your Enneagram</h3>
+            <p class="panel-subtitle">All nine scores shape the build. We infer your ordered tritype, but you get the final say.</p>
+            <div class="test-line"><a href="https://findmynine.com/test" target="_blank" rel="noopener noreferrer">Take the free Find My Nine test ↗</a><span>Full nine-score results</span></div>
+            <div class="mode-switch" role="group" aria-label="Enneagram input mode">
+              <button type="button" class="mode-button active" data-ennea-mode="scores" aria-pressed="true">9 scores</button>
+              <button type="button" class="mode-button" data-ennea-mode="ranking" aria-pressed="false">Ranking</button>
+              <button type="button" class="mode-button" data-ennea-mode="tritype" aria-pressed="false">Tritype only</button>
+            </div>
+            <div id="ennea-score-fields" class="ennea-grid"></div>
+            <div id="ennea-ranking-fields" class="field hidden">
+              <label for="ennea-ranking">Order all nine types from strongest to weakest</label>
+              <input type="text" id="ennea-ranking" placeholder="5 9 3 6 1 4 8 7 2" inputmode="text" />
+              <p class="mini-note">Enter every digit 1–9 once, separated by spaces or commas.</p>
+            </div>
+            <div class="field-grid two">
+              <label class="field">
+                <span>Tritype override <span class="muted">(optional)</span></span>
+                <input id="tritype-override" type="text" inputmode="numeric" maxlength="3" placeholder="e.g. 593" pattern="[1-9]{3}" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>Wing <span class="muted">(optional)</span></span>
+                <select id="wing-override"><option value="">Auto-detect</option></select>
+              </label>
+            </div>
+            <p class="mini-note" id="ennea-derived">Tritype = one type from each center, ordered by strength.</p>
+          </section>
+
+          <section class="panel input-panel" id="bigfive-section" aria-labelledby="bigfive-title">
+            <div class="panel-heading">
+              <span class="step-number">03 / TEMPERAMENT</span>
+              <span class="panel-icon">⌁</span>
+            </div>
+            <h3 id="bigfive-title">Your Big Five</h3>
+            <p class="panel-subtitle">The statistical backbone. Your scores shape the spread; nobody gets extra base stat points.</p>
+            <div class="test-line"><a href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span>50 questions · free scores</span></div>
+            <div id="bigfive-fields" class="slider-stack"></div>
+            <p class="mini-note">Starting values of 50 are neutral placeholders, not guesses about you. Replace them with your actual results.</p>
+          </section>
+
+          <div id="form-error" class="form-error hidden" role="alert"></div>
+          <div class="action-bar">
+            <button id="generate-button" type="submit" class="primary-button"><span class="button-spark">✳</span> Generate my Pokémon <span aria-hidden="true">↗</span></button>
+            <span class="action-aside">Runs entirely in your browser.<br />No account. No data upload.</span>
+          </div>
+        </form>
+
+        <div class="demo-band">
+          <span>JUST EXPLORING?</span>
+          <button type="button" data-demo="architect">Load a 593 example <span>↗</span></button>
+          <button type="button" data-demo="catalyst">Load a 714 example <span>↗</span></button>
+        </div>
+      </main>
+
+      <aside class="result-column" aria-label="Your generated Pokémon">
+        <div class="section-heading result-header">
+          <div>
+            <div class="section-kicker">THE REVEAL</div>
+            <h2>Your Pokémon<span class="terminal-dot">.</span></h2>
+          </div>
+          <span class="live-label" id="result-status"><span></span> WAITING</span>
+        </div>
+        <div class="result-frame" id="result-container" aria-live="polite">
+          <div class="empty-state">
+            <div class="empty-orb"><span class="empty-core">?</span></div>
+            <div class="empty-overline">NO DATA, NO DRAMA</div>
+            <h3>Something's evolving.</h3>
+            <p>Enter your scores or try a sample build to see the Pokémon your personality would create.</p>
+            <div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div>
+          </div>
+        </div>
+        <p class="result-disclaimer">For entertainment, not diagnosis. MBTI-style labels, Enneagram scores, and stat formulas are symbolic design choices—not validated measurements of your capabilities. Unofficial fan project; not affiliated with or endorsed by Nintendo, Game Freak, or The Pokémon Company.</p>
+      </aside>
+    </div>
+    <footer class="footer">
+      <span>TYPE EFFECTIVELY / V0.1</span>
+      <span>KNOW YOURSELF. KNOW YOUR WEAKNESSES. BLAME TYPE MATCHUPS.</span>
+      <a href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">OPEN SOURCE ↗</a>
+    </footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
