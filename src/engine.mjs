@@ -4,6 +4,7 @@ import {
   PAIR_TYPES, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs';
+import { chooseHeldItem } from './held-items.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -257,6 +258,11 @@ export function generateBuild(input) {
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
   const role=classifyRole(effectiveStats,toolkitTypes);
   const ability=chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
+  const heldItem=chooseHeldItem({
+    tritype,core,second,third,wing:selectedWing,
+    enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
+    role,hasBigFive:input.bigFive!=null
+  });
   let hiddenAbility=HIDDEN_ABILITY_BY_TYPE[hiddenType];
   if (hiddenAbility===ability.name) {
     hiddenAbility=ABILITIES.find(a=>a.name!==ability.name&&a.types.includes(hiddenType))?.name || 'Pressure';
@@ -271,7 +277,7 @@ export function generateBuild(input) {
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
     tritype, suggestedTritype, suggestedType, wing:selectedWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'The '+archetype,
-    types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,
+    types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings

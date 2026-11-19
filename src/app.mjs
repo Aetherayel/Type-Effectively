@@ -5,6 +5,8 @@ import {
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
+import { getDefensiveMatchups } from './matchups.mjs';
+import { downloadCardPng } from './export-card.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -190,6 +192,35 @@ function typeChip(type) {
   const color=TYPE_COLORS[type]||'#98afb8';
   return '<span class="type-chip" style="background:'+color+'">'+escapeHtml(type)+'</span>';
 }
+function renderMatchups(types) {
+  const matchups=getDefensiveMatchups(types);
+  const groups=[
+    ['4× Weakness',matchups.quadWeak,'4×','danger'],
+    ['2× Weakness',matchups.weak,'2×','weak'],
+    ['½× Resistance',matchups.resist,'½×','resist'],
+    ['¼× Resistance',matchups.strongResist,'¼×','strong'],
+    ['Immunity',matchups.immune,'0×','immune']
+  ];
+  const rows=groups.map(([heading,entries,multiplier,kind])=>
+    '<div class="matchup-row matchup-'+kind+'">'+
+      '<span class="matchup-label">'+heading+'</span>'+
+      '<div class="matchup-types">'+
+        (entries.length
+          ? entries.map(({type})=>
+              '<span class="matchup-chip" style="--matchup-type:'+TYPE_COLORS[type]+'">'+
+                '<strong>'+escapeHtml(type)+'</strong><span>'+multiplier+'</span></span>'
+            ).join('')
+          : '<span class="matchup-none">None</span>')+
+      '</div>'+
+    '</div>'
+  ).join('');
+  return '<section class="matchup-panel" aria-label="Defensive type matchups">'+
+    '<div class="result-section-title"><h4>Type matchups</h4><span>DEFENSIVE PROFILE</span></div>'+
+    '<p class="matchup-explain">Incoming attack damage against '+types.map(escapeHtml).join(' / ')+' typing.</p>'+
+    '<div class="matchup-grid">'+rows+'</div>'+
+    '<p class="matchup-caveat">Typing only; abilities, items, weather and other battle effects can change these results.</p>'+
+  '</section>';
+}
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
@@ -223,21 +254,49 @@ function renderCard(build) {
         '<div class="ability-box"><span class="mini-label">Standard ability</span><strong>'+escapeHtml(build.ability.name)+'</strong><p>'+escapeHtml(build.ability.desc)+'</p></div>'+
         '<div class="ability-box hidden-ability"><span class="mini-label">Hidden ability · '+escapeHtml(build.hiddenType)+'</span><strong>'+escapeHtml(build.hiddenAbility)+'</strong><p>Derived from the relationship between fixes '+build.second+' and '+build.third+'. Alternative ability, not active simultaneously.</p></div>'+
       '</div>'+
+      '<section class="held-item-section" aria-label="Thematic held item">'+
+        '<div class="result-section-title"><h4>Held item</h4><span>PERSONALITY FLAVOR</span></div>'+
+        '<div class="held-item-card">'+
+          '<div class="held-item-heading"><strong>'+escapeHtml(build.heldItem.name)+'</strong><span>'+escapeHtml(build.heldItem.familyLabel)+'</span></div>'+
+          '<p class="held-item-effect">'+escapeHtml(build.heldItem.effect)+'</p>'+
+          '<p class="held-item-quip">“'+escapeHtml(build.heldItem.quip)+'”</p>'+
+          '<div class="held-item-why"><span class="mini-label">WHY YOU GOT THIS</span>'+escapeHtml(build.heldItem.why)+'</div>'+
+        '</div>'+
+        '<p class="held-item-caveat">A personality metaphor, not an active battle modifier.</p>'+
+      '</section>'+
       '<div class="result-section-title"><h4>Signature moveset</h4><span>04 MOVES</span></div>'+
       '<div class="moves">'+moveHtml+'</div>'+
+      renderMatchups(build.types)+
       '<details class="explain"><summary>How was this build calculated? +</summary>'+
         '<p><strong>Typing:</strong> Core '+build.core+' pairs with '+build.second+' ('+escapeHtml(build.types[0])+') and '+build.third+' ('+escapeHtml(build.types[1]||build.types[0])+'). '+
         (build.monotype?'Both pairings match, so this is a monotype; the hidden '+escapeHtml(build.hiddenType)+' pairing supplies coverage. ':'')+
         'The '+escapeHtml(build.hiddenType)+' hidden pairing influences the Hidden Ability.</p>'+
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Abilities and moves are then matched to the role and personality themes, not necessarily to any official species learnset.</p>'+
+        '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. The item is for humor and does not modify calculated stats or type matchups.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
-      '<div class="result-actions"><button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
+      '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
+      '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
       '<button type="button" id="share-build" class="outline-button">Copy share link ↗</button></div>'+
     '</div></article>';
   $('result-status').classList.add('ready');
   $('result-status').innerHTML='<span></span> BUILD COMPLETE';
+  $('download-card').addEventListener('click',async()=>{
+    const button=$('download-card');
+    if(button.disabled)return;
+    button.disabled=true;
+    button.textContent='Preparing PNG…';
+    try {
+      await downloadCardPng(build);
+      showToast('PNG card ready to save or share.');
+    } catch(error) {
+      showToast(error.message||'Could not download the card.');
+    } finally {
+      button.disabled=false;
+      button.textContent='Download card ↓';
+    }
+  });
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
   // Optional real-Pokémon comparisons load only after the base build is complete.
@@ -250,6 +309,7 @@ function buildSummary(b) {
     'Role: '+b.role.primary.name+(b.role.secondary?' / '+b.role.secondary.name:''),
     'BST 535: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
     'Ability: '+b.ability.name+' · Hidden: '+b.hiddenAbility,
+    'Held item: '+b.heldItem.name+' — '+b.heldItem.quip,
     'Moves: '+b.moves.map(m=>m.name).join(' / '),
     'Unofficial personality Pokémon, not scientific assessment.'
   ].join('\n');
