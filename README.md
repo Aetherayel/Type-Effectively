@@ -83,7 +83,7 @@ Once your build is generated, a bonus section loads the versioned [local Pokéde
 - **Stat siblings** minimize a six-dimensional RMSE after scaling each real Pokémon's stat distribution to **535 BST**, plus a small penalty (`0.08 × absolute BST difference`) to distinguish overall strength differences. The distance is a comparison score, not a psychological similarity percentage.
 - **Ability relatives** match the generated standard Ability and alternate Hidden Ability by canonical PokéAPI identifier, whether that real Pokémon lists the ability in a regular or hidden slot.
 
-Results diversify by species rather than repeating multiple forms of the same Pokémon. The display uses remote [PokéAPI official-artwork images](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/official-artwork) with sprite fallbacks; it does not copy Pokémon art into this repository. Imagery and names remain the intellectual property of their respective rights holders. Failed Pokémon data/art requests must never stop the primary personality result from working.
+To update the index, run `npm run refresh:pokedex`, review the generated diff, and commit it. The refresh script fetches source CSVs only during manual regeneration; the website never calls PokéAPI for its comparisons.\n\nResults diversify by species rather than repeating multiple forms of the same Pokémon. The display uses remote [PokéAPI official-artwork images](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/official-artwork) with sprite fallbacks; it does not copy Pokémon art into this repository. Imagery and names remain the intellectual property of their respective rights holders. Failed Pokémon data/art requests must never stop the primary personality result from working.
 
 ## Privacy and sharing
 
@@ -107,7 +107,7 @@ src/engine.mjs            Pure, testable scoring + selection logic
 src/app.mjs               Browser form, overrides, cards, sharing
 src/relatives.mjs         Pure type, stat, and ability matchers
 src/relatives-ui.mjs      Bonus Pokémon cards and artwork fallbacks
-data/pokedex.json         Static Pokémon and form index (1,351 records)
+data/pokedex.json         Static Pokémon and form index (1,351 records)\nscripts/refresh-pokedex.mjs  Rebuild the index from public PokéAPI CSVs
 tests/engine.test.mjs     Full tritype coverage + randomized invariants
 tests/relatives.test.mjs  Real Pokémon index + comparison tests
 .github/workflows/        Static Pages deployment
