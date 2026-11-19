@@ -68,9 +68,15 @@ Once your build is generated, a bonus section loads the versioned [local Pokéde
 
 To update the index, run `npm run refresh:pokedex`, review the generated diff, and commit it. The refresh script fetches source CSVs only during manual regeneration; the website never calls PokéAPI for its comparisons.\n\nResults diversify by species rather than repeating multiple forms of the same Pokémon. The display uses remote [PokéAPI official-artwork images](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/official-artwork) with sprite fallbacks; it does not copy Pokémon art into this repository. Imagery and names remain the intellectual property of their respective rights holders. Failed Pokémon data/art requests must never stop the primary personality result from working.
 
+## Downloadable card and defensive matchups
+
+**Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, standard Ability and six-stat radar, but **not the original questionnaire percentages or full input data**. No screenshot service, external image request, or new library is needed to export it.
+
+The **Type matchups** section evaluates incoming attacks against the generated one- or two-type Pokémon using the modern (Generation VI onward) 18-type effectiveness chart. It lists 4× weaknesses, 2× weaknesses, ½× resistances, ¼× resistances, and immunities. Unaffected attacks are omitted. These multipliers describe *typing only*; abilities, items, weather, and other battle effects can change damage in an actual Pokémon battle.
+
 ## Privacy and sharing
 
-Every build is calculated locally in the browser. Nothing is written to a database and nothing is automatically stored in local storage. The optional **Copy share link** action encodes the entered results in the URL **fragment** (the portion after `#`); fragment contents are not sent in ordinary HTTP requests. Anyone who receives that link **can read the personality scores encoded in it**. Don't share a link you want to keep private.
+Every build is calculated locally in the browser. Nothing is written to a database and nothing is automatically stored in local storage. The PNG download exports a result summary without the original questionnaire scores. The optional **Copy share link** action encodes the entered results in the URL **fragment** (the portion after `#`); fragment contents are not sent in ordinary HTTP requests. Anyone who receives that link **can read the personality scores encoded in it**. Don't share a link you want to keep private.
 
 The page loads Google Fonts for typography and Pokémon artwork from the GitHub-hosted PokéAPI sprite collection. These third-party requests can expose normal network metadata such as IP address, but **do not include questionnaire scores**. The optional Pokédex snapshot is loaded from the same static website.
 
@@ -88,6 +94,8 @@ styles.css                Responsive visual design
 src/data.mjs              Pair map, templates, Natures, abilities, moves
 src/engine.mjs            Pure, testable scoring + selection logic
 src/app.mjs               Browser form, overrides, cards, sharing
+src/matchups.mjs          Defensive type-chart calculations
+src/export-card.mjs       Local SVG-to-PNG result card export
 src/relatives.mjs         Pure type, stat, and ability matchers
 src/relatives-ui.mjs      Bonus Pokémon cards and artwork fallbacks
 data/pokedex.json         Static Pokémon and form index (1,351 records)\nscripts/refresh-pokedex.mjs  Rebuild the index from public PokéAPI CSVs
