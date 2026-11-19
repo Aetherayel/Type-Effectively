@@ -103,30 +103,33 @@ export function normalizeStats(affinities, total = 535, min = 45, max = 140) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
   const mean = average(affinities);
-  const values = affinities.map(a=>total/6+1.1*(a-mean));
-  const fixed = new Set();
-  // Water filling: respect bounds while preserving the exact requested total.
-  for (let attempt=0; attempt<7; attempt++) {
-    const active = values.map((_,i)=>i).filter(i=>!fixed.has(i));
-    if (!active.length) break;
-    const fixedTotal = values.reduce((s,v,i)=>s+(fixed.has(i)?v:0),0);
-    const activeTotal = active.reduce((s,i)=>s+values[i],0);
-    const delta = (total-fixedTotal-activeTotal)/active.length;
-    active.forEach(i=> {values[i]+=delta;});
-    let clipped = false;
-    active.forEach(i=>{
-      if (values[i]<min) { values[i]=min; fixed.add(i); clipped=true; }
-      if (values[i]>max) { values[i]=max; fixed.add(i); clipped=true; }
-    });
-    if (!clipped) break;
+  const raw = affinities.map(a=>total/6+1.1*(a-mean));
+  // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
+  // clipping, this handles cases where several bounds are hit together.
+  let low=min-Math.max(...raw)-1;
+  let high=max-Math.min(...raw)+1;
+  for (let i=0;i<80;i++) {
+    const middle=(low+high)/2;
+    const candidate=raw.reduce((sum,value)=>sum+clamp(value+middle,min,max),0);
+    if(candidate<total) low=middle; else high=middle;
   }
+  const values=raw.map(v=>clamp(v+(low+high)/2,min,max));
   const integers=values.map(Math.floor);
   let remaining=total-integers.reduce((a,b)=>a+b,0);
-  const order=values.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f||a.i-b.i);
-  for (const {i} of order) {
-    if (remaining<=0) break;
-    if (integers[i]<max) { integers[i]++; remaining--; }
+  const ascending=values.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>a.f-b.f||b.i-a.i);
+  const descending=[...ascending].reverse();
+  if (remaining>0) {
+    for(const {i} of descending) {
+      if(!remaining)break;
+      if(integers[i]<max){integers[i]++;remaining--;}
+    }
+  } else if (remaining<0) {
+    for(const {i} of ascending) {
+      if(!remaining)break;
+      if(integers[i]>min){integers[i]--;remaining++;}
+    }
   }
+  if (remaining!==0) throw new Error('Could not normalize base stat total.');
   return Object.fromEntries(STAT_KEYS.map((k,i)=>[k,integers[i]]));
 }
 
