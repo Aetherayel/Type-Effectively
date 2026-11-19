@@ -31,7 +31,7 @@ function typeBadges(types) {
 }
 
 function pokemonCard(pokemon,context,abilityName) {
-  const label=context==='stat'?'Spread gap '+pokemon.match.spreadGap.toFixed(1):
+  const label=context==='stat'?'Match distance '+pokemon.match.score.toFixed(1)+' · BST '+pokemon.match.bst:
     context==='ability'?(pokemon.abilities.find(a=>a.name===abilitySlug(abilityName))?.hidden?'Hidden on species':'Available ability') :
     'BST '+pokemon.match.bst;
   return '<li class="relative-card">'+
