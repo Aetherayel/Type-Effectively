@@ -34,15 +34,15 @@ function svgLines(value,{x=76,y,size=18,lineHeight=26,maxCharacters=76,fill='#c5
     ).join('')+'</text>';
 }
 
-// Only explicitly entered Big Five values are exported. Missing scores
-// should never look like a real five-number assessment.
+// Only high/low signals (not raw Big Five values) appear on exported cards.
+// H = input score >= 50, L = below 50. Null means no measured OCEAN data.
 export function oceanHeaderText(build) {
-  const scores=build.oceanScores;
-  if(scores==null)return 'OCEAN · Estimated';
-  if(!Array.isArray(scores)||scores.length!==5||scores.some(value=>!Number.isFinite(value)||value<0||value>100)) {
-    throw new Error('The OCEAN card header needs five valid scores.');
+  const flags=build.oceanBinary;
+  if(flags==null)return 'OCEAN · Estimated';
+  if(!Array.isArray(flags)||flags.length!==5||flags.some(value=>value!==0&&value!==1)) {
+    throw new Error('The OCEAN card header needs five binary flags.');
   }
-  return ['O','C','E','A','N'].map((label,i)=>label+Math.round(scores[i])).join(' · ');
+  return ['O','C','E','A','N'].map((label,i)=>label+':'+(flags[i]===1?'H':'L')).join(' · ');
 }
 
 function typeBadges(types) {
@@ -150,7 +150,7 @@ export function buildCardSvg(build) {
   ${svgLines('“'+build.heldItem.quip+'”',{x:192,y:1557,maxCharacters:65,size:18,lineHeight:23,fill:'#d6edda',italic:true})}
   <line x1="76" x2="884" y1="1612" y2="1612" stroke="#4b6964"/>
   <text x="76" y="1640" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
-  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · Only entered OCEAN scores are shown</text>
+  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · OCEAN shown only as high / low</text>
 </svg>`;
 }
 
