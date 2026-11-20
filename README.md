@@ -24,6 +24,14 @@ These are independent external websites. **No test integration, scraping, affili
 
 Don't have the full results? You can select an MBTI-style type, enter an ordered Enneagram ranking, or supply a tritype. The result clearly labels estimated inputs. If Big Five is missing, neutral 50-point placeholders are used and disclosed.
 
+### Explore random combinations
+
+The **Randomize ↻** button beside the results heading instantly creates a **synthetic sample build** using the ordinary calculator: five generated bipolar 16Personalities scores, nine Enneagram scores with a valid ordered tritype, and five Big Five scores. The editable input controls update to match the sample, so visitors can inspect exactly how it was produced. Clicking again creates a fresh combination without requiring any manual form entry.
+
+The result clearly reads **RANDOM SAMPLE · SYNTHETIC SCORES**, not a personal assessment. A manual Generate action returns to normal results; Reset clears the sample. Share links preserve the sample label, and randomizing clears any old share-link hash. All work remains local in the browser.
+
+**Current typing-map limitation:** the Enneagram pair mappings for **Fire** (2–3 and 3–4) and **Ground** (1–9 and 8–9) use two types from the *same* Enneagram center. Because a valid tritype selects only one digit per center, those typings cannot arise from an authentic generated tritype. Randomization deliberately does **not** override computed typing or alter that mapping; the corresponding artwork is already implemented for when the source mapping is reviewed.
+
 ### Manual overrides
 
 The inferred four-letter type, ordered tritype, and wing can be overridden. Overrides affect **identity and type selection**, while entered score distributions remain intact for stats. This preserves the distinction between your interpretation of the tests and the raw measurements.
