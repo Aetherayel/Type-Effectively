@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const root=resolve(process.cwd());
 const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
@@ -38,17 +38,24 @@ try{
   for(const cmd of candidates){
     const probe=spawnSync('which',[cmd],{encoding:'utf8'});
     if(probe.status===0){
-      result=spawnSync(cmd,[
-        '--headless=new','--no-sandbox','--disable-dev-shm-usage',
-        '--disable-gpu','--no-first-run','--no-default-browser-check',
-        '--virtual-time-budget=6000','--dump-dom',
-        'http://127.0.0.1:'+port+'/'
-      ],{encoding:'utf8',timeout:35000,maxBuffer:8_000_000});
+      result=await new Promise((ok,fail)=>{
+        const proc=spawn(cmd,[
+          '--headless=new','--no-sandbox','--disable-dev-shm-usage',
+          '--disable-gpu','--no-first-run','--no-default-browser-check',
+          '--virtual-time-budget=6000','--dump-dom',
+          'http://127.0.0.1:'+port+'/'
+        ],{stdio:['ignore','pipe','pipe']});
+        let stdout='',stderr='';
+        const timer=setTimeout(()=>{proc.kill('SIGKILL');fail(new Error('Chrome startup timed out'));},35000);
+        proc.stdout.on('data',chunk=>{stdout+=chunk.toString();});
+        proc.stderr.on('data',chunk=>{stderr+=chunk.toString();});
+        proc.once('error',err=>{clearTimeout(timer);fail(err);});
+        proc.once('close',status=>{clearTimeout(timer);ok({status,stdout,stderr});});
+      });
       break;
     }
   }
   if(!result)throw new Error('Chrome/Chromium unavailable: cannot run browser startup smoke test');
-  if(result.error)throw result.error;
   const html=result.stdout||'';
   const diagnostics=html.match(/data-boot-error="([^"]+)"/)?.[1]||'';
   const counts={
