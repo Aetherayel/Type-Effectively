@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ARCHETYPE_CATALOG, ARCHETYPE_WEIGHTS, classifyArchetype } from '../src/archetypes.mjs';
+import { ARCHETYPE_CATALOG, ARCHETYPE_PROTOTYPES, ARCHETYPE_WEIGHTS, classifyArchetype } from '../src/archetypes.mjs';
 import { DEMOS } from '../src/data.mjs';
-import { generateBuild } from '../src/engine.mjs';
+import { deriveTritype, generateBuild } from '../src/engine.mjs';
 
 const roleNames=['Sweeper','Wall','Tank','Pivot','Support','Controller'];
 const roleShape=(favorite='Controller')=>({
@@ -30,6 +30,25 @@ test('36 curated archetype identities span every operating style and battle expr
   }
   assert.ok(ARCHETYPE_CATALOG.every(x=>x.title.startsWith('The ') && x.gift && x.shadow && x.signature));
   assert.equal(Object.values(ARCHETYPE_WEIGHTS).reduce((a,b)=>a+b,0),1);
+});
+
+test('every one of the 36 identities is reachable with its representative full-profile scores',()=>{
+  const reached=new Set();
+  for(const profile of ARCHETYPE_PROTOTYPES){
+    const [core,second,third]=deriveTritype(profile.ennea).split('').map(Number);
+    const mbti=(profile.mbti[0]>=50?'I':'E')+(profile.mbti[1]>=50?'N':'S')+
+      (profile.mbti[2]>=50?'F':'T')+(profile.mbti[3]>=50?'P':'J');
+    for(const wanted of roleNames){
+      const chosen=classifyArchetype({
+        enneagramScores:profile.ennea,mbtiScores:profile.mbti,bigFive:profile.ocean,
+        mbti,core,second,third,
+        role:{all:roleNames.map(name=>({name,score:name===wanted?90:45}))}
+      });
+      assert.equal(chosen.id,profile.id+'-'+wanted.toLowerCase());
+      reached.add(chosen.id);
+    }
+  }
+  assert.equal(reached.size,36);
 });
 
 test('whole-build classification is deterministic, explainable, and role-sensitive',()=>{
@@ -82,6 +101,16 @@ test('estimated temperament is explained, not asserted as measured',()=>{
   assert.match(build.report.temperament,/not supplied/);
   assert.match(build.report.twist,/Missing temperament data/);
   assert.equal(build.title,build.archetype.title);
+});
+
+test('near-neutral measured OCEAN scores do not trigger exaggerated trait claims',()=>{
+  const build=generateBuild({
+    mbtiScores:DEMOS.architect.mbti,
+    enneagramScores:DEMOS.architect.enneagram,
+    bigFive:[50,51,49,50,50]
+  });
+  assert.match(build.report.temperament,/fairly close to the midpoint/);
+  assert.doesNotMatch(build.report.temperament,/loudest OCEAN/);
 });
 
 test('archetype scores are not simulated probabilities',()=>{
