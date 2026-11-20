@@ -260,8 +260,6 @@ export const GROWTH_MOVES = {
 };
 
 // Used by eligibility and tactical fitting: all other moves are Status moves.
-export const PHYSICAL_TACTICS=['Flame Charge','U-turn','Flip Turn','Drain Punch'];
-
 export const MOVE_SYNERGIES = {
   'Swords Dance':{types:['Steel','Fighting','Dragon'],fixes:[1,3,8]},
   'Dragon Dance':{types:['Dragon','Fire','Flying'],fixes:[3,7,8]},
