@@ -1,7 +1,7 @@
 import { TYPE_COLORS } from './data.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { loadItemSprite } from './item-sprites.mjs';
-import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs';
+import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
