@@ -75,13 +75,15 @@ A static **Understanding your stats** section appears below the input/results wo
 
 The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / 16Personalities** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
-## Prototype card artwork: Ice / Steel / Tank
+## Elemental card artwork: all 18 types
 
-Both the **visible results card and the downloadable PNG** now compose a first-pass elemental illustration from the same local SVG shapes. Previously, only the export implemented these elements, so the artwork was absent from the on-site result. **Ice** adds angular translucent crystal shards; **Steel** adds riveted plates and beams. The primary type enters from the **top-left**, the secondary type from the **bottom-right**, and monotypes use the same element in both corners. These two motifs work in either corner. Types other than Ice and Steel retain the existing plain background for now.
+The **visible results card and downloaded PNG** use one shared, browser-generated SVG motif system covering **all 18 Pokémon types**. Each element has a distinct visual identity: Normal (engraved geometry), Fire (flame tongues/embers), Water (rolling waves), Electric (lightning), Grass (vines/leaves), Ice (crystalline shards), Fighting (impact fractures), Poison (dripping toxins), Ground (layered earth), Flying (wind/feathers), Psychic (concentric rings/prisms), Bug (chitin/wing cells), Rock (stone slabs), Ghost (spectral wisps), Dragon (scales/claws), Dark (shadow tendrils), Steel (riveted beams), and Fairy (ribbons/starlight).
 
-A **Tank** battle role adds a faint fortress-shield watermark behind the stat radar on the site and in the exported card. Other battle roles remain unillustrated until their icons are designed. Every artwork layer is clipped to the rounded card and fades toward the central text. The generated PNG continues to use the existing local SVG-to-Canvas export and the optional held-item icon. **No 324-combination image library or additional image request is needed for the artwork.**
+The **primary type enters from the top-left**, while the **secondary type enters from the bottom-right**. Monotypes use their motif in both corners. Layers fade toward the card content; live SVG gradients are namespaced per corner to prevent conflicts. The PNG exports through the existing SVG-to-Canvas renderer. **No pre-rendered pairings, server, or third-party artwork fetch is needed.**
 
-[View the Ice/Steel Tank SVG render used by the exporter](previews/ice-steel-tank.svg). This static visual sample includes the default icon placeholder; the actual browser-exported PNG overlays the selected held item's sprite afterward.
+The **Tank battle role** continues to use a faint fortress-shield watermark beneath the radar. Other battle-role emblems remain intentionally unimplemented until designed.
+
+[View the original Ice/Steel Tank exporter sample](previews/ice-steel-tank.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG sample uses its fallback icon.
 
 ## Downloadable card and defensive matchups
 
