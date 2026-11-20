@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { ARCHETYPE_CATALOG, ARCHETYPE_PROTOTYPES, ARCHETYPE_WEIGHTS, classifyArchetype } from '../src/archetypes.mjs';
 import { DEMOS } from '../src/data.mjs';
 import { deriveTritype, generateBuild } from '../src/engine.mjs';
+import { getDefensiveMatchups } from '../src/matchups.mjs';
 
 const roleNames=['Sweeper','Wall','Tank','Pivot','Support','Controller'];
 const roleShape=(favorite='Controller')=>({
@@ -85,6 +86,16 @@ test('final build retains generator rules while gaining a real field report',()=
   assert.equal(Object.values(build.baseStats).reduce((a,b)=>a+b,0),535);
   assert.equal(build.moves.length,4);
   assert.ok(build.report.opener.includes(build.archetype.modeJoke));
+  assert.match(build.report.dexEntry,/This (?:[A-Za-z]+(?: \/ [A-Za-z]+)?)-type Pokémon/);
+  assert.match(build.report.dexEntry,/\./);
+  assert.equal(build.report.trainerTips.length,3);
+  assert.ok(build.report.trainerTips[0].text.includes(build.moves[2].name),
+    'battle drill must name the selected role tactic');
+  assert.ok(build.report.trainerTips[0].text.includes(build.role.primary.name));
+  assert.ok(build.report.trainerTips[1].text.includes('partner') ||
+    build.report.trainerTips[1].text.includes('switch'));
+  assert.ok(build.report.trainerTips[2].text.includes(build.moves[3].name),
+    'growth drill must name the actual growth move');
   assert.ok(build.report.motives.includes(String(build.core)));
   assert.ok(build.report.combat.includes(build.role.primary.name));
   assert.ok(build.report.growth.includes(build.moves[3].name));
@@ -98,9 +109,23 @@ test('final build retains generator rules while gaining a real field report',()=
 
 test('estimated temperament is explained, not asserted as measured',()=>{
   const build=generateBuild({typeOverride:'INTJ',tritypeOverride:'513'});
-  assert.match(build.report.temperament,/not supplied/);
-  assert.match(build.report.twist,/Missing temperament data/);
+  assert.match(build.report.temperament,/No measured Big Five scores were supplied/);
+  assert.match(build.report.twist,/temperament data is missing/);
   assert.equal(build.title,build.archetype.title);
+});
+
+test('trainer briefing accurately calls out a real four-times type weakness',()=>{
+  const candidates=[
+    {typeOverride:'INTJ',tritypeOverride:'514'},
+    {typeOverride:'INTJ',tritypeOverride:'593'},
+    {typeOverride:'ESFP',tritypeOverride:'714'}
+  ].map(input=>generateBuild(input));
+  const candidate=candidates.find(build=>build.report.trainerTips[1].text.includes('4× damage'));
+  assert.ok(candidate,'at least one sampled build should have a four-times type weakness');
+  const matchup=getDefensiveMatchups(candidate.types);
+  assert.ok(matchup.quadWeak.length>0);
+  for(const entry of matchup.quadWeak)
+    assert.ok(candidate.report.trainerTips[1].text.includes(entry.type));
 });
 
 test('near-neutral measured OCEAN scores do not trigger exaggerated trait claims',()=>{
