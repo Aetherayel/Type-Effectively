@@ -227,14 +227,14 @@ function renderMatchups(types) {
 function renderFieldReport(build) {
   const a=build.archetype,r=build.report;
   const parts=[
-    ['01 / THE MOTIVE','What keeps this creature moving?',r.motives],
-    ['02 / THE OPERATING SYSTEM','How it approaches the world',r.thinking],
-    ['03 / THE TEMPERAMENT','The OCEAN under the hood',r.temperament],
-    ['04 / THE BATTLE STYLE','What it actually does',r.combat],
-    ['05 / THE TRADEOFF','Where the build can get in its own way',r.tradeoff],
-    ['06 / THE SURPRISE','A mildly inconvenient contradiction',r.twist],
-    ['07 / THE PARTY SLOT','What teammates get out of it',r.team],
-    ['08 / THE LEVEL-UP QUEST','A move worth learning',r.growth]
+    ['01 / INSTINCTS','What gets this Pokémon moving?',r.motives],
+    ['02 / FIELD BEHAVIOR','How to read its approach',r.thinking],
+    ['03 / TEMPERAMENT','What to expect in training',r.temperament],
+    ['04 / DEPLOYMENT','Where to send it into battle',r.combat],
+    ['05 / CAUTIONS','What the trainer should watch for',r.tradeoff],
+    ['06 / ODDITIES','What might surprise you',r.twist],
+    ['07 / TEAMWORK','Which partners bring out its best',r.team],
+    ['08 / GROWTH','How to expand its moveset',r.growth]
   ];
   const breakdown=[
     ['Motivation',a.breakdown.motivation,'25%'],
@@ -243,11 +243,18 @@ function renderFieldReport(build) {
     ['Battle expression',a.breakdown.battle,'30%']
   ];
   return '<section class="field-report" aria-label="Trainer field report">'+
-    '<div class="field-report-head"><span class="mini-label">TRAINER FIELD REPORT · NO COUCH REQUIRED</span>'+
-      '<h4>The unofficial field notes</h4>'+
-      '<p>A closer look at what the numbers created. Some tactical insight, a few questionable life lessons, and absolutely no insurance billing.</p></div>'+
-    '<div class="report-intro"><span>SPECIES BEHAVIOR · '+escapeHtml(a.modeLabel.toUpperCase())+'</span>'+
+    '<div class="field-report-head"><span class="mini-label">UNOFFICIAL FIELD GUIDE · TRAINER EDITION</span>'+
+      '<h4>Your Pokémon, according to our highly unofficial Pokédex</h4>'+
+      '<p>You caught the creature. Here is what the field researchers think you should do with it. Clipboard optional; Potions recommended.</p></div>'+
+    '<div class="dex-entry"><span class="mini-label">POKÉDEX ENTRY · '+escapeHtml(a.title.toUpperCase())+'</span>'+
+      '<p>'+escapeHtml(r.dexEntry)+'</p></div>'+
+    '<div class="report-intro"><span>FIELD OBSERVATION · '+escapeHtml(a.modeLabel.toUpperCase())+'</span>'+
       '<strong>'+escapeHtml(a.signature)+'</strong><p>'+escapeHtml(r.opener)+'</p></div>'+
+    '<section class="trainer-playbook" aria-label="Recommended training plan">'+
+      '<h5>TRAINER PLAYBOOK <span>3 FIELD ORDERS</span></h5>'+
+      '<div class="trainer-step-grid">'+r.trainerTips.map((tip,i)=>
+        '<div class="trainer-step"><span class="mini-label">0'+(i+1)+' / '+escapeHtml(tip.label)+'</span>'+
+        '<strong>'+escapeHtml(tip.title)+'</strong><p>'+escapeHtml(tip.text)+'</p></div>').join('')+'</div></section>'+
     '<div class="report-grid">'+parts.map(([label,heading,description])=>
       '<article class="report-tile"><span class="mini-label">'+escapeHtml(label)+'</span>'+
       '<h5>'+escapeHtml(heading)+'</h5><p>'+escapeHtml(description)+'</p></article>').join('')+'</div>'+
