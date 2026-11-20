@@ -88,10 +88,81 @@ export function renderTypeCornerArtwork(types) {
   return primary+secondary;
 }
 
+// Broad, monochrome silhouettes share Tank's scale, opacity and position.
+// Hybrid builds use the primary role, so exactly one emblem is displayed.
+export const BATTLE_ROLE_NAMES=Object.freeze([
+  'Sweeper','Tank','Wall','Pivot','Support','Controller'
+]);
+
+const OTHER_ROLE_MARKS=Object.freeze({
+  Sweeper: `
+    <path d="M-154 -163 L-115 -178 L25 -21 L159 133 L128 162 L-24 29 Z"
+      fill="#bdd6cf" fill-opacity=".24" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M154 -163 L115 -178 L-25 -21 L-159 133 L-128 162 L24 29 Z"
+      fill="#bdd6cf" fill-opacity=".24" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M-153 -169 L-105 -192 L-92 -132 L-126 -109 Z M153 -169 L105 -192 L92 -132 L126 -109 Z"
+      fill="#cfe5db" fill-opacity=".27" stroke-width="6"/>
+    <path d="M-161 131 L-103 190 M-125 143 L-89 178 M161 131 L103 190 M125 143 L89 178"
+      stroke-width="11" stroke-linecap="round"/>
+    <path d="M-191 -36 L-113 -36 M113 -36 L191 -36 M-166 5 L-125 5 M125 5 L166 5"
+      stroke-width="8" stroke-linecap="round" stroke-opacity=".68"/>
+    <path d="M-35 -25 L0 -59 L35 -25 L0 9 Z"
+      fill="#cee9df" fill-opacity=".23" stroke-width="7"/>
+  `,
+  Wall: `
+    <path d="M-190 -120 H-137 V-176 H-78 V-120 H-29 V-176 H29 V-120 H78 V-176 H137 V-120 H190 V158 H-190 Z"
+      fill="#b1d0ca" fill-opacity=".24" stroke-width="15" stroke-linejoin="round"/>
+    <path d="M-170 -85 H170 M-170 8 H170 M-170 95 H170"
+      stroke-width="9" stroke-opacity=".69"/>
+    <path d="M-115 -85 V8 M-25 -85 V8 M75 -85 V8 M125 8 V95 M30 8 V95 M-72 8 V95"
+      stroke-width="7" stroke-opacity=".55"/>
+    <path d="M-59 158 V73 Q-59 18 0 18 Q59 18 59 73 V158"
+      fill="#0f2630" fill-opacity=".56" stroke-width="12"/>
+    <path d="M-178 178 H178" stroke-width="15" stroke-linecap="square"/>
+  `,
+  Pivot: `
+    <path d="M-135 -78 A156 156 0 0 1 134 -94" stroke-width="22" stroke-linecap="round"/>
+    <path d="M131 -146 L168 -82 L101 -70" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M135 80 A156 156 0 0 1 -134 94" stroke-width="22" stroke-linecap="round"/>
+    <path d="M-131 146 L-168 82 L-101 70" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="82" stroke-width="5" stroke-opacity=".52"/>
+    <path d="M-45 0 H45 M20 -25 L45 0 L20 25 M-20 25 L-45 0 L-20 -25"
+      stroke-width="11" stroke-linejoin="round" stroke-linecap="round" stroke-opacity=".77"/>
+  `,
+  Support: `
+    <circle cx="0" cy="0" r="160" stroke-width="12" stroke-opacity=".62"/>
+    <circle cx="0" cy="0" r="119" stroke-width="5" stroke-opacity=".55"/>
+    <path d="M0 -126 L35 -36 L126 0 L35 36 L0 126 L-35 36 L-126 0 L-35 -36 Z"
+      fill="#cfe9dd" fill-opacity=".22" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M0 -209 V-178 M0 178 V209 M-209 0 H-178 M178 0 H209"
+      stroke-width="13" stroke-linecap="round"/>
+    <path d="M-139 -139 L-158 -158 M139 139 L158 158 M139 -139 L158 -158 M-139 139 L-158 158"
+      stroke-width="10" stroke-linecap="round" stroke-opacity=".74"/>
+    <circle cx="0" cy="0" r="24" fill="#d8eee4" fill-opacity=".35" stroke-width="8"/>
+  `,
+  Controller: `
+    <circle cx="0" cy="0" r="170" stroke-width="10" stroke-opacity=".61"/>
+    <circle cx="0" cy="0" r="120" stroke-width="9"/>
+    <circle cx="0" cy="0" r="67" stroke-width="8" stroke-opacity=".76"/>
+    <path d="M0 -211 V-117 M0 117 V211 M-211 0 H-117 M117 0 H211"
+      stroke-width="9" stroke-linecap="round"/>
+    <path d="M-125 -125 L-72 -72 M125 125 L72 72 M125 -125 L72 -72 M-125 125 L-72 72"
+      stroke-width="7" stroke-opacity=".67"/>
+    <path d="M0 -27 L27 0 L0 27 L-27 0 Z"
+      fill="#cfe9df" fill-opacity=".31" stroke-width="7"/>
+    <path d="M-44 -173 A179 179 0 0 1 44 -173 M-44 173 A179 179 0 0 0 44 173"
+      stroke-width="16" stroke-linecap="round" stroke-opacity=".73"/>
+  `
+});
+
 export function renderRoleWatermark(role) {
-  // The Tank prototype uses a fortress shield. Other roles get no emblem
-  // until their silhouettes have been designed and reviewed.
-  if(role!=='Tank')return '';
+  if(role!=='Tank') {
+    if(!Object.hasOwn(OTHER_ROLE_MARKS,role))return '';
+    return '<g class="role-watermark role-watermark-'+role.toLowerCase()+
+      '" transform="translate(480 706)" opacity=".072" fill="none" stroke="#cee9df">'+
+      OTHER_ROLE_MARKS[role]+'</g>';
+  }
+  // Retain the original Tank fortress-shield design unchanged.
   return `<g class="role-watermark role-watermark-tank" transform="translate(480 706)" opacity=".072" fill="none" stroke="#cee9df">
     <path d="M0 -244 L196 -177 L191 31 Q170 168 0 248 Q-170 168 -191 31 L-196 -177 Z"
       stroke-width="17" stroke-linejoin="round" fill="#9dbdb8" fill-opacity=".35"/>
@@ -134,10 +205,11 @@ export function renderLiveCornerArtwork(types) {
   }).join('');
 }
 
-export function renderLiveTankWatermark(role) {
-  if(role!=='Tank')return '';
-  // Crop and center the same underlying shield used by the export renderer.
+export function renderLiveRoleWatermark(role) {
+  const artwork=renderRoleWatermark(role);
+  if(!artwork)return '';
+  // Crop and center the exact same silhouette used by the PNG exporter.
   return '<svg xmlns="http://www.w3.org/2000/svg" class="stat-role-watermark" '+
     'viewBox="250 440 460 530" aria-hidden="true" focusable="false">'+
-    renderRoleWatermark(role)+'</svg>';
+    artwork+'</svg>';
 }

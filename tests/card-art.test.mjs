@@ -4,7 +4,7 @@ import { DEMOS, TYPE_COLORS } from '../src/data.mjs';
 import { EXTRA_ELEMENT_TYPES, additionalTypeDefinitions, renderAdditionalTypeMotif } from '../src/type-motifs.mjs';
 import { generateBuild } from '../src/engine.mjs';
 import { buildCardSvg } from '../src/export-card.mjs';
-import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from '../src/card-art.mjs';
+import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark, BATTLE_ROLE_NAMES } from '../src/card-art.mjs';
 
 const example=generateBuild({
   mbtiScores:DEMOS.architect.mbti,
@@ -56,13 +56,41 @@ test('every possible two-type pairing composes both independently positioned mot
   }
 });
 
-test('Tank role has an understated SVG shield behind the radar; other roles remain plain',()=>{
-  const badge=renderRoleWatermark('Tank');
-  assert.match(badge,/role-watermark-tank/);
-  assert.match(badge,/opacity="\.072"/);
-  assert.ok(badge.includes('translate(480 706)'));
-  for(const role of ['Sweeper','Wall','Pivot','Controller','Support'])
-    assert.equal(renderRoleWatermark(role),'','unimplemented role '+role+' should not receive a false emblem');
+test('all six roles produce distinct, restrained, locally drawn SVG emblems',()=>{
+  assert.deepEqual(BATTLE_ROLE_NAMES,['Sweeper','Tank','Wall','Pivot','Support','Controller']);
+  const artworks=new Set();
+  for(const role of BATTLE_ROLE_NAMES) {
+    const markup=renderRoleWatermark(role);
+    assert.ok(markup.includes('class="role-watermark role-watermark-'+role.toLowerCase()+'"'),role);
+    assert.ok(markup.includes('transform="translate(480 706)"'),role);
+    assert.ok(markup.includes('opacity=".072"'),role);
+    assert.ok(markup.includes('fill="none" stroke="#cee9df"'),role);
+    assert.match(markup,/<path d="/,role+' must draw a recognizable shape');
+    assert.ok(!markup.includes('<image')&&!markup.includes('<foreignObject'),role);
+    assert.ok(!markup.includes('http'),role+' needs no remote graphics');
+    artworks.add(markup);
+  }
+  assert.equal(artworks.size,6,'each role needs its own emblem');
+  assert.equal(renderRoleWatermark(''), '');
+  assert.equal(renderRoleWatermark('Unknown'), '');
+  assert.equal(renderRoleWatermark('__proto__'), '');
+  assert.match(renderRoleWatermark('Tank'),/role-watermark-tank/);
+  assert.match(renderRoleWatermark('Tank'),/M0 -244 L196 -177/,'the original Tank shield must be preserved');
+});
+
+test('all six roles export their primary emblem under the radar, never a hybrid overlay',()=>{
+  for(const role of BATTLE_ROLE_NAMES) {
+    const b={...example,role:{...example.role,
+      primary:{...example.role.primary,name:role},
+      secondary:{name:'Sweeper'}}};
+    const svg=buildCardSvg(b);
+    const className='class="role-watermark role-watermark-'+role.toLowerCase()+'"';
+    assert.ok(svg.includes(className),role);
+    assert.ok(svg.indexOf(className)<svg.indexOf('class="stat-radar"'),role+' should stay behind stats');
+    assert.equal((svg.match(/class="role-watermark role-watermark-/g)||[]).length,1,role+' must have one emblem');
+    assert.match(svg,/535 BST/);
+    assert.match(svg,/>BATTLE ROLE<\/text>/);
+  }
 });
 
 test('real 593 Ice/Water Tank card has clipped corner motifs and shield behind text and radar',()=>{
@@ -82,7 +110,7 @@ test('real 593 Ice/Water Tank card has clipped corner motifs and shield behind t
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
 });
 
-test('new elemental motifs export without adding unfinished role emblems',()=>{
+test('new elemental motifs and Support emblem export together',()=>{
   const other=generateBuild({
     mbtiScores:DEMOS.catalyst.mbti,
     enneagramScores:DEMOS.catalyst.enneagram,
@@ -94,6 +122,7 @@ test('new elemental motifs export without adding unfinished role emblems',()=>{
   assert.ok(svg.includes('class="type-corner type-corner-secondary"'));
   assert.ok(svg.includes('class="type-art-water"'));
   assert.ok(svg.includes('class="type-art-grass"'));
+  assert.ok(svg.includes('class="role-watermark role-watermark-support"'));
   assert.ok(!svg.includes('class="role-watermark role-watermark-tank"'));
   assert.match(svg,/535 BST/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);

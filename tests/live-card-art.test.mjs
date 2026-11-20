@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {renderLiveCornerArtwork,renderLiveTankWatermark} from '../src/card-art.mjs';
+import {renderLiveCornerArtwork,renderLiveRoleWatermark,BATTLE_ROLE_NAMES} from '../src/card-art.mjs';
 import {DEMOS,TYPE_COLORS} from '../src/data.mjs';
 import {generateBuild} from '../src/engine.mjs';
 
@@ -11,13 +11,13 @@ const styles=readFileSync(new URL('../styles.css',import.meta.url),'utf8');
 test('site result card includes shared elemental art rather than limiting it to PNG export',()=>{
   const result=app.slice(app.indexOf('function renderCard('),app.indexOf('function buildSummary('));
   assert.ok(result.includes('renderLiveCornerArtwork(build.types)'));
-  assert.ok(result.includes('renderLiveTankWatermark(build.role.primary.name)'));
+  assert.ok(result.includes('renderLiveRoleWatermark(build.role.primary.name)'));
   assert.ok(result.includes('class="result-artwork"'));
-  assert.ok(result.includes("tankWatermark+renderStatRadar(build.baseStats,build.effectiveStats)"));
+  assert.ok(result.includes("roleWatermark+renderStatRadar(build.baseStats,build.effectiveStats)"));
   assert.ok(result.includes('has-type-art'));
   assert.ok(styles.includes('.result-card.has-type-art>.pokemon-header{background:transparent}'));
   assert.ok(styles.includes('.result-art-corner{position:absolute'));
-  assert.ok(styles.includes('.stat-role-watermark .role-watermark-tank{opacity:.13}'));
+  assert.ok(styles.includes('.stat-role-watermark .role-watermark{opacity:.13}'));
 });
 
 test('Ice/Steel corners display as two independently positioned, namespaced SVGs',()=>{
@@ -61,7 +61,7 @@ test('all 18 types render in either live corner and repeat for monotypes',()=>{
   assert.equal(renderLiveCornerArtwork(['Unknown','Other']),'');
 });
 
-test('Tank watermark appears in live stat panel; other roles do not invent emblems',()=>{
+test('all six roles render from shared SVG paths inside the live stat panel',()=>{
   const demo=generateBuild({
     mbtiScores:DEMOS.architect.mbti,
     enneagramScores:DEMOS.architect.enneagram,
@@ -70,9 +70,25 @@ test('Tank watermark appears in live stat panel; other roles do not invent emble
   });
   assert.equal(demo.role.primary.name,'Tank');
   assert.deepEqual(demo.types,['Ice','Water']);
-  const svg=renderLiveTankWatermark(demo.role.primary.name);
-  assert.match(svg,/class="stat-role-watermark"/);
-  assert.match(svg,/role-watermark-tank/);
-  assert.match(svg,/viewBox="250 440 460 530"/);
-  assert.equal(renderLiveTankWatermark('Sweeper'),'');
+  for(const role of BATTLE_ROLE_NAMES) {
+    const svg=renderLiveRoleWatermark(role);
+    assert.match(svg,/class="stat-role-watermark"/,role);
+    assert.ok(svg.includes('role-watermark-'+role.toLowerCase()),role);
+    assert.match(svg,/viewBox="250 440 460 530"/,role);
+    assert.equal((svg.match(/class="role-watermark role-watermark-/g)||[]).length,1,role);
+  }
+  assert.equal(renderLiveRoleWatermark('Unknown'),'');
+  assert.equal(renderLiveRoleWatermark(''),'');
+});
+
+test('live and PNG exporters consume the same role artwork with no new external assets',()=>{
+  assert.ok(app.includes("import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs"));
+  assert.ok(app.includes('const roleWatermark=renderLiveRoleWatermark(build.role.primary.name)'));
+  assert.ok(app.includes('roleWatermark+renderStatRadar(build.baseStats,build.effectiveStats)'));
+  const png=readFileSync(new URL('../src/export-card.mjs',import.meta.url),'utf8');
+  assert.ok(png.includes('renderRoleWatermark(build.role.primary.name)'));
+  assert.ok(!png.includes('renderLiveTankWatermark'));
+  const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(index, /src\/app\.mjs\?v=randomize-1/,'entry module cache key must update');
+  assert.match(index, /styles\.css\?v=randomize-1/,'stylesheet cache key must update');
 });
