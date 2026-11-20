@@ -91,7 +91,9 @@ test('export card calls out primary or hybrid battle role without a duplicate su
   const singleSvg=buildCardSvg(sample);
   assert.match(singleSvg,/>BATTLE ROLE<\/text>/);
   assert.match(singleSvg,new RegExp('>'+sample.role.primary.name+'<\\/text>'));
-  assert.match(singleSvg,new RegExp('>'+sample.nature+' Nature · '+sample.ability.name+' Ability<\\/text>'));
+  assert.ok(!singleSvg.includes(sample.nature+' Nature · '+sample.ability.name+' Ability'));
+  assert.match(singleSvg,/>ABILITIES<\/text>/);
+  assert.match(singleSvg,new RegExp('>'+sample.nature+' Nature · \\+10%'));
   const hybrid=buildCardSvg({
     ...sample,
     role:{...sample.role,secondary:{name:'Controller'}}
