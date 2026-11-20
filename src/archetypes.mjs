@@ -14,42 +14,42 @@ const modes = [
     ennea:[88,30,75,45,98,75,38,52,48],mbti:[82,85,24,22,30],ocean:[83,88,32,46,28],
     gift:'turning loose observations into a plan that survives contact with reality',
     snag:'mistaking one more round of preparation for the actual first move',
-    joke:'You probably brought a contingency plan to a picnic.'
+    joke:'It has reportedly prepared contingency plans for a picnic.'
   },
   {
     id:'steward',label:'The steady hand',
     ennea:[72,96,48,58,40,84,35,42,95],mbti:[65,52,85,30,38],ocean:[63,83,45,94,30],
     gift:'making the people and systems around you stronger',
     snag:'carrying the whole party when some teammates need to level up themselves',
-    joke:'You remembered the Potions. And everyone else’s Potions.'
+    joke:'It packs spare Potions for teammates who insist they brought their own.'
   },
   {
     id:'pathfinder',label:'The open horizon',
     ennea:[38,55,62,75,81,43,98,68,68],mbti:[58,89,55,88,38],ocean:[97,42,66,60,42],
     gift:'finding a route where everyone else sees a wall',
     snag:'confusing an exciting detour with an important destination',
-    joke:'You found three side quests before the tutorial ended.'
+    joke:'It has found three side quests before finishing the tutorial.'
   },
   {
     id:'sentinel',label:'The watchful eye',
     ennea:[91,46,55,52,78,100,30,77,69],mbti:[77,60,28,25,65],ocean:[66,94,29,47,58],
     gift:'seeing the weak point early and making sure the team is ready',
     snag:'turning sensible caution into a fortress nobody asked to live in',
-    joke:'You checked the tall grass for ambushes. It was a lawn.'
+    joke:'It once searched a suspicious patch of tall grass for ambushes. It was a lawn.'
   },
   {
     id:'catalyst',label:'The driving spark',
     ennea:[51,56,96,34,35,49,91,98,33],mbti:[23,55,28,70,25],ocean:[68,73,97,39,29],
     gift:'turning intention into momentum and bringing others along',
     snag:'moving the whole team before everyone agrees on the destination',
-    joke:'The battle began. You were already on turn three.'
+    joke:'It tends to plan turn three before the opponent has taken turn one.'
   },
   {
     id:'artisan',label:'The imaginative maker',
     ennea:[65,76,55,100,79,48,77,33,59],mbti:[72,98,75,67,56],ocean:[99,64,43,80,55],
     gift:'finding surprising connections and shaping something distinctive',
     snag:'polishing the interesting detail long after the main quest has moved on',
-    joke:'Your item descriptions have item descriptions.'
+    joke:'Its item descriptions have occasionally acquired item descriptions of their own.'
   }
 ];
 

@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ARCHETYPE_CATALOG, ARCHETYPE_PROTOTYPES, ARCHETYPE_WEIGHTS, classifyArchetype } from '../src/archetypes.mjs';
-import { DEMOS } from '../src/data.mjs';
-import { deriveTritype, generateBuild } from '../src/engine.mjs';
+import { DEMOS, GROWTH_MOVES } from '../src/data.mjs';
+import { deriveMbti, deriveTritype, generateBuild } from '../src/engine.mjs';
+import { composeFieldReport } from '../src/profile-analysis.mjs';
 import { getDefensiveMatchups } from '../src/matchups.mjs';
 
 const roleNames=['Sweeper','Wall','Tank','Pivot','Support','Controller'];
@@ -105,6 +106,70 @@ test('final build retains generator rules while gaining a real field report',()=
     assert.ok(build.report[key].length>30,'Missing '+key);
   assert.equal('bigFive' in build,false);
   assert.equal('enneagramScores' in build,false);
+});
+
+
+test('all growth move explanations are complete third-person trainer-facing sentences',()=>{
+  for(const [core,{reason}] of Object.entries(GROWTH_MOVES)){
+    assert.match(reason,/^It [A-Z]?[a-z].*[.!?]$/,'core '+core);
+    assert.doesNotMatch(reason,/\byour\b|\.{2,}/i,'core '+core);
+  }
+});
+
+test('every one of the 36 archetype combinations generates coherent field report copy',()=>{
+  let count=0;
+  for(const profile of ARCHETYPE_PROTOTYPES){
+    const [core,second,third]=deriveTritype(profile.ennea).split('').map(Number);
+    const mbti=deriveMbti(profile.mbti);
+    const baseBuild=generateBuild({
+      mbtiScores:profile.mbti,enneagramScores:profile.ennea,bigFive:profile.ocean
+    });
+    for(const roleName of roleNames){
+      const role={
+        ...baseBuild.role,primary:{name:roleName,score:90},secondary:null,
+        all:roleNames.map(name=>({name,score:name===roleName?90:45}))
+      };
+      const archetype=classifyArchetype({
+        enneagramScores:profile.ennea,mbtiScores:profile.mbti,bigFive:profile.ocean,
+        mbti,core,second,third,role
+      });
+      const report=composeFieldReport({
+        ...baseBuild,archetype,role,core,second,third
+      },{bigFive:profile.ocean,mbtiScores:profile.mbti});
+      const lines=[
+        report.dexEntry,report.opener,report.motives,report.thinking,
+        report.temperament,report.combat,report.tradeoff,report.twist,
+        report.team,report.growth,report.reasoning,report.caution,
+        ...report.trainerTips.map(item=>item.text)
+      ];
+      assert.match(report.opener,/^This Pokémon [a-z]/,archetype.title);
+      assert.ok(report.opener.includes(archetype.modeJoke),archetype.title);
+      assert.doesNotMatch(report.opener,/\b(?:You|Your)\b/,archetype.title);
+      assert.match(report.tradeoff,/A recurring blind spot is /,archetype.title);
+      assert.match(report.reasoning,/field guide sums up its pattern as/,archetype.title);
+      for(const text of lines){
+        assert.ok(text.length>25 && text===text.trim(),archetype.title+': '+text);
+        assert.doesNotMatch(text,/\.{2,}|[!?]\.|[.][!?]/,archetype.title+': '+text);
+        assert.doesNotMatch(text,/[.!?]\s+[a-z]/,archetype.title+': '+text);
+        assert.doesNotMatch(text,/\bspecializes in [A-Z]/,archetype.title+': '+text);
+      }
+      count++;
+    }
+  }
+  assert.equal(count,36);
+});
+
+test('all four signature-move explanations are complete Pokémon-centered sentences',()=>{
+  const build=generateBuild({
+    mbtiScores:DEMOS.architect.mbti,
+    enneagramScores:DEMOS.architect.enneagram,
+    bigFive:DEMOS.architect.bigfive
+  });
+  assert.equal(build.moves.length,4);
+  for(const move of build.moves){
+    assert.match(move.why,/^(Its|It|This) [A-Za-z].*[.!?]$/);
+    assert.doesNotMatch(move.why,/\byour\b|\.{2,}/i);
+  }
 });
 
 test('estimated temperament is explained, not asserted as measured',()=>{

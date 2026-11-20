@@ -334,7 +334,7 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
   const attacks=attackTypes.map(type=>{
     const move=TYPE_ATTACKS[type].find(entry=>entry[1]===style);
     return {name:move[0],category:style==='physical'?'Physical STAB':'Special STAB',
-      why:'Your '+type+' side expressed through '+style+' offense.'};
+      why:'Its '+type+' typing is expressed through '+style+' offense.'};
   });
   const selected=new Set(attacks.map(m=>m.name));
   const validRole=ROLE_MOVES[role.primary.name].filter(name=>
@@ -370,7 +370,7 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-      why:'A '+role.primary.name.toLowerCase()+' tactic shaped by visible typing, stats and supporting motivations.'},
+      why:'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
