@@ -178,62 +178,88 @@ export const TYPE_ATTACKS = {
 // Each role has a distinct set of real Pokémon moves, with elemental and
 // motivational affinities below. Physical/special describes the build's
 // offensive orientation; these role moves are predominantly status moves.
+// Third moves are classified by what they do, NOT by their physical/special
+// category. The Pokémon's offensive orientation only helps rank eligible moves.
+// These sets are functional contracts for role-tactic selection.
 export const ROLE_MOVES = {
-  Sweeper:{
-    physical:['Swords Dance','Dragon Dance','Flame Charge','Agility','Bulk Up','Hone Claws'],
-    special:['Nasty Plot','Calm Mind','Quiver Dance','Growth','Agility','Charge Beam']
-  },
-  Wall:{
-    physical:['Iron Defense','Protect','Curse','Amnesia','Stockpile','Cotton Guard'],
-    special:['Light Screen','Aurora Veil','Amnesia','Reflect','Mist','Protect']
-  },
-  Tank:{
-    physical:['Bulk Up','Drain Punch','Coil','Curse','Dragon Dance','Iron Defense'],
-    special:['Calm Mind','Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia']
-  },
-  // Pivoting repositions the *user's* team. Baton Pass is treated as a
-  // setup-transfer/growth move; Dragon Tail phazes, Rapid Spin clears hazards,
-  // and Tailwind supports Speed without switching the user.
-  Pivot:{
-    physical:['U-turn','Flip Turn','Parting Shot','Shed Tail','Chilly Reception','Teleport'],
-    special:['Volt Switch','Chilly Reception','Parting Shot','Teleport','Shed Tail','U-turn']
-  },
-  Support:{
-    physical:['Helping Hand','Reflect','Synthesis','Wish','Aromatherapy','Safeguard'],
-    special:['Light Screen','Life Dew','Tailwind','Grassy Terrain','Heal Bell','Wish']
-  },
-  Controller:{
-    physical:['Taunt','Thunder Wave','Toxic','Spikes','Will-O-Wisp','Encore'],
-    special:['Thunder Wave','Haze','Trick Room','Will-O-Wisp','Spore','Taunt']
-  }
+  Sweeper:['Swords Dance','Dragon Dance','Flame Charge','Agility','Hone Claws',
+    'Nasty Plot','Calm Mind','Quiver Dance','Growth','Charge Beam','Work Up'],
+  Wall:['Iron Defense','Protect','Amnesia','Stockpile','Cotton Guard',
+    'Light Screen','Reflect','Mist','Recover','Cosmic Power','Acid Armor'],
+  Tank:['Bulk Up','Drain Punch','Coil','Curse','Iron Defense','Calm Mind',
+    'Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia','Recover'],
+  // Only moves which switch or reposition the user's Pokémon are pivots.
+  Pivot:['U-turn','Flip Turn','Volt Switch','Parting Shot',
+    'Chilly Reception','Teleport','Shed Tail'],
+  Support:['Helping Hand','Reflect','Wish','Aromatherapy','Safeguard',
+    'Light Screen','Life Dew','Tailwind','Grassy Terrain','Heal Bell'],
+  Controller:['Taunt','Thunder Wave','Toxic','Spikes','Will-O-Wisp',
+    'Encore','Haze','Trick Room','Spore']
 };
 
-// Growth always retains the meaning of the core Enneagram lesson, but can be
-// expressed through different moves as other motivations and elements change.
+// Mechanical purpose is explicit and independently audited against the role.
+// A move can serve multiple purposes, but a role must have the relevant one.
+export const ROLE_PURPOSES={
+  Sweeper:'offense',Wall:'fortification',Tank:'endurance',
+  Pivot:'reposition',Support:'ally',Controller:'disruption'
+};
+export const MOVE_PURPOSES={
+  'Swords Dance':['offense'],'Dragon Dance':['offense'],
+  'Flame Charge':['offense'],'Agility':['offense'],
+  'Hone Claws':['offense'],'Nasty Plot':['offense'],
+  'Calm Mind':['offense','endurance'],
+  'Quiver Dance':['offense'],'Growth':['offense'],
+  'Charge Beam':['offense'],'Work Up':['offense'],
+  'Iron Defense':['fortification','endurance'],
+  'Protect':['fortification'],'Amnesia':['fortification','endurance'],
+  'Stockpile':['fortification'],'Cotton Guard':['fortification'],
+  'Light Screen':['fortification','ally'],'Reflect':['fortification','ally'],
+  'Mist':['fortification'],'Recover':['fortification','endurance'],
+  'Cosmic Power':['fortification','endurance'],
+  'Acid Armor':['fortification','endurance'],
+  'Bulk Up':['endurance'],'Drain Punch':['endurance'],
+  'Coil':['endurance'],'Curse':['endurance'],
+  'Aqua Ring':['endurance'],'Charge':['endurance'],
+  'U-turn':['reposition'],'Flip Turn':['reposition'],
+  'Volt Switch':['reposition'],'Parting Shot':['reposition'],
+  'Chilly Reception':['reposition'],'Teleport':['reposition'],
+  'Shed Tail':['reposition'],
+  'Helping Hand':['ally'],'Wish':['ally'],
+  'Aromatherapy':['ally'],'Safeguard':['ally'],
+  'Life Dew':['ally'],'Tailwind':['ally'],
+  'Grassy Terrain':['ally'],'Heal Bell':['ally'],
+  'Taunt':['disruption'],'Thunder Wave':['disruption'],
+  'Toxic':['disruption'],'Spikes':['disruption'],
+  'Will-O-Wisp':['disruption'],'Encore':['disruption'],
+  'Haze':['disruption'],'Trick Room':['disruption'],
+  'Spore':['disruption']
+};
+
+// Slot 4 MUST represent the corrective growth direction of the core, not its
+// default strategy. Supporting fixes and elemental affinity choose a concrete
+// expression only from within these semantically validated lesson pools.
 export const GROWTH_MOVES = {
-  1:{choices:['Rest','Protect','Calm Mind','Helping Hand','Work Up'],
-     reason:'Learning that worth is not earned by constant correction.'},
-  2:{choices:['Recover','Life Dew','Helping Hand','Wish','Protect'],
-     reason:'Making room for your own needs, not only those of others.'},
-  3:{choices:['Helping Hand','Work Up','Baton Pass','Rest','Agility'],
-     reason:'Making success shared rather than merely visible.'},
-  4:{choices:['Calm Mind','Reflect','Rest','Heal Bell','Substitute'],
-     reason:'Discovering steadiness beyond the pursuit of uniqueness.'},
-  5:{choices:['Baton Pass','Helping Hand','Trick Room','Calm Mind','Teleport'],
-     reason:'Letting understanding become a gift to others.'},
-  6:{choices:['Substitute','Protect','Reflect','Endure','Safeguard'],
-     reason:'Acting with courage even when certainty is incomplete.'},
-  7:{choices:['Endure','Rest','Protect','Growth','Calm Mind'],
-     reason:'Learning that freedom also includes the ability to remain.'},
-  8:{choices:['Protect','Helping Hand','Bulk Up','Endure','Safeguard'],
-     reason:'Using strength to protect instead of always control.'},
-  9:{choices:['Work Up','Taunt','Swords Dance','Agility','Growth'],
-     reason:'Choosing to take up space and act with intention.'}
+  1:{choices:['Rest','Helping Hand','Life Dew','Recover','Wish'],
+    reason:'Learning that worth is not earned by constant correction.'},
+  2:{choices:['Recover','Rest','Aqua Ring','Calm Mind','Protect'],
+    reason:'Making room for your own needs, not only those of others.'},
+  3:{choices:['Helping Hand','Baton Pass','Reflect','Tailwind','Wish'],
+    reason:'Making success shared rather than merely visible.'},
+  4:{choices:['Calm Mind','Rest','Aqua Ring','Recover','Reflect'],
+    reason:'Discovering steadiness beyond the pursuit of uniqueness.'},
+  5:{choices:['Baton Pass','Helping Hand','Tailwind','Light Screen','Reflect'],
+    reason:'Letting understanding become a gift to others.'},
+  6:{choices:['Endure','Work Up','Taunt','Agility','Bulk Up'],
+    reason:'Acting with courage even when certainty is incomplete.'},
+  7:{choices:['Endure','Rest','Calm Mind','Aqua Ring','Grassy Terrain'],
+    reason:'Learning that freedom also includes the ability to remain.'},
+  8:{choices:['Protect','Helping Hand','Reflect','Safeguard','Life Dew'],
+    reason:'Using strength to protect instead of always control.'},
+  9:{choices:['Work Up','Taunt','Swords Dance','Agility','Bulk Up'],
+    reason:'Choosing to take up space and act with intention.'}
 };
 
-// Meaningful types and fixes, rather than a global move-order preference,
-// determine which move best represents an individual's role and growth.
-// Missing affinities simply receive no preference bonus.
+// Used by eligibility and tactical fitting: all other moves are Status moves.
 export const MOVE_SYNERGIES = {
   'Swords Dance':{types:['Steel','Fighting','Dragon'],fixes:[1,3,8]},
   'Dragon Dance':{types:['Dragon','Fire','Flying'],fixes:[3,7,8]},
