@@ -1,6 +1,7 @@
 import { TYPE_COLORS } from './data.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { loadItemSprite } from './item-sprites.mjs';
+import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs';
 
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
@@ -97,6 +98,7 @@ export function buildCardSvg(build) {
       <stop offset="100%" stop-color="#111e23"/>
     </linearGradient>
     <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1649" rx="30"/></clipPath>
+    ${cardArtDefinitions()}
   </defs>
   <style>
     text{font-family:Arial,Helvetica,sans-serif}
@@ -120,6 +122,8 @@ export function buildCardSvg(build) {
   <rect x="28" y="25" width="904" height="1649" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
   <g clip-path="url(#rounded-card)">
     <rect x="28" y="25" width="904" height="16" fill="url(#type-gradient)"/>
+    ${renderTypeCornerArtwork(build.types)}
+    ${renderRoleWatermark(build.role.primary.name)}
   </g>
   <text x="76" y="105" class="overline">TYPE EFFECTIVELY</text>
   <text x="878" y="105" text-anchor="end" class="overline">${esc(identity)}</text>
