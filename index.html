@@ -9,8 +9,8 @@
   <meta property="og:description" content="Three personality tests. One extremely specific Pokémon build." />
   <title>Type Effectively · Your personality has a moveset</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=role-emblems-1" />
-  <script type="module" src="./src/app.mjs?v=role-emblems-1"></script>
+  <link rel="stylesheet" href="./styles.css?v=randomize-1" />
+  <script type="module" src="./src/app.mjs?v=randomize-1"></script>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -135,7 +135,10 @@
             <div class="section-kicker">THE REVEAL</div>
             <h2>Your Pokémon<span class="terminal-dot">.</span></h2>
           </div>
-          <span class="live-label" id="result-status"><span></span> WAITING</span>
+          <div class="result-header-actions">
+            <button id="randomize-button" class="randomize-button" type="button" aria-label="Generate a random sample Pokémon" title="Explore synthetic personality combinations">Randomize ↻</button>
+            <span class="live-label" id="result-status"><span></span> WAITING</span>
+          </div>
         </div>
         <div class="result-frame" id="result-container" aria-live="polite">
           <div class="empty-state">
