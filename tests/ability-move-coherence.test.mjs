@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateBuild, chooseHiddenAbility } from '../src/engine.mjs';
-import { ABILITIES, GROWTH_MOVES, MOVE_SYNERGIES, ROLE_MOVES } from '../src/data.mjs';
+import { generateBuild, chooseHiddenAbility, isMoveEligible } from '../src/engine.mjs';
+import { ABILITIES, GROWTH_MOVES, MOVE_SYNERGIES, ROLE_MOVES, ROLE_PURPOSES, MOVE_PURPOSES } from '../src/data.mjs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
 
 const scoreInputs={
@@ -17,9 +17,14 @@ const permutations=xs=>[
 
 test('every selectable role or growth move has defined elemental and fix meaning',()=>{
   const named=new Set();
-  for(const role of Object.values(ROLE_MOVES))
-    for(const pool of Object.values(role))
-      for(const move of pool)named.add(move);
+  for(const [role,pool] of Object.entries(ROLE_MOVES)){
+    assert.ok(pool.length>=7,'role must have enough tactical options: '+role);
+    for(const move of pool){
+      named.add(move);
+      assert.ok(MOVE_PURPOSES[move]?.includes(ROLE_PURPOSES[role]),
+        'move does not serve '+role+': '+move);
+    }
+  }
   for(const growth of Object.values(GROWTH_MOVES)){
     assert.equal(growth.choices.length,5);
     assert.ok(growth.reason.length>20);
@@ -31,6 +36,58 @@ test('every selectable role or growth move has defined elemental and fix meaning
     assert.ok(affinity.types.length>0,'no elemental meaning: '+move);
     assert.ok(affinity.fixes.length>0,'no Enneagram meaning: '+move);
   }
+});
+
+test('Pivot tactics switch our own Pokémon; setup passing and other utility stay distinct',()=>{
+  // Baton Pass can switch in the game, but this app reserves Pivot for
+  // tempo/repositioning rather than passing setup boosts to a teammate.
+  const selfSwitches=new Set([
+    'U-turn','Flip Turn','Volt Switch','Parting Shot',
+    'Chilly Reception','Teleport','Shed Tail'
+  ]);
+  const moves=ROLE_MOVES.Pivot;
+  assert.equal(moves.length,7);
+  assert.equal(new Set(moves).size,moves.length);
+  assert.ok(moves.every(move=>selfSwitches.has(move)),
+    'non-pivot move listed: '+moves.filter(move=>!selfSwitches.has(move)));
+  assert.ok(!moves.includes('Baton Pass'));
+  assert.ok(GROWTH_MOVES[5].choices.includes('Baton Pass'),
+    'keep Baton Pass where its sharing/setup meaning belongs');
+  assert.ok(MOVE_SYNERGIES['Shed Tail'],
+    'every new self-switch move needs affinity weights');
+});
+
+test('move prerequisites are checked before type/fix affinity scoring',()=>{
+  const stats={hp:105,atk:90,def:95,spa:102,spd:100,spe:110};
+  assert.equal(isMoveEligible('Curse',{types:['Ghost','Rock'],stats}),false);
+  assert.equal(isMoveEligible('Curse',{types:['Rock','Steel'],stats}),true);
+  assert.equal(isMoveEligible('Aurora Veil',{types:['Ice','Fairy'],stats}),false);
+  assert.equal(isMoveEligible('Trick Room',{types:['Psychic','Ice'],stats}),false);
+  assert.equal(isMoveEligible('Trick Room',{types:['Psychic','Ice'],stats:{...stats,spe:65}}),true);
+  assert.equal(isMoveEligible('Shed Tail',{types:['Grass'],stats:{...stats,hp:70}}),false);
+  assert.equal(isMoveEligible('Charge',{types:['Fire','Dragon'],stats}),false);
+});
+
+test('growth candidate sets correct each core rather than reward its default compulsion',()=>{
+  const lessons={
+    1:['Work Up','Swords Dance'],
+    2:['Helping Hand','Life Dew'],
+    3:['Work Up','Agility'],
+    4:['Substitute'],
+    5:['Calm Mind','Trick Room','Teleport'],
+    6:['Protect','Safeguard','Substitute'],
+    7:['Growth','Agility'],
+    8:['Bulk Up'],
+    9:['Rest','Protect']
+  };
+  for(const [core,anti] of Object.entries(lessons)){
+    assert.equal(GROWTH_MOVES[core].choices.length,5);
+    for(const move of anti){
+      assert.ok(!GROWTH_MOVES[core].choices.includes(move),
+        'core '+core+' growth repeats its habitual defense: '+move);
+    }
+  }
+  assert.ok(GROWTH_MOVES[5].choices.includes('Baton Pass'));
 });
 
 test('Fire/Fighting and Water/Ice Hidden Abilities are compatible with their visible typing',()=>{
@@ -62,8 +119,7 @@ test('all 324 tritype/wing combinations give coherent, distinct abilities and un
           'off-type hidden ability for '+b.tritype+'w'+wing+': '+b.hiddenAbility);
         assert.notEqual(b.hiddenAbility,b.ability.name);
         assert.equal(new Set(b.moves.map(x=>x.name)).size,4);
-        const style=b.effectiveStats.atk>=b.effectiveStats.spa?'physical':'special';
-        assert.ok(ROLE_MOVES[b.role.primary.name][style].includes(b.moves[2].name));
+        assert.ok(ROLE_MOVES[b.role.primary.name].includes(b.moves[2].name));
         assert.ok(GROWTH_MOVES[core].choices.includes(b.moves[3].name));
         count++;
       }
