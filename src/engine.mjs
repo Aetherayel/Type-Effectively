@@ -1,9 +1,9 @@
 import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
-  MOVE_SYNERGIES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
+  MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=pivot-tactics-1';
+} from './data.mjs?v=coherent-moves-1';
 import { chooseHeldItem } from './held-items.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -258,10 +258,33 @@ export function chooseHiddenAbility({role,secondaryRole=null,types,stats,second,
 const MOVE_STAT_FIT={
   spe:['Agility','Flame Charge','Dragon Dance','Tailwind','Volt Switch','U-turn'],
   def:['Iron Defense','Reflect','Cotton Guard','Acid Armor','Stockpile','Bulk Up'],
-  spd:['Light Screen','Amnesia','Calm Mind','Cosmic Power','Aurora Veil','Mist'],
+  spd:['Light Screen','Amnesia','Calm Mind','Cosmic Power','Mist'],
   atk:['Swords Dance','Bulk Up','Drain Punch','Coil','Hone Claws'],
-  spa:['Nasty Plot','Calm Mind','Charge Beam','Trick Room','Quiver Dance']
+  spa:['Nasty Plot','Calm Mind','Charge Beam','Quiver Dance']
 };
+const PHYSICAL_ATTACKS=new Set(['Flame Charge','U-turn','Flip Turn','Drain Punch']);
+const SPECIAL_ATTACKS=new Set(['Charge Beam','Volt Switch']);
+const PHYSICAL_SETUP=new Set(['Swords Dance','Dragon Dance','Bulk Up','Hone Claws','Coil','Curse']);
+const SPECIAL_SETUP=new Set(['Nasty Plot','Quiver Dance','Charge Beam']);
+
+// Hard mechanical requirements precede any psychology-based move weighting.
+// Moves are abstract signature moves, so species learnsets are not assumed.
+export function isMoveEligible(name,{types,stats,role=null}){
+  if(name==='Curse' && types.includes('Ghost'))return false;
+  // Aurora Veil needs active snow; this generator has no snow setter.
+  if(name==='Aurora Veil')return false;
+  // Trick Room reverses Speed order: do not give it to fast Pokémon.
+  if(name==='Trick Room' && stats.spe>85)return false;
+  // Shed Tail sacrifices half the user's HP and requires enough staying power.
+  if(name==='Shed Tail' && stats.hp<92)return false;
+  // Charge has a strongly Electric-dependent offensive effect.
+  if(name==='Charge' && !types.includes('Electric'))return false;
+  if(role==='Sweeper'){
+    if(PHYSICAL_SETUP.has(name) && stats.atk+12<stats.spa)return false;
+    if(SPECIAL_SETUP.has(name) && stats.spa+12<stats.atk)return false;
+  }
+  return true;
+}
 
 function scoreMove(name,types,stats,second,third) {
   const affinity=MOVE_SYNERGIES[name];
@@ -273,15 +296,34 @@ function scoreMove(name,types,stats,second,third) {
   for(const [key,moves] of Object.entries(MOVE_STAT_FIT)){
     if(moves.includes(name) && stats[key]>=100)score+=12;
   }
+  if(PHYSICAL_ATTACKS.has(name) && stats.spa>stats.atk)
+    score-=Math.min(35,Math.round((stats.spa-stats.atk)*.9));
+  if(SPECIAL_ATTACKS.has(name) && stats.atk>stats.spa)
+    score-=Math.min(35,Math.round((stats.atk-stats.spa)*.9));
   return score;
 }
 
-function chooseMove(pool,types,stats,second,third,excluded) {
-  const viable=pool.filter(name=>!excluded.has(name));
-  if(!viable.length)throw new Error('Not enough unique thematic moves.');
-  return viable
-    .map(name=>({name,score:scoreMove(name,types,stats,second,third)}))
-    .sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name))[0].name;
+const MOVE_EFFECT_GROUPS={
+  'Swords Dance':'attack-setup','Bulk Up':'attack-setup',
+  'Coil':'attack-setup','Hone Claws':'attack-setup',
+  'Work Up':'attack-setup','Dragon Dance':'attack-setup',
+  'Nasty Plot':'special-setup','Quiver Dance':'special-setup',
+  'Calm Mind':'special-setup','Growth':'special-setup',
+  'Agility':'speed-setup','Tailwind':'speed-setup',
+  'Rest':'recovery','Recover':'recovery','Aqua Ring':'recovery',
+  'Light Screen':'screen','Reflect':'screen'
+};
+
+function roleTacticScore(name,role,types,stats,second,third) {
+  let score=scoreMove(name,types,stats,second,third);
+  // A close secondary role influences tactical expression without replacing
+  // the declared primary role's functional contract.
+  if(role.secondary && ROLE_MOVES[role.secondary.name].includes(name))score+=20;
+  if(PHYSICAL_SETUP.has(name) && stats.atk>=stats.spa)score+=12;
+  if(SPECIAL_SETUP.has(name) && stats.spa>=stats.atk)score+=12;
+  if(name==='Trick Room')score+=Math.max(0,95-stats.spe)*.6;
+  if(name==='Shed Tail')score+=Math.max(0,stats.hp-95)*.35;
+  return score;
 }
 
 function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
@@ -293,14 +335,40 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
       why:'Your '+type+' side expressed through '+style+' offense.'};
   });
   const selected=new Set(attacks.map(m=>m.name));
-  const tactic=chooseMove(ROLE_MOVES[role][style],visibleTypes,stats,second,third,selected);
-  selected.add(tactic);
+  const validRole=ROLE_MOVES[role.primary.name].filter(name=>
+    !selected.has(name) &&
+    MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[role.primary.name]) &&
+    isMoveEligible(name,{types:visibleTypes,stats,role:role.primary.name}));
   const growth=GROWTH_MOVES[core];
-  const growthName=chooseMove(growth.choices,visibleTypes,stats,second,third,selected);
+  const validGrowth=growth.choices.filter(name=>
+    !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats}));
+  if(!validRole.length || !validGrowth.length)
+    throw new Error('No mechanically coherent role/growth moves for the build.');
+
+  // Score pairs together, rather than greedily exhausting a fourth-slot choice.
+  // Semantic growth eligibility is guaranteed by the curated core lesson pool.
+  const pairs=[];
+  for(const tactic of validRole)for(const growthName of validGrowth){
+    if(tactic===growthName)continue;
+    if((tactic==='Trick Room' &&
+      ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growthName)) ||
+      (growthName==='Trick Room' &&
+      ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(tactic)))continue;
+    const roleScore=roleTacticScore(tactic,role,visibleTypes,stats,second,third);
+    const growthScore=scoreMove(growthName,visibleTypes,stats,second,third);
+    const duplicateEffect=MOVE_EFFECT_GROUPS[tactic] &&
+      MOVE_EFFECT_GROUPS[tactic]===MOVE_EFFECT_GROUPS[growthName];
+    const score=roleScore*.9+growthScore*.85-(duplicateEffect?45:0);
+    pairs.push({tactic,growthName,score});
+  }
+  if(!pairs.length)throw new Error('No compatible tactical/growth move pair.');
+  pairs.sort((a,b)=>b.score-a.score||
+    a.tactic.localeCompare(b.tactic)||a.growthName.localeCompare(b.growthName));
+  const {tactic,growthName}=pairs[0];
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-     why:'A '+role.toLowerCase()+' tactic shaped by your typing and supporting motivations.'},
+      why:'A '+role.primary.name.toLowerCase()+' tactic shaped by visible typing, stats and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
@@ -356,18 +424,20 @@ export function generateBuild(input) {
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
   const role=classifyRole(effectiveStats,toolkitTypes);
   const ability=chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
-  const heldItem=chooseHeldItem({
-    tritype,core,second,third,wing:selectedWing,
-    enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-    role,hasBigFive:input.bigFive!=null
-  });
   const hiddenAbility=chooseHiddenAbility({
     role:role.primary.name,secondaryRole:role.secondary?.name,
     types,stats:effectiveStats,second,third,standard:ability
   });
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
-  const moves=chooseMoves(moveTypes,types,role.primary.name,effectiveStats,core,second,third);
+  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third);
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
+  // Item choice follows move choice: equipment must actually work with its
+  // holder and the four signature moves.
+  const heldItem=chooseHeldItem({
+    tritype,core,second,third,wing:selectedWing,
+    enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
+    role,types,moves,ability,hasBigFive:input.bigFive!=null
+  });
   const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
   return {
