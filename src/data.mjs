@@ -151,13 +151,8 @@ export const ABILITIES = [
   {name:'Guts',roles:['Tank','Sweeper'],types:['Fighting','Normal'],desc:'Raises Attack while affected by a status condition.'}
 ];
 
-export const HIDDEN_ABILITY_BY_TYPE = {
-  Normal:'Adaptability',Fire:'Flash Fire',Water:'Water Absorb',Electric:'Motor Drive',
-  Grass:'Natural Cure',Ice:'Ice Scales',Fighting:'Inner Focus',Poison:'Poison Heal',
-  Ground:'Sand Force',Flying:'Gale Wings',Psychic:'Magic Guard',Bug:'Swarm',
-  Rock:'Solid Rock',Ghost:'Cursed Body',Dragon:'Multiscale',Dark:'Infiltrator',
-  Steel:'Clear Body',Fairy:'Friend Guard'
-};
+// Hidden Abilities are selected from ABILITIES by visible typing, role,
+// supporting fixes and stat fit. No off-type one-to-one mapping is used.
 
 export const TYPE_ATTACKS = {
   Normal:[['Body Slam','physical'],['Hyper Voice','special']],
@@ -180,24 +175,122 @@ export const TYPE_ATTACKS = {
   Fairy:[['Play Rough','physical'],['Moonblast','special']]
 };
 
+// Each role has a distinct set of real Pokémon moves, with elemental and
+// motivational affinities below. Physical/special describes the build's
+// offensive orientation; these role moves are predominantly status moves.
 export const ROLE_MOVES = {
-  Sweeper:{physical:['Swords Dance','Agility'],special:['Nasty Plot','Agility']},
-  Wall:{physical:['Iron Defense','Protect'],special:['Light Screen','Protect']},
-  Tank:{physical:['Bulk Up','Drain Punch'],special:['Calm Mind','Protect']},
-  Pivot:{physical:['U-turn','Baton Pass'],special:['Volt Switch','Baton Pass']},
-  Support:{physical:['Helping Hand','Reflect'],special:['Light Screen','Helping Hand']},
-  Controller:{physical:['Taunt','Thunder Wave'],special:['Thunder Wave','Haze']}
+  Sweeper:{
+    physical:['Swords Dance','Dragon Dance','Flame Charge','Agility','Bulk Up','Hone Claws'],
+    special:['Nasty Plot','Calm Mind','Quiver Dance','Growth','Agility','Charge Beam']
+  },
+  Wall:{
+    physical:['Iron Defense','Protect','Curse','Amnesia','Stockpile','Cotton Guard'],
+    special:['Light Screen','Aurora Veil','Amnesia','Reflect','Mist','Protect']
+  },
+  Tank:{
+    physical:['Bulk Up','Drain Punch','Coil','Curse','Dragon Dance','Iron Defense'],
+    special:['Calm Mind','Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia']
+  },
+  Pivot:{
+    physical:['U-turn','Flip Turn','Parting Shot','Baton Pass','Dragon Tail','Rapid Spin'],
+    special:['Volt Switch','Chilly Reception','Parting Shot','Baton Pass','Teleport','Tailwind']
+  },
+  Support:{
+    physical:['Helping Hand','Reflect','Synthesis','Wish','Aromatherapy','Safeguard'],
+    special:['Light Screen','Life Dew','Tailwind','Grassy Terrain','Heal Bell','Wish']
+  },
+  Controller:{
+    physical:['Taunt','Thunder Wave','Toxic','Spikes','Will-O-Wisp','Encore'],
+    special:['Thunder Wave','Haze','Trick Room','Will-O-Wisp','Spore','Taunt']
+  }
 };
+
+// Growth always retains the meaning of the core Enneagram lesson, but can be
+// expressed through different moves as other motivations and elements change.
 export const GROWTH_MOVES = {
-  1:{name:'Rest',reason:'Learning that worth is not earned by constant correction.'},
-  2:{name:'Recover',reason:'Making room for your own needs, not only those of others.'},
-  3:{name:'Helping Hand',reason:'Making success shared rather than merely visible.'},
-  4:{name:'Calm Mind',reason:'Discovering steadiness beyond the pursuit of uniqueness.'},
-  5:{name:'Baton Pass',reason:'Letting understanding become a gift to others.'},
-  6:{name:'Substitute',reason:'Acting with courage even when certainty is incomplete.'},
-  7:{name:'Endure',reason:'Learning that freedom also includes the ability to remain.'},
-  8:{name:'Protect',reason:'Using strength to protect instead of always control.'},
-  9:{name:'Work Up',reason:'Choosing to take up space and act with intention.'}
+  1:{choices:['Rest','Protect','Calm Mind','Helping Hand','Work Up'],
+     reason:'Learning that worth is not earned by constant correction.'},
+  2:{choices:['Recover','Life Dew','Helping Hand','Wish','Protect'],
+     reason:'Making room for your own needs, not only those of others.'},
+  3:{choices:['Helping Hand','Work Up','Baton Pass','Rest','Agility'],
+     reason:'Making success shared rather than merely visible.'},
+  4:{choices:['Calm Mind','Reflect','Rest','Heal Bell','Substitute'],
+     reason:'Discovering steadiness beyond the pursuit of uniqueness.'},
+  5:{choices:['Baton Pass','Helping Hand','Trick Room','Calm Mind','Teleport'],
+     reason:'Letting understanding become a gift to others.'},
+  6:{choices:['Substitute','Protect','Reflect','Endure','Safeguard'],
+     reason:'Acting with courage even when certainty is incomplete.'},
+  7:{choices:['Endure','Rest','Protect','Growth','Calm Mind'],
+     reason:'Learning that freedom also includes the ability to remain.'},
+  8:{choices:['Protect','Helping Hand','Bulk Up','Endure','Safeguard'],
+     reason:'Using strength to protect instead of always control.'},
+  9:{choices:['Work Up','Taunt','Swords Dance','Agility','Growth'],
+     reason:'Choosing to take up space and act with intention.'}
+};
+
+// Meaningful types and fixes, rather than a global move-order preference,
+// determine which move best represents an individual's role and growth.
+// Missing affinities simply receive no preference bonus.
+export const MOVE_SYNERGIES = {
+  'Swords Dance':{types:['Steel','Fighting','Dragon'],fixes:[1,3,8]},
+  'Dragon Dance':{types:['Dragon','Fire','Flying'],fixes:[3,7,8]},
+  'Flame Charge':{types:['Fire','Electric','Fighting'],fixes:[3,7,8]},
+  'Agility':{types:['Electric','Flying','Psychic'],fixes:[3,5,7]},
+  'Bulk Up':{types:['Fighting','Rock','Ground'],fixes:[1,6,8]},
+  'Hone Claws':{types:['Dark','Steel','Poison'],fixes:[3,5,8]},
+  'Nasty Plot':{types:['Dark','Ghost','Poison'],fixes:[3,4,5]},
+  'Calm Mind':{types:['Psychic','Ice','Fairy'],fixes:[1,4,5,9]},
+  'Quiver Dance':{types:['Bug','Fairy','Flying'],fixes:[2,4,7]},
+  'Growth':{types:['Grass','Water','Fairy'],fixes:[2,7,9]},
+  'Charge Beam':{types:['Electric','Steel'],fixes:[3,5,7]},
+  'Iron Defense':{types:['Steel','Rock','Ground'],fixes:[1,6,9]},
+  'Protect':{types:['Rock','Steel','Water','Grass'],fixes:[1,2,6,8,9]},
+  'Curse':{types:['Ghost','Rock','Steel'],fixes:[1,4,6]},
+  'Amnesia':{types:['Water','Psychic','Ice'],fixes:[5,6,9]},
+  'Stockpile':{types:['Poison','Ground','Rock'],fixes:[5,6,9]},
+  'Cotton Guard':{types:['Grass','Fairy'],fixes:[2,6,9]},
+  'Light Screen':{types:['Psychic','Fairy','Electric'],fixes:[2,5,6]},
+  'Aurora Veil':{types:['Ice','Fairy'],fixes:[1,4,6]},
+  'Reflect':{types:['Psychic','Steel','Fairy'],fixes:[1,2,6]},
+  'Mist':{types:['Ice','Water'],fixes:[4,6,9]},
+  'Drain Punch':{types:['Fighting','Grass'],fixes:[2,8,9]},
+  'Coil':{types:['Poison','Ground','Dragon'],fixes:[3,6,8]},
+  'Cosmic Power':{types:['Psychic','Rock','Fairy'],fixes:[4,5,9]},
+  'Aqua Ring':{types:['Water','Ice'],fixes:[2,6,9]},
+  'Acid Armor':{types:['Poison','Water','Ice'],fixes:[4,6,9]},
+  'Charge':{types:['Electric','Steel'],fixes:[3,5,6]},
+  'U-turn':{types:['Bug','Flying'],fixes:[2,3,7]},
+  'Flip Turn':{types:['Water','Ice'],fixes:[2,7,9]},
+  'Parting Shot':{types:['Dark','Poison','Ghost'],fixes:[4,5,8]},
+  'Baton Pass':{types:['Psychic','Fairy','Bug'],fixes:[2,3,5]},
+  'Dragon Tail':{types:['Dragon','Fighting'],fixes:[6,8]},
+  'Rapid Spin':{types:['Ground','Rock','Steel'],fixes:[1,6,9]},
+  'Volt Switch':{types:['Electric','Steel'],fixes:[3,7]},
+  'Chilly Reception':{types:['Ice','Ghost','Dark'],fixes:[4,5,7]},
+  'Teleport':{types:['Psychic','Ghost','Flying'],fixes:[4,5,9]},
+  'Tailwind':{types:['Flying','Electric','Fairy'],fixes:[2,3,7]},
+  'Helping Hand':{types:['Fairy','Grass','Bug'],fixes:[2,3,5,8]},
+  'Synthesis':{types:['Grass','Water'],fixes:[2,6,9]},
+  'Wish':{types:['Fairy','Water','Psychic'],fixes:[2,4,9]},
+  'Aromatherapy':{types:['Grass','Fairy'],fixes:[2,6,9]},
+  'Safeguard':{types:['Fairy','Steel','Ground'],fixes:[1,2,6,8]},
+  'Life Dew':{types:['Water','Fairy'],fixes:[2,6,9]},
+  'Grassy Terrain':{types:['Grass','Ground'],fixes:[2,6,9]},
+  'Heal Bell':{types:['Fairy','Grass','Water'],fixes:[2,4,9]},
+  'Taunt':{types:['Dark','Fighting','Fire'],fixes:[3,7,8,9]},
+  'Thunder Wave':{types:['Electric','Steel'],fixes:[3,6,7]},
+  'Toxic':{types:['Poison','Dark'],fixes:[4,6,8]},
+  'Spikes':{types:['Ground','Rock','Steel'],fixes:[1,5,6]},
+  'Will-O-Wisp':{types:['Fire','Ghost'],fixes:[4,6,8]},
+  'Encore':{types:['Fairy','Psychic'],fixes:[2,3,7]},
+  'Haze':{types:['Water','Ice','Poison'],fixes:[4,6,9]},
+  'Trick Room':{types:['Psychic','Ghost'],fixes:[4,5,6]},
+  'Spore':{types:['Grass','Bug'],fixes:[2,5,9]},
+  'Rest':{types:['Ice','Grass','Water','Rock'],fixes:[1,5,6,7,9]},
+  'Recover':{types:['Water','Fairy','Psychic'],fixes:[2,5,9]},
+  'Work Up':{types:['Fire','Fighting','Electric'],fixes:[1,3,8,9]},
+  'Substitute':{types:['Ghost','Dark','Poison'],fixes:[4,5,6]},
+  'Endure':{types:['Rock','Fighting','Grass'],fixes:[6,7,8]}
 };
 
 export const TEST_LINKS = {
