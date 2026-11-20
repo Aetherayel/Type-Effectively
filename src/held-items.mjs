@@ -19,7 +19,9 @@ const CONTACT_MOVES=new Set(['Flare Blitz','Liquidation','Wild Charge','Leaf Bla
   'Icicle Crash','Close Combat','Poison Jab','Brave Bird','Zen Headbutt','X-Scissor',
   'Stone Edge','Shadow Claw','Dragon Claw','Crunch','Iron Head','Play Rough',
   'U-turn','Flip Turn','Drain Punch']);
-const SOUND_MOVES=new Set(['Hyper Voice','Boomburst','Snarl','Bug Buzz','Parting Shot']);
+// Parting Shot is sound-based but switches the user before its own Sp. Atk
+// boost from Throat Spray can meaningfully contribute to this build.
+const SOUND_MOVES=new Set(['Hyper Voice','Boomburst','Snarl','Bug Buzz']);
 const MULTI_HIT_MOVES=new Set(['Icicle Spear','Bullet Seed','Rock Blast','Scale Shot']);
 const BINDING_MOVES=new Set(['Wrap','Bind','Fire Spin','Whirlpool','Sand Tomb','Infestation']);
 const CHARGING_MOVES=new Set(['Solar Beam','Solar Blade','Sky Attack','Meteor Beam']);
