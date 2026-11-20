@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { HELD_ITEMS, ITEM_FAMILIES } from '../src/held-items-data.mjs';
-import { chooseHeldItem } from '../src/held-items.mjs';
+import { chooseHeldItem, isHeldItemCompatible } from '../src/held-items.mjs';
 import { DEMOS } from '../src/data.mjs';
 import { generateBuild } from '../src/engine.mjs';
 import { buildCardSvg } from '../src/export-card.mjs';
@@ -95,10 +95,49 @@ test('a held item is selected from the complete build and can be independently c
     enneagramScores:architectInput.enneagramScores,
     bigFive:architectInput.bigFive,
     mbtiScores:architectInput.mbtiScores,
-    role:b.role
+    role:b.role,types:b.types,moves:b.moves,ability:b.ability
   });
   assert.deepEqual(candidate,b.heldItem);
   assert.throws(()=>chooseHeldItem({}),/complete personality build/);
+});
+
+test('hard item eligibility rules prevent incompatible equipment',()=>{
+  const kit={types:['Water','Ice'],
+    moves:['Surf','Ice Beam','Recover','Calm Mind']};
+  for(const name of ['Assault Vest','Black Sludge','Big Root','Light Clay',
+    'Choice Band','Choice Specs','Choice Scarf','Grip Claw','Binding Band',
+    'Loaded Dice','Heat Rock','Damp Rock','Icy Rock','Smooth Rock',
+    'Terrain Extender','Misty Seed','Electric Seed','Psychic Seed',
+    'Eviolite','Everstone','Room Service']){
+    assert.equal(isHeldItemCompatible(name,kit),false,name);
+  }
+  assert.equal(isHeldItemCompatible('Black Sludge',
+    {...kit,types:['Water','Poison']}),true);
+  assert.equal(isHeldItemCompatible('Big Root',
+    {...kit,moves:['Surf','Ice Beam','Aqua Ring','Protect']}),true);
+  assert.equal(isHeldItemCompatible('Light Clay',
+    {...kit,moves:['Surf','Ice Beam','Reflect','Rest']}),true);
+  assert.equal(isHeldItemCompatible('Room Service',
+    {...kit,moves:['Surf','Ice Beam','Trick Room','Endure']}),true);
+  assert.equal(isHeldItemCompatible('Grassy Seed',
+    {...kit,moves:['Surf','Ice Beam','Grassy Terrain','Rest']}),true);
+});
+
+test('actual generated builds never equip items that contradict their moves or typing',()=>{
+  let seed=90411;
+  const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+  const eligible=new Set();
+  for(let i=0;i<1800;i++){
+    const b=generateBuild({
+      mbtiScores:Array.from({length:5},()=>Math.floor(rand()*101)),
+      enneagramScores:Array.from({length:9},()=>Math.floor(rand()*101)),
+      bigFive:Array.from({length:5},()=>Math.floor(rand()*101))
+    });
+    assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves}),
+      b.tritype+' / '+b.heldItem.name);
+    eligible.add(b.heldItem.name);
+  }
+  assert.ok(eligible.size>=40,'item compatibility should preserve thematic variety');
 });
 
 test('compact exported card includes item name and dry joke, not the long explanation',()=>{
