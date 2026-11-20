@@ -102,3 +102,41 @@ export function renderRoleWatermark(role) {
     <path d="M-10 72 V-4 Q0 -23 10 -4 V72" stroke-width="10" stroke-linejoin="round"/>
   </g>`;
 }
+
+
+/**
+ * The result page uses the same Ice/Steel shapes as the PNG, but positions them
+ * independently at the corners of a responsive HTML card. Both SVG roots get
+ * unique paint IDs so gradients and masks never collide in the DOM.
+ */
+function scopedArt(markup,namespace) {
+  return markup
+    .replace(/id="([a-z][a-z0-9-]+)"/g,(_,id)=>'id="'+namespace+id+'"')
+    .replace(/url\(#([a-z][a-z0-9-]+)\)/g,(_,id)=>'url(#'+namespace+id+')');
+}
+
+export function renderLiveCornerArtwork(types) {
+  if(!Array.isArray(types)||types.length<1||types.length>2)return '';
+  const elements=[
+    ['primary',types[0]],
+    ['secondary',types[1]||types[0]]
+  ];
+  return elements.map(([corner,type])=>{
+    const artwork=motif(type);
+    if(!artwork)return '';
+    const prefix='live-'+corner+'-';
+    const defs=scopedArt(cardArtDefinitions(),prefix);
+    const content=scopedArt(artwork,prefix);
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="result-art-corner result-art-'+corner+
+      '" viewBox="0 0 430 430" aria-hidden="true" focusable="false">'+
+      '<defs>'+defs+'</defs><g mask="url(#'+prefix+'type-corner-mask)">'+content+'</g></svg>';
+  }).join('');
+}
+
+export function renderLiveTankWatermark(role) {
+  if(role!=='Tank')return '';
+  // Crop and center the same underlying shield used by the export renderer.
+  return '<svg xmlns="http://www.w3.org/2000/svg" class="stat-role-watermark" '+
+    'viewBox="250 440 460 530" aria-hidden="true" focusable="false">'+
+    renderRoleWatermark(role)+'</svg>';
+}
