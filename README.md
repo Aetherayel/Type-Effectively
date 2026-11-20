@@ -81,7 +81,7 @@ The **visible results card and downloaded PNG** use one shared, browser-generate
 
 The **primary type enters from the top-left**, while the **secondary type enters from the bottom-right**. Monotypes use their motif in both corners. Layers fade toward the card content; live SVG gradients are namespaced per corner to prevent conflicts. The PNG exports through the existing SVG-to-Canvas renderer. **No pre-rendered pairings, server, or third-party artwork fetch is needed.**
 
-The **Tank battle role** continues to use a faint fortress-shield watermark beneath the radar. Other battle-role emblems remain intentionally unimplemented until designed.
+All **six battle roles** now receive a faint, monochrome watermark behind the radar, shared by the live card and exported PNG: **Sweeper** (crossed blades), **Tank** (original fortress shield), **Wall** (battlements), **Pivot** (circular arrows), **Support** (radiant crest), and **Controller** (containment rings). A hybrid build uses the **primary role only**, avoiding overlapping symbols. Each watermark is deliberately subdued and never affects battle calculations.
 
 Actual exporter samples: [Ice/Steel Tank](previews/ice-steel-tank.svg), [Grass/Flying Pivot](previews/grass-flying-card.svg), and [Water/Ghost Pivot](previews/water-ghost-card.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG samples use their fallback icons.
 
