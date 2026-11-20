@@ -10,14 +10,61 @@ const hash = value => {
   return out>>>0;
 };
 
+// Only reject equipment whose key mechanic contradicts this specific build.
+// Situational reactive items remain flavor-eligible; impossible prerequisites do not.
+const DRAINING_MOVES=new Set(['Drain Punch','Aqua Ring','Giga Drain','Leech Life',
+  'Draining Kiss','Parabolic Charge','Leech Seed','Ingrain','Strength Sap']);
+const SCREEN_MOVES=new Set(['Reflect','Light Screen','Aurora Veil']);
+const CONTACT_MOVES=new Set(['Flare Blitz','Liquidation','Wild Charge','Leaf Blade',
+  'Icicle Crash','Close Combat','Poison Jab','Brave Bird','Zen Headbutt','X-Scissor',
+  'Stone Edge','Shadow Claw','Dragon Claw','Crunch','Iron Head','Play Rough',
+  'U-turn','Flip Turn','Drain Punch']);
+const SOUND_MOVES=new Set(['Hyper Voice','Boomburst','Snarl','Bug Buzz','Parting Shot']);
+const MULTI_HIT_MOVES=new Set(['Icicle Spear','Bullet Seed','Rock Blast','Scale Shot']);
+const BINDING_MOVES=new Set(['Wrap','Bind','Fire Spin','Whirlpool','Sand Tomb','Infestation']);
+const CHARGING_MOVES=new Set(['Solar Beam','Solar Blade','Sky Attack','Meteor Beam']);
+
+export function isHeldItemCompatible(item,{types,moves}){
+  const name=typeof item==='string'?item:item.name;
+  if(!Array.isArray(types)||!types.length||!Array.isArray(moves)||!moves.length)
+    throw new Error('Item compatibility requires typing and moves.');
+  const names=new Set(moves.map(move=>typeof move==='string'?move:move.name));
+  const hasSome=set=>[...set].some(name=>names.has(name));
+  if(name==='Assault Vest')return false; // Slot 3 and 4 are always status/utility.
+  if(['Choice Band','Choice Specs','Choice Scarf'].includes(name))return false;
+  if(name==='Black Sludge')return types.includes('Poison');
+  if(name==='Big Root')return hasSome(DRAINING_MOVES);
+  if(name==='Light Clay')return hasSome(SCREEN_MOVES);
+  if(name==='Grip Claw'||name==='Binding Band')return hasSome(BINDING_MOVES);
+  if(name==='Throat Spray')return hasSome(SOUND_MOVES);
+  if(name==='Loaded Dice')return hasSome(MULTI_HIT_MOVES);
+  if(name==='Power Herb')return hasSome(CHARGING_MOVES);
+  if(name==='Room Service')return names.has('Trick Room');
+  if(name==='Terrain Extender'||name==='Grassy Seed')
+    return names.has('Grassy Terrain');
+  if(name==='Electric Seed')return names.has('Electric Terrain');
+  if(name==='Misty Seed')return names.has('Misty Terrain');
+  if(name==='Psychic Seed')return names.has('Psychic Terrain');
+  const weather={
+    'Heat Rock':'Sunny Day','Damp Rock':'Rain Dance',
+    'Icy Rock':'Snowscape','Smooth Rock':'Sandstorm'
+  };
+  if(weather[name])return names.has(weather[name]);
+  if(name==='Protective Pads')return hasSome(CONTACT_MOVES);
+  // No evolutionary stage exists for an original generated personality Pokémon.
+  if(name==='Eviolite'||name==='Everstone')return false;
+  return true;
+}
+
 export function chooseHeldItem({
   tritype,core,second,third,wing,enneagramScores,bigFive,mbtiScores,
-  role,hasBigFive=true
+  role,types,moves,ability,hasBigFive=true
 }) {
   if(!Array.isArray(enneagramScores)||enneagramScores.length!==9 ||
       !Array.isArray(bigFive)||bigFive.length!==5 ||
       !Array.isArray(mbtiScores)||mbtiScores.length!==5 ||
-      !Number.isInteger(core)||core<1||core>9 || !role?.primary?.name) {
+      !Number.isInteger(core)||core<1||core>9 || !role?.primary?.name ||
+      !Array.isArray(types)||!types.length||!Array.isArray(moves)||moves.length!==4) {
     throw new Error('Held item selection requires a complete personality build.');
   }
   const familyScores=Object.fromEntries(Object.entries(ITEM_FAMILIES).map(([key,family])=>{
@@ -29,7 +76,7 @@ export function chooseHeldItem({
     return [key,.68*coreSignal+.32*traits];
   }));
   const seed=[tritype,wing,...mbtiScores,...enneagramScores,...bigFive,role.primary.name].join('|');
-  const sorted=HELD_ITEMS.map(item=>{
+  const sorted=HELD_ITEMS.filter(item=>isHeldItemCompatible(item,{types,moves})).map(item=>{
     const familyScore=familyScores[item.family];
     const traits=traitFit(bigFive,item.targets);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
@@ -37,6 +84,7 @@ export function chooseHeldItem({
     const tie=(hash(seed+'|'+item.name)/4294967295-.5)*8;
     return {item,score:.47*familyScore+.38*traits+.15*roleScore+tie};
   }).sort((a,b)=>b.score-a.score || a.item.name.localeCompare(b.item.name));
+  if(!sorted.length)throw new Error('No compatible thematic held item.');
   const selected=sorted[0].item;
   const family=ITEM_FAMILIES[selected.family];
   const signal=bigFive.map((value,i)=>({i,value,distance:Math.abs(value-50)}))
