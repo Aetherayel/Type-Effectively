@@ -1,7 +1,7 @@
 import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   HIDDEN_ABILITY_BY_TYPE, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
-  PAIR_TYPES, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
+  GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs';
 import { chooseHeldItem } from './held-items.mjs';
@@ -9,7 +9,41 @@ import { chooseHeldItem } from './held-items.mjs';
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
 const round = n => Math.round(n);
-export const pairType = (a,b) => PAIR_TYPES[[a,b].sort((x,y)=>x-y).join('-')];
+// Scores describe motivational resonance, not trait likelihood. A type is
+// selected independently at each layer, allowing real monotype convergence.
+const strongestType=(sources,excluded=[])=>{
+  return GENERATED_TYPES
+    .filter(type=>!excluded.includes(type))
+    .map(type=>({
+      type,
+      score:sources.reduce((sum,[enneagram,weight])=>
+        sum + weight*TYPE_AFFINITY[enneagram][type],0)
+    }))
+    .sort((a,b)=>b.score-a.score ||
+      GENERATED_TYPES.indexOf(a.type)-GENERATED_TYPES.indexOf(b.type))[0].type;
+};
+
+// Primary: core identity (88%) and an evidenced wing (12%).
+// Secondary: second fix (65%), third fix (30%), core (5%).
+// Hidden: third fix (60%), second fix (30%), wing (10%),
+//         excluding visible types. Unknown wings use 70% third/30% second.
+export function deriveTyping({core,second,third,wing=null}) {
+  if(!isValidTritype(String(core)+String(second)+String(third)))
+    throw new Error('Typing requires one Enneagram fix from each center.');
+  if(wing!=null && ![core===1?9:core-1,core===9?1:core+1].includes(wing))
+    throw new Error('Typing wing must be adjacent to the core.');
+
+  const primary=strongestType(
+    wing==null ? [[core,1]] : [[core,.88],[wing,.12]]
+  );
+  const secondary=strongestType([[second,.65],[third,.30],[core,.05]]);
+  const types=[...new Set([primary,secondary])];
+  const hiddenType=strongestType(
+    wing==null ? [[third,.70],[second,.30]] :
+      [[third,.60],[second,.30],[wing,.10]],types
+  );
+  return {types,hiddenType};
+}
 
 export function deriveMbti(scores) {
   if (!Array.isArray(scores) || scores.length !== 5 || scores.some(n => !Number.isFinite(n) || n < 0 || n > 100)) {
@@ -252,9 +286,12 @@ export function generateBuild(input) {
   const blend=STAT_KEYS.map((_,i)=>.7*oa[i]+.2*ea[i]+.1*ma[i]);
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
-  const pairTypes=[pairType(core,second),pairType(core,third)];
-  const types=[...new Set(pairTypes)]; // Matching pair types produce a monotype, not an invalid duplicate type.
-  const hiddenType=pairType(second,third);
+  // Do not let fabricated proxy scores supply a typing wing when the visitor
+  // entered only a tritype. Explicit wing or actual scores/ranking can do so.
+  const hasRealEnneagramInput=input.enneagramScores!=null || input.enneagramRanking!=null;
+  const typingWing=(input.wingOverride!=null && input.wingOverride!=='') ||
+    hasRealEnneagramInput ? selectedWing : null;
+  const {types,hiddenType}=deriveTyping({core,second,third,wing:typingWing});
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
   const role=classifyRole(effectiveStats,toolkitTypes);
   const ability=chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
@@ -269,7 +306,7 @@ export function generateBuild(input) {
   }
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
   const moves=chooseMoves(moveTypes,role.primary.name,effectiveStats,core);
-  if (types.length===1) moves[1].category=hiddenType+' coverage (hidden pairing)';
+  if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
   return {
@@ -278,7 +315,7 @@ export function generateBuild(input) {
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
     oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
-    tritype, suggestedTritype, suggestedType, wing:selectedWing,
+    tritype, suggestedTritype, suggestedType, wing:selectedWing, typingWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'The '+archetype,
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
