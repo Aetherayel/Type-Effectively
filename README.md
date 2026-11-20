@@ -24,6 +24,14 @@ These are independent external websites. **No test integration, scraping, affili
 
 Don't have the full results? You can select an MBTI-style type, enter an ordered Enneagram ranking, or supply a tritype. The result clearly labels estimated inputs. If Big Five is missing, neutral 50-point placeholders are used and disclosed.
 
+### Explore random combinations
+
+The **Randomize ↻** button beside the results heading instantly creates a **synthetic sample build** using the ordinary calculator: five generated bipolar 16Personalities scores, nine Enneagram scores with a valid ordered tritype, and five Big Five scores. The editable input controls update to match the sample, so visitors can inspect exactly how it was produced. Clicking again creates a fresh combination without requiring any manual form entry.
+
+The result clearly reads **RANDOM SAMPLE · SYNTHETIC SCORES**, not a personal assessment. A manual Generate action returns to normal results; Reset clears the sample. Share links preserve the sample label, and randomizing clears any old share-link hash. All work remains local in the browser.
+
+**Current typing-map limitation:** the Enneagram pair mappings for **Fire** (2–3 and 3–4) and **Ground** (1–9 and 8–9) use two types from the *same* Enneagram center. Because a valid tritype selects only one digit per center, those typings cannot arise from an authentic generated tritype. Randomization deliberately does **not** override computed typing or alter that mapping; the corresponding artwork is already implemented for when the source mapping is reviewed.
+
 ### Manual overrides
 
 The inferred four-letter type, ordered tritype, and wing can be overridden. Overrides affect **identity and type selection**, while entered score distributions remain intact for stats. This preserves the distinction between your interpretation of the tests and the raw measurements.
@@ -81,7 +89,9 @@ The **visible results card and downloaded PNG** use one shared, browser-generate
 
 The **primary type enters from the top-left**, while the **secondary type enters from the bottom-right**. Monotypes use their motif in both corners. Layers fade toward the card content; live SVG gradients are namespaced per corner to prevent conflicts. The PNG exports through the existing SVG-to-Canvas renderer. **No pre-rendered pairings, server, or third-party artwork fetch is needed.**
 
-The **Tank battle role** continues to use a faint fortress-shield watermark beneath the radar. Other battle-role emblems remain intentionally unimplemented until designed.
+All **six battle roles** now receive a faint, monochrome watermark behind the radar, shared by the live card and exported PNG: **Sweeper** (crossed blades), **Tank** (original fortress shield), **Wall** (battlements), **Pivot** (circular arrows), **Support** (radiant crest), and **Controller** (containment rings). A hybrid build uses the **primary role only**, avoiding overlapping symbols. Each watermark is deliberately subdued and never affects battle calculations.
+
+[Review the six generated role emblems](previews/battle-role-emblems.svg). This gallery brightens the marks for visual inspection; the cards render them at much lower opacity.
 
 Actual exporter samples: [Ice/Steel Tank](previews/ice-steel-tank.svg), [Grass/Flying Pivot](previews/grass-flying-card.svg), and [Water/Ghost Pivot](previews/water-ghost-card.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG samples use their fallback icons.
 
