@@ -1,6 +1,7 @@
-// Lightweight, local SVG artwork for the first two Pokémon type motifs.
-// Designed for the exported 960 × 1700 card; no remote images or pre-rendered
-// type combinations are required. Other types intentionally remain unadorned.
+// Lightweight, local SVG artwork for all 18 Pokémon types.
+// Ice and Steel are defined below; the other 16 live in type-motifs.mjs.
+// The exact same vector illustrations serve the PNG and the live results card.
+import { additionalTypeDefinitions, renderAdditionalTypeMotif } from './type-motifs.mjs';
 
 export function cardArtDefinitions() {
   return `
@@ -30,7 +31,7 @@ export function cardArtDefinitions() {
     </linearGradient>
     <mask id="type-corner-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="430" height="430">
       <rect x="0" y="0" width="430" height="430" fill="url(#type-corner-fade)"/>
-    </mask>`;
+    </mask>${additionalTypeDefinitions()}`;
 }
 
 // Coordinates are corner-relative so the same asset works in either position.
@@ -73,7 +74,7 @@ const STEEL = `
 function motif(type) {
   if(type==='Ice')return ICE;
   if(type==='Steel')return STEEL;
-  return '';
+  return renderAdditionalTypeMotif(type);
 }
 
 export function renderTypeCornerArtwork(types) {
@@ -105,7 +106,7 @@ export function renderRoleWatermark(role) {
 
 
 /**
- * The result page uses the same Ice/Steel shapes as the PNG, but positions them
+ * The results page uses the same 18 type motifs as the PNG, positioned
  * independently at the corners of a responsive HTML card. Both SVG roots get
  * unique paint IDs so gradients and masks never collide in the DOM.
  */
