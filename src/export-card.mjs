@@ -1,6 +1,7 @@
 import { TYPE_COLORS } from './data.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { loadItemSprite } from './item-sprites.mjs';
+import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs';
 
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
@@ -97,6 +98,7 @@ export function buildCardSvg(build) {
       <stop offset="100%" stop-color="#111e23"/>
     </linearGradient>
     <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1649" rx="30"/></clipPath>
+    ${cardArtDefinitions()}
   </defs>
   <style>
     text{font-family:Arial,Helvetica,sans-serif}
@@ -120,13 +122,18 @@ export function buildCardSvg(build) {
   <rect x="28" y="25" width="904" height="1649" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
   <g clip-path="url(#rounded-card)">
     <rect x="28" y="25" width="904" height="16" fill="url(#type-gradient)"/>
+    ${renderTypeCornerArtwork(build.types)}
+    ${renderRoleWatermark(build.role.primary.name)}
   </g>
   <text x="76" y="105" class="overline">TYPE EFFECTIVELY</text>
   <text x="878" y="105" text-anchor="end" class="overline">${esc(identity)}</text>
   <text x="878" y="140" text-anchor="end" font-size="19" font-family="monospace" font-weight="500" fill="#9fbcb4">${esc(oceanHeaderText(build))}</text>
   <text x="76" y="192" class="title">${esc(build.title)}</text>
   ${typeBadges(build.types)}
-  <text x="76" y="333" class="subline">${esc(build.nature)} · ${esc(role)} · ${esc(build.ability.name)}</text>
+  <rect x="596" y="244" width="288" height="48" rx="9" fill="#20333a" stroke="#65877e" stroke-opacity=".7"/>
+  <text x="611" y="261" font-size="11" font-weight="700" letter-spacing="1" fill="#9eb9b0">BATTLE ROLE</text>
+  <text x="611" y="283" font-size="19" font-weight="700" fill="#edf9f2">${esc(role)}</text>
+  <text x="76" y="333" class="subline">${esc(build.nature)} Nature · ${esc(build.ability.name)} Ability</text>
   <line x1="76" x2="884" y1="364" y2="364" stroke="#4b6964"/>
   <text x="76" y="399" class="overline">BASE STATS</text>
   <text x="882" y="399" text-anchor="end" class="overline">535 BST</text>

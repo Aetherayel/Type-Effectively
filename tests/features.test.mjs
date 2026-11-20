@@ -87,6 +87,20 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.throws(()=>buildCardSvg({...sample,types:['Fake']}),/valid Pokémon typing/);
 });
 
+test('export card calls out primary or hybrid battle role without a duplicate subtitle',()=>{
+  const singleSvg=buildCardSvg(sample);
+  assert.match(singleSvg,/>BATTLE ROLE<\/text>/);
+  assert.match(singleSvg,new RegExp('>'+sample.role.primary.name+'<\\/text>'));
+  assert.match(singleSvg,new RegExp('>'+sample.nature+' Nature · '+sample.ability.name+' Ability<\\/text>'));
+  const hybrid=buildCardSvg({
+    ...sample,
+    role:{...sample.role,secondary:{name:'Controller'}}
+  });
+  assert.match(hybrid,/>Tank \/ Controller<\/text>/);
+  assert.doesNotMatch(hybrid,/>Quiet · Tank \/ Controller · Analytic<\/text>/);
+  assert.match(hybrid,/viewBox="0 0 960 1700"/);
+});
+
 test('OCEAN header exports five binary high/low traits, never precise numbers',()=>{
   assert.deepEqual(sample.oceanBinary,[1,1,0,1,0]);
   assert.equal('oceanScores' in sample,false,'build should not retain raw Big Five values');

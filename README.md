@@ -75,6 +75,14 @@ A static **Understanding your stats** section appears below the input/results wo
 
 The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / 16Personalities** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
+## Prototype card artwork: Ice / Steel / Tank
+
+The PNG renderer now composes a **first-pass elemental card illustration** from local, pure SVG shapes. **Ice** adds angular translucent crystal shards; **Steel** adds riveted plates and beams. The primary type enters from the **top-left**, the secondary type from the **bottom-right**, and monotypes use the same element in both corners. These two motifs work in either corner. Types other than Ice and Steel retain the existing plain background for now.
+
+A **Tank** battle role adds a faint fortress-shield watermark beneath the stat radar and other content. Other battle roles remain unillustrated until their icons are designed. Every artwork layer is clipped to the rounded card and fades toward the central text. The generated PNG continues to use the existing local SVG-to-Canvas export and the optional held-item icon. **No 324-combination image library or additional image request is needed for the artwork.**
+
+[View the Ice/Steel Tank SVG render used by the exporter](previews/ice-steel-tank.svg). This static visual sample includes the default icon placeholder; the actual browser-exported PNG overlays the selected held item's sprite afterward.
+
 ## Downloadable card and defensive matchups
 
 **Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Without entered Big Five results, the card reads **OCEAN · Estimated**. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.

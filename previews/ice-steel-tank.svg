@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1700" viewBox="0 0 960 1700">
+  <defs>
+    <linearGradient id="type-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3DCEF3"/>
+      <stop offset="100%" stop-color="#60A1B8"/>
+    </linearGradient>
+    <linearGradient id="base-card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1b3035"/>
+      <stop offset="100%" stop-color="#111e23"/>
+    </linearGradient>
+    <clipPath id="rounded-card"><rect x="28" y="25" width="904" height="1649" rx="30"/></clipPath>
+    
+    <linearGradient id="ice-crystal" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#e4ffff" stop-opacity=".94"/>
+      <stop offset="33%" stop-color="#81d8f4" stop-opacity=".7"/>
+      <stop offset="100%" stop-color="#2b7799" stop-opacity=".11"/>
+    </linearGradient>
+    <linearGradient id="ice-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a1e9ff" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#195577" stop-opacity=".05"/>
+    </linearGradient>
+    <linearGradient id="steel-face" x1="0%" y1="0%" x2="100%" y2="88%">
+      <stop offset="0%" stop-color="#d3e7ed" stop-opacity=".82"/>
+      <stop offset="27%" stop-color="#7a98a9" stop-opacity=".58"/>
+      <stop offset="68%" stop-color="#344f65" stop-opacity=".62"/>
+      <stop offset="100%" stop-color="#142f42" stop-opacity=".19"/>
+    </linearGradient>
+    <linearGradient id="steel-edge" x1="0%" y1="0%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#f5ffff" stop-opacity=".67"/>
+      <stop offset="100%" stop-color="#50677b" stop-opacity=".17"/>
+    </linearGradient>
+    <linearGradient id="type-corner-fade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="53%" stop-color="#ffffff" stop-opacity=".72"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="type-corner-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="430" height="430">
+      <rect x="0" y="0" width="430" height="430" fill="url(#type-corner-fade)"/>
+    </mask>
+  </defs>
+  <style>
+    text{font-family:Arial,Helvetica,sans-serif}
+    .overline{font-size:18px;font-weight:700;letter-spacing:2px;fill:#a6beb8}
+    .title{font-size:58px;font-weight:800;letter-spacing:-2px;fill:#f3fbf7}
+    .subline{font-size:23px;font-weight:500;fill:#c6d9d3}
+    .type-text{font-size:20px;font-weight:800;fill:#102126}
+    .stat-radar-ring{fill:none;stroke:#accbcb;stroke-opacity:.24;stroke-width:1}
+    .stat-radar-outer{stroke-opacity:.44}
+    .stat-radar-axis{stroke:#accbcb;stroke-opacity:.3;stroke-width:1}
+    .stat-radar-shape{fill:#3DCEF3;fill-opacity:.26;stroke:#c6e9e4;stroke-width:2.4;stroke-linejoin:round}
+    .stat-radar-point{fill:#e8fcf7;stroke:#163139;stroke-width:1.5}
+    .stat-radar-label{text-anchor:middle}
+    .stat-radar-label-name{font-size:12px;font-weight:700;fill:#d9eeea}
+    .stat-radar-label-effective,.stat-radar-label-single{font-size:14px;font-weight:800;fill:#fff}
+    .stat-radar-label-effective.stat-boost{fill:#c9f68a}
+    .stat-radar-label-effective.stat-drop{fill:#ffb998}
+    .stat-radar-label-base{font-size:11px;fill:#9db9b1}
+  </style>
+  <rect width="960" height="1700" fill="#0b161b"/>
+  <rect x="28" y="25" width="904" height="1649" rx="30" fill="url(#base-card)" stroke="#41605a" stroke-width="2"/>
+  <g clip-path="url(#rounded-card)">
+    <rect x="28" y="25" width="904" height="16" fill="url(#type-gradient)"/>
+    <g class="type-corner type-corner-primary" transform="translate(28 25)" mask="url(#type-corner-mask)">
+  <g class="type-art-ice">
+    <path d="M-12 -10 L175 -10 L58 151 L-12 235 Z" fill="url(#ice-crystal)" opacity=".74"/>
+    <path d="M13 -10 L114 -10 L31 229 L-12 282 L-12 165 Z" fill="url(#ice-shadow)" opacity=".75"/>
+    <path d="M68 -10 L293 -10 L178 76 L116 190 Z" fill="url(#ice-crystal)" opacity=".63"/>
+    <path d="M-12 125 L64 45 L85 184 L-12 369 Z" fill="url(#ice-crystal)" opacity=".7"/>
+    <path d="M-12 274 L83 171 L52 330 L-12 419 Z" fill="url(#ice-shadow)" opacity=".48"/>
+    <path d="M153 -10 L368 -10 L223 74 Z" fill="url(#ice-shadow)" opacity=".46"/>
+    <path d="M90 34 L175 -10 L125 141 L88 188 Z" fill="#c1effd" fill-opacity=".2"/>
+    <path d="M68 -10 L293 -10 L178 76 L116 190" stroke="#d9f9ff" stroke-width="2.5" stroke-opacity=".43" fill="none"/>
+    <path d="M-12 125 L64 45 L85 184 L-12 369" stroke="#e1fbff" stroke-width="2.4" stroke-opacity=".46" fill="none"/>
+    <path d="M17 72 L76 12 M38 123 L59 59 M6 299 L56 216" stroke="#edffff" stroke-width="2" stroke-opacity=".58" fill="none"/>
+    <path d="M216 54 L234 50 L229 69 L215 74 Z M120 189 L132 177 L140 193 L126 202 Z M49 362 L64 350 L70 370 L52 379 Z" fill="#bff5ff" fill-opacity=".41"/>
+    <path d="M313 18 L319 32 M311 31 L326 22 M195 128 L204 144 M196 141 L212 133" stroke="#c5f8ff" stroke-width="1.5" stroke-opacity=".5"/>
+  </g></g><g class="type-corner type-corner-secondary" transform="translate(932 1674) rotate(180)" mask="url(#type-corner-mask)">
+  <g class="type-art-steel">
+    <path d="M-18 -12 L145 -12 L75 351 L-18 411 Z" fill="url(#steel-face)" opacity=".84"/>
+    <path d="M145 -12 L187 -12 L98 315 L75 351 Z" fill="#b8d1da" fill-opacity=".32"/>
+    <path d="M-12 138 L199 -12 L295 -12 L-12 231 Z" fill="url(#steel-face)" opacity=".75"/>
+    <path d="M-12 215 L299 -12 L345 -12 L-12 274 Z" fill="#1a3449" fill-opacity=".53"/>
+    <path d="M-12 13 L218 -12 L242 22 L-12 97 Z" fill="url(#steel-edge)" opacity=".72"/>
+    <path d="M-12 87 L221 11 L245 34 L-12 124 Z" fill="#183346" fill-opacity=".62"/>
+    <path d="M35 -12 L83 -12 L-12 330 L-12 230 Z" fill="url(#steel-edge)" opacity=".45"/>
+    <path d="M-12 138 L199 -12 M-12 215 L299 -12 M-12 13 L218 -12" stroke="#d6e7ec" stroke-opacity=".36" stroke-width="3" fill="none"/>
+    <path d="M145 -12 L75 351 M187 -12 L98 315" stroke="#2e4a5e" stroke-opacity=".62" stroke-width="3" fill="none"/>
+    <path d="M-12 231 L295 -12 L345 -12" stroke="#c5d8df" stroke-opacity=".25" stroke-width="2.5" fill="none"/>
+    <g fill="#c8d9de" fill-opacity=".64" stroke="#233b49" stroke-width="1.2">
+      <circle cx="36" cy="64" r="4"/><circle cx="89" cy="47" r="4"/><circle cx="142" cy="30" r="4"/>
+      <circle cx="17" cy="163" r="4"/><circle cx="74" cy="119" r="4"/><circle cx="132" cy="74" r="4"/>
+      <circle cx="59" cy="236" r="4"/><circle cx="88" cy="132" r="4"/>
+    </g>
+  </g></g>
+    <g class="role-watermark role-watermark-tank" transform="translate(480 706)" opacity=".072" fill="none" stroke="#cee9df">
+    <path d="M0 -244 L196 -177 L191 31 Q170 168 0 248 Q-170 168 -191 31 L-196 -177 Z"
+      stroke-width="17" stroke-linejoin="round" fill="#9dbdb8" fill-opacity=".35"/>
+    <path d="M0 -203 L149 -151 L146 21 Q131 132 0 196 Q-131 132 -146 21 L-149 -151 Z"
+      stroke-width="6"/>
+    <path d="M-87 -65 L-87 -110 L-44 -110 L-44 -89 L-17 -89 L-17 -120 L17 -120 L17 -89 L44 -89 L44 -110 L87 -110 L87 -65"
+      stroke-width="13" stroke-linejoin="miter"/>
+    <path d="M-76 -45 H76 V72 H-76 Z" fill="#b1d0ca" fill-opacity=".22" stroke-width="10"/>
+    <path d="M-10 72 V-4 Q0 -23 10 -4 V72" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  </g>
+  <text x="76" y="105" class="overline">TYPE EFFECTIVELY</text>
+  <text x="878" y="105" text-anchor="end" class="overline">INTJ-A · #593</text>
+  <text x="878" y="140" text-anchor="end" font-size="19" font-family="monospace" font-weight="500" fill="#9fbcb4">O:H · C:H · E:L · A:H · N:L</text>
+  <text x="76" y="192" class="title">The Architect</text>
+  <rect x="76" y="246" rx="8" width="87" height="42" fill="#3DCEF3"/><text x="119.5" y="274" text-anchor="middle" class="type-text">ICE</text><rect x="175" y="246" rx="8" width="117" height="42" fill="#60A1B8"/><text x="233.5" y="274" text-anchor="middle" class="type-text">STEEL</text>
+  <rect x="596" y="244" width="288" height="48" rx="9" fill="#20333a" stroke="#65877e" stroke-opacity=".7"/>
+  <text x="611" y="261" font-size="11" font-weight="700" letter-spacing="1" fill="#9eb9b0">BATTLE ROLE</text>
+  <text x="611" y="283" font-size="19" font-weight="700" fill="#edf9f2">Tank</text>
+  <text x="76" y="333" class="subline">Quiet Nature · Analytic Ability</text>
+  <line x1="76" x2="884" y1="364" y2="364" stroke="#4b6964"/>
+  <text x="76" y="399" class="overline">BASE STATS</text>
+  <text x="882" y="399" text-anchor="end" class="overline">535 BST</text>
+  <svg x="145" y="386" width="670" height="627" class="stat-radar" viewBox="0 0 360 337" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="stat-radar-title stat-radar-description"><title id="stat-radar-title">Six-stat radar, adjusted values shown above base only when Nature changes a stat</title><desc id="stat-radar-description">HP: base 103; Attack: base 53; Defense: base 110; Speed: after Nature 54, base 61; Sp. Def: base 99; Sp. Atk: after Nature 119, base 109. Base stat polygon scale: zero to 140 on each axis.</desc><g class="stat-radar-grid"><polygon class="stat-radar-ring" points="180,137 203.38,150.5 203.38,177.5 180,191 156.62,177.5 156.62,150.5"/><polygon class="stat-radar-ring" points="180,110 226.77,137 226.77,191 180,218 133.23,191 133.23,137"/><polygon class="stat-radar-ring" points="180,83 250.15,123.5 250.15,204.5 180,245 109.85,204.5 109.85,123.5"/><polygon class="stat-radar-ring stat-radar-outer" points="180,56 273.53,110 273.53,218 180,272 86.47,218 86.47,110"/><line class="stat-radar-axis" x1="180" y1="164" x2="180" y2="56"/><line class="stat-radar-axis" x1="180" y1="164" x2="273.53" y2="110"/><line class="stat-radar-axis" x1="180" y1="164" x2="273.53" y2="218"/><line class="stat-radar-axis" x1="180" y1="164" x2="180" y2="272"/><line class="stat-radar-axis" x1="180" y1="164" x2="86.47" y2="218"/><line class="stat-radar-axis" x1="180" y1="164" x2="86.47" y2="110"/></g><polygon class="stat-radar-shape" points="180,84.54 215.41,143.56 253.49,206.43 180,211.06 113.86,202.19 107.18,121.96"/><g class="stat-radar-vertices"><circle class="stat-radar-point" cx="180" cy="84.54" r="3.6"/><circle class="stat-radar-point" cx="215.41" cy="143.56" r="3.6"/><circle class="stat-radar-point" cx="253.49" cy="206.43" r="3.6"/><circle class="stat-radar-point" cx="180" cy="211.06" r="3.6"/><circle class="stat-radar-point" cx="113.86" cy="202.19" r="3.6"/><circle class="stat-radar-point" cx="107.18" cy="121.96" r="3.6"/></g><g class="stat-radar-labels"><g class="stat-radar-label" transform="translate(180 20)"><text class="stat-radar-label-name" y="-4">HP</text><text class="stat-radar-label-single" y="15">103</text></g><g class="stat-radar-label" transform="translate(313 87)"><text class="stat-radar-label-name" y="-4">Attack</text><text class="stat-radar-label-single" y="15">53</text></g><g class="stat-radar-label" transform="translate(313 230)"><text class="stat-radar-label-name" y="-4">Defense</text><text class="stat-radar-label-single" y="15">110</text></g><g class="stat-radar-label" transform="translate(180 305)"><text class="stat-radar-label-name" y="-4">Speed</text><text class="stat-radar-label-effective stat-drop" y="11">↓54</text><text class="stat-radar-label-base" y="25">61</text></g><g class="stat-radar-label" transform="translate(47 230)"><text class="stat-radar-label-name" y="-4">Sp. Def</text><text class="stat-radar-label-single" y="15">99</text></g><g class="stat-radar-label" transform="translate(47 87)"><text class="stat-radar-label-name" y="-4">Sp. Atk</text><text class="stat-radar-label-effective stat-boost" y="11">↑119</text><text class="stat-radar-label-base" y="25">109</text></g></g></svg>
+  <text x="480" y="1052" text-anchor="middle" font-size="18" fill="#a9c2ba">Quiet Nature · +10% SPA / −10% SPE</text>
+  <line x1="76" x2="884" y1="1073" y2="1073" stroke="#4b6964"/>
+  <text x="76" y="1106" class="overline">ABILITIES</text>
+  <rect x="76" y="1122" width="395" height="81" rx="11" fill="#1b3034" stroke="#3b5854"/>
+  <rect x="487" y="1122" width="397" height="81" rx="11" fill="#1b3034" stroke="#3b5854"/>
+  <text x="96" y="1149" font-size="13" letter-spacing="1" fill="#9eb9b0">STANDARD</text>
+  <text x="507" y="1149" font-size="13" letter-spacing="1" fill="#9eb9b0">HIDDEN</text>
+  <text x="96" y="1183" font-size="26" font-weight="700" fill="#f1faf4">Analytic</text>
+  <text x="507" y="1183" font-size="26" font-weight="700" fill="#f1faf4">Adaptability</text>
+  <text x="76" y="1238" class="overline">SIGNATURE MOVES</text>
+  <rect x="76" y="1251" width="399" height="80" rx="11" fill="#1b3034" stroke="#3b5854"/><text x="94" y="1275" font-size="13" font-weight="700" letter-spacing="1" fill="#9eb9b0">SPECIAL STAB</text><text font-size="24" font-weight="700" fill="#f1faf4"><tspan x="94" y="1305">Ice Beam</tspan></text><rect x="485" y="1251" width="399" height="80" rx="11" fill="#1b3034" stroke="#3b5854"/><text x="503" y="1275" font-size="13" font-weight="700" letter-spacing="1" fill="#9eb9b0">SPECIAL STAB</text><text font-size="24" font-weight="700" fill="#f1faf4"><tspan x="503" y="1305">Flash Cannon</tspan></text><rect x="76" y="1342" width="399" height="80" rx="11" fill="#1b3034" stroke="#3b5854"/><text x="94" y="1366" font-size="13" font-weight="700" letter-spacing="1" fill="#9eb9b0">ROLE TACTIC</text><text font-size="24" font-weight="700" fill="#f1faf4"><tspan x="94" y="1396">Calm Mind</tspan></text><rect x="485" y="1342" width="399" height="80" rx="11" fill="#1b3034" stroke="#3b5854"/><text x="503" y="1366" font-size="13" font-weight="700" letter-spacing="1" fill="#9eb9b0">GROWTH MOVE</text><text font-size="24" font-weight="700" fill="#f1faf4"><tspan x="503" y="1396">Baton Pass</tspan></text>
+  <text x="76" y="1459" class="overline">HELD ITEM</text>
+  <rect x="76" y="1477" width="808" height="119" rx="13" fill="#1e322e" stroke="#4d7361"/>
+  <rect x="89" y="1490" width="82" height="82" rx="11" fill="#12282b" stroke="#426859"/>
+  <text x="130" y="1547" text-anchor="middle" font-size="45" fill="#93b89f">◇</text>
+  <text x="192" y="1521" font-size="31" font-weight="700" fill="#f1faf1">Absorb Bulb</text>
+  <text font-size="18" font-weight="400" fill="#d6edda" font-style="italic"><tspan x="192" y="1557">“Had a plan specifically for unexpected moisture.”</tspan></text>
+  <line x1="76" x2="884" y1="1612" y2="1612" stroke="#4b6964"/>
+  <text x="76" y="1640" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
+  <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · OCEAN shown only as high / low</text>
+</svg>
