@@ -3,7 +3,7 @@ import {
   HIDDEN_ABILITY_BY_TYPE, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs';
+} from './data.mjs?v=typing17-1';
 import { chooseHeldItem } from './held-items.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
