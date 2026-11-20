@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFileSync } from 'node:fs';
-import { resolve, extname } from 'node:path';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { resolve, extname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { spawn, spawnSync } from 'node:child_process';
 
 const root=resolve(process.cwd());
@@ -18,7 +19,7 @@ window.addEventListener('unhandledrejection',event=>{
   document.documentElement.setAttribute('data-boot-error',
     String(event.reason));
 });
-window.addEventListener('load',()=>{
+window.addEventListener('DOMContentLoaded',()=>{
   // Exercise the actual results UI, not merely the slider bootstrap.
   document.getElementById('randomize-button')?.click();
 });
@@ -29,6 +30,10 @@ const server=createServer((req,res)=>{
     const path=resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
     if(!path.startsWith(root+'/')){res.writeHead(403);res.end();return;}
     let body=readFileSync(path);
+    // No external font loading during CI: a stalled third-party stylesheet
+    // must not determine whether our own JavaScript works.
+    if(path.endsWith('/styles.css'))body=Buffer.from(
+      body.toString().replace(/^@import\s+url\([^;]+;\s*/,''));
     if(path.endsWith('/index.html'))body=Buffer.from(
       body.toString().replace('<script type="module"',instrumentation+'<script type="module"'));
     res.setHeader('Content-Type',mime[extname(path)]||'application/octet-stream');
@@ -38,28 +43,44 @@ const server=createServer((req,res)=>{
 await new Promise((ok,fail)=>server.once('error',fail).listen(port,'127.0.0.1',ok));
 try{
   const candidates=['google-chrome','google-chrome-stable','chromium','chromium-browser'];
-  let result;
-  for(const cmd of candidates){
-    const probe=spawnSync('which',[cmd],{encoding:'utf8'});
-    if(probe.status===0){
-      result=await new Promise((ok,fail)=>{
-        const proc=spawn(cmd,[
+  const executable=candidates.find(cmd=>spawnSync('which',[cmd],{encoding:'utf8'}).status===0);
+  if(!executable)throw new Error('Chrome/Chromium unavailable: cannot run browser startup smoke test');
+
+  // A clean profile prevents collisions with other browser processes on shared
+  // runners. Retry only a stalled Chrome startup, never failing assertions.
+  const runChrome=async (timeoutMs)=>{
+    const profile=mkdtempSync(join(tmpdir(),'type-effectively-smoke-'));
+    try{
+      return await new Promise((ok,fail)=>{
+        const proc=spawn(executable,[
           '--headless=new','--no-sandbox','--disable-dev-shm-usage',
-          '--disable-gpu','--no-first-run','--no-default-browser-check',
-          '--virtual-time-budget=6000','--dump-dom',
+          '--disable-gpu','--disable-background-networking',
+          '--disable-extensions','--blink-settings=imagesEnabled=false',
+          '--no-first-run','--no-default-browser-check',
+          '--user-data-dir='+profile,
+          '--virtual-time-budget=4500','--dump-dom',
           'http://127.0.0.1:'+port+'/'
         ],{stdio:['ignore','pipe','pipe']});
-        let stdout='',stderr='';
-        const timer=setTimeout(()=>{proc.kill('SIGKILL');fail(new Error('Chrome startup timed out'));},35000);
+        let stdout='',stderr='',timedOut=false;
+        const timer=setTimeout(()=>{timedOut=true;proc.kill('SIGKILL');},timeoutMs);
         proc.stdout.on('data',chunk=>{stdout+=chunk.toString();});
         proc.stderr.on('data',chunk=>{stderr+=chunk.toString();});
-        proc.once('error',err=>{clearTimeout(timer);fail(err);});
-        proc.once('close',status=>{clearTimeout(timer);ok({status,stdout,stderr});});
+        proc.once('error',error=>{clearTimeout(timer);fail(error);});
+        proc.once('close',status=>{clearTimeout(timer);ok({status,stdout,stderr,timedOut});});
       });
-      break;
+    }finally{
+      rmSync(profile,{recursive:true,force:true});
     }
+  };
+  let result=await runChrome(25000);
+  if(result.timedOut){
+    console.warn('Headless Chrome stalled on first attempt; retrying with a fresh profile.',
+      'stderr:',result.stderr.slice(-1400),'output bytes:',result.stdout.length);
+    result=await runChrome(35000);
   }
-  if(!result)throw new Error('Chrome/Chromium unavailable: cannot run browser startup smoke test');
+  if(result.timedOut)throw new Error(
+    'Headless Chrome timed out twice; last stderr: '+result.stderr.slice(-1800)+
+    '; partial output bytes: '+result.stdout.length);
   const html=result.stdout||'';
   const diagnostics=html.match(/data-boot-error="([^"]+)"/)?.[1]||'';
   const counts={
