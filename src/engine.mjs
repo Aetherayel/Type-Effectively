@@ -1,9 +1,9 @@
 import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
-  HIDDEN_ABILITY_BY_TYPE, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
+  MOVE_SYNERGIES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=typing17-1';
+} from './data.mjs?v=move-coherence-1';
 import { chooseHeldItem } from './held-items.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -198,48 +198,109 @@ function classifyRole(stats, types) {
   };
 }
 
+// Standard and Hidden Abilities come from the same curated pool. Supporting
+// Enneagram fixes affect the ranking, but cannot force an unrelated type.
+const ABILITY_HINTS={
+  1:['Sturdy','Clear Body','Pressure'],
+  2:['Friend Guard','Regenerator','Natural Cure'],
+  3:['Technician','Adaptability','Sheer Force'],
+  4:['Infiltrator','Cursed Body','Serene Grace'],
+  5:['Analytic','Pressure','Magic Guard'],
+  6:['Sturdy','Unaware','Intimidate'],
+  7:['Motor Drive','Speed Boost','Regenerator'],
+  8:['Intimidate','Guts','Sheer Force'],
+  9:['Regenerator','Sturdy','Unaware']
+};
+
+function abilityStatFit(item,stats) {
+  if(item.name==='Analytic' && stats.spe<80)return 15;
+  if(item.name==='Sturdy' && stats.def+stats.spd>=185)return 12;
+  if(item.name==='Technician' && stats.spe>=90)return 12;
+  if(item.name==='Speed Boost' && stats.spe>=100)return 12;
+  if(item.name==='Ice Scales' && stats.spd>=95)return 12;
+  return 0;
+}
+
 function chooseAbility(role,types,stats,secondFix) {
-  const hints={
-    1:['Sturdy','Clear Body','Pressure'],2:['Friend Guard','Regenerator','Natural Cure'],
-    3:['Technician','Adaptability','Sheer Force'],4:['Infiltrator','Cursed Body','Serene Grace'],
-    5:['Analytic','Pressure','Magic Guard'],6:['Sturdy','Unaware','Intimidate'],
-    7:['Motor Drive','Speed Boost','Regenerator'],8:['Intimidate','Guts','Sheer Force'],
-    9:['Regenerator','Sturdy','Unaware']
-  }[secondFix];
+  const hints=ABILITY_HINTS[secondFix];
   const ranked=ABILITIES.map(item=>{
-    let score=(item.roles.includes(role)?60:0)+(item.types.includes(types[0])?26:0)+(item.types.includes(types[1])?18:0);
-    if (hints.includes(item.name)) score+=18;
-    if (item.name==='Analytic' && stats.spe<80) score+=15;
-    if (item.name==='Sturdy' && stats.def+stats.spd>=185) score+=12;
-    if (item.name==='Technician' && stats.spe>=90) score+=12;
-    if (item.name==='Speed Boost' && stats.spe>=100) score+=12;
-    if (item.name==='Ice Scales' && stats.spd>=95) score+=12;
-    return { ...item,score };
+    let score=(item.roles.includes(role)?60:0)+
+      (item.types.includes(types[0])?26:0)+
+      (item.types.includes(types[1])?18:0);
+    if(hints.includes(item.name))score+=18;
+    score+=abilityStatFit(item,stats);
+    return {...item,score};
   }).sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name));
   return ranked[0];
 }
 
-function chooseMoves(types, role, stats, core) {
+export function chooseHiddenAbility({role,secondaryRole=null,types,stats,second,third,standard}) {
+  // The visible type constraint is strict: Fire/Fighting cannot receive
+  // Sand Force, and Water/Ice cannot receive Solid Rock.
+  const viable=ABILITIES.filter(item=>
+    item.name!==standard.name && item.types.some(type=>types.includes(type))
+  );
+  if(!viable.length)throw new Error('No complementary Hidden Ability for visible typing.');
+  return viable.map(item=>{
+    let score=(item.roles.includes(role)?40:0)+
+      (secondaryRole && item.roles.includes(secondaryRole)?12:0)+
+      (item.types.includes(types[0])?38:0)+
+      (types[1] && item.types.includes(types[1])?28:0)+
+      (ABILITY_HINTS[second].includes(item.name)?14:0)+
+      (ABILITY_HINTS[third].includes(item.name)?24:0)+
+      abilityStatFit(item,stats);
+    // Favor a distinct mechanism only after establishing type and role fit.
+    if(item.roles.some(r=>!standard.roles.includes(r)))score+=5;
+    return {...item,score};
+  }).sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name))[0].name;
+}
+
+const MOVE_STAT_FIT={
+  spe:['Agility','Flame Charge','Dragon Dance','Tailwind','Volt Switch','U-turn'],
+  def:['Iron Defense','Reflect','Cotton Guard','Acid Armor','Stockpile','Bulk Up'],
+  spd:['Light Screen','Amnesia','Calm Mind','Cosmic Power','Aurora Veil','Mist'],
+  atk:['Swords Dance','Bulk Up','Drain Punch','Coil','Hone Claws'],
+  spa:['Nasty Plot','Calm Mind','Charge Beam','Trick Room','Quiver Dance']
+};
+
+function scoreMove(name,types,stats,second,third) {
+  const affinity=MOVE_SYNERGIES[name];
+  if(!affinity)throw new Error('Missing move affinity: '+name);
+  let score=(affinity.types.includes(types[0])?60:0)+
+    (types[1] && affinity.types.includes(types[1])?36:0)+
+    (affinity.fixes.includes(second)?21:0)+
+    (affinity.fixes.includes(third)?11:0);
+  for(const [key,moves] of Object.entries(MOVE_STAT_FIT)){
+    if(moves.includes(name) && stats[key]>=100)score+=12;
+  }
+  return score;
+}
+
+function chooseMove(pool,types,stats,second,third,excluded) {
+  const viable=pool.filter(name=>!excluded.has(name));
+  if(!viable.length)throw new Error('Not enough unique thematic moves.');
+  return viable
+    .map(name=>({name,score:scoreMove(name,types,stats,second,third)}))
+    .sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name))[0].name;
+}
+
+function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
   const physical=stats.atk>=stats.spa;
   const style=physical?'physical':'special';
-  const attacks=types.map(type=>{
+  const attacks=attackTypes.map(type=>{
     const move=TYPE_ATTACKS[type].find(entry=>entry[1]===style);
-    return {name:move[0],category:style==='physical'?'Physical STAB':'Special STAB',why:'Your '+type+' side expressed through '+style+' offense.'};
+    return {name:move[0],category:style==='physical'?'Physical STAB':'Special STAB',
+      why:'Your '+type+' side expressed through '+style+' offense.'};
   });
-  const rolePool=ROLE_MOVES[role][style];
   const selected=new Set(attacks.map(m=>m.name));
-  let tactic=rolePool[0];
-  if (role==='Pivot' && !physical && !types.includes('Electric')) tactic='Baton Pass';
-  if (selected.has(tactic)) tactic=rolePool[1];
+  const tactic=chooseMove(ROLE_MOVES[role][style],visibleTypes,stats,second,third,selected);
   selected.add(tactic);
   const growth=GROWTH_MOVES[core];
-  let growthName=growth.name;
-  if (selected.has(growthName)) {
-    growthName=['Protect','Rest','Work Up','Helping Hand','Substitute'].find(m=>!selected.has(m));
-  }
+  const growthName=chooseMove(growth.choices,visibleTypes,stats,second,third,selected);
   return [
     ...attacks,
-    {name:tactic,category:'Role tactic',why:'Supports your '+role.toLowerCase()+' battle role.'},
+    {name:tactic,category:'Role tactic',
+     why:'A '+role.toLowerCase()+' tactic shaped by your typing and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
@@ -300,12 +361,12 @@ export function generateBuild(input) {
     enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
     role,hasBigFive:input.bigFive!=null
   });
-  let hiddenAbility=HIDDEN_ABILITY_BY_TYPE[hiddenType];
-  if (hiddenAbility===ability.name) {
-    hiddenAbility=ABILITIES.find(a=>a.name!==ability.name&&a.types.includes(hiddenType))?.name || 'Pressure';
-  }
+  const hiddenAbility=chooseHiddenAbility({
+    role:role.primary.name,secondaryRole:role.secondary?.name,
+    types,stats:effectiveStats,second,third,standard:ability
+  });
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
-  const moves=chooseMoves(moveTypes,role.primary.name,effectiveStats,core);
+  const moves=chooseMoves(moveTypes,types,role.primary.name,effectiveStats,core,second,third);
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
