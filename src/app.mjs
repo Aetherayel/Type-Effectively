@@ -224,6 +224,45 @@ function renderMatchups(types) {
     '<p class="matchup-caveat">Typing only; abilities, items, weather and other battle effects can change these results.</p>'+
   '</section>';
 }
+function renderFieldReport(build) {
+  const a=build.archetype,r=build.report;
+  const parts=[
+    ['01 / THE MOTIVE','What keeps this creature moving?',r.motives],
+    ['02 / THE OPERATING SYSTEM','How it approaches the world',r.thinking],
+    ['03 / THE TEMPERAMENT','The OCEAN under the hood',r.temperament],
+    ['04 / THE BATTLE STYLE','What it actually does',r.combat],
+    ['05 / THE TRADEOFF','Where the build can get in its own way',r.tradeoff],
+    ['06 / THE SURPRISE','A mildly inconvenient contradiction',r.twist],
+    ['07 / THE PARTY SLOT','What teammates get out of it',r.team],
+    ['08 / THE LEVEL-UP QUEST','A move worth learning',r.growth]
+  ];
+  const breakdown=[
+    ['Motivation',a.breakdown.motivation,'25%'],
+    ['Cognitive style',a.breakdown.cognition,'20%'],
+    ['Temperament',a.breakdown.temperament,'25%'],
+    ['Battle expression',a.breakdown.battle,'30%']
+  ];
+  return '<section class="field-report" aria-label="Trainer field report">'+
+    '<div class="field-report-head"><span class="mini-label">TRAINER FIELD REPORT · NO COUCH REQUIRED</span>'+
+      '<h4>The unofficial field notes</h4>'+
+      '<p>A closer look at what the numbers created. Some tactical insight, a few questionable life lessons, and absolutely no insurance billing.</p></div>'+
+    '<div class="report-intro"><span>SPECIES BEHAVIOR · '+escapeHtml(a.modeLabel.toUpperCase())+'</span>'+
+      '<strong>'+escapeHtml(a.signature)+'</strong><p>'+escapeHtml(r.opener)+'</p></div>'+
+    '<div class="report-grid">'+parts.map(([label,heading,description])=>
+      '<article class="report-tile"><span class="mini-label">'+escapeHtml(label)+'</span>'+
+      '<h5>'+escapeHtml(heading)+'</h5><p>'+escapeHtml(description)+'</p></article>').join('')+'</div>'+
+    '<details class="report-explain"><summary>Why '+escapeHtml(a.title)+'? Show the receipts +</summary>'+
+      '<p>'+escapeHtml(r.reasoning)+'</p>'+
+      '<p class="report-score-explain">Scores are relative compatibility points out of 100, not probabilities, diagnoses, or scientific confidence. The four inputs overlap: battle style already incorporates stats and typing.</p>'+
+      '<div class="report-score-grid">'+breakdown.map(([name,value,weight])=>
+        '<div class="report-score-row"><div><strong>'+escapeHtml(name)+'</strong><span>'+weight+' weight · '+value+'/100 match</span></div>'+
+          '<div class="report-meter" aria-hidden="true"><i style="width:'+Math.max(0,Math.min(100,value))+'%"></i></div></div>').join('')+'</div>'+
+      '<div class="report-neighbors"><strong>Other near-matches</strong><p>'+a.alternatives.map(x=>escapeHtml(x.title)+' ('+x.score+'/100)').join(' · ')+'</p></div>'+
+    '</details>'+
+    '<p class="report-disclaimer">'+escapeHtml(r.caution)+'</p>'+
+  '</section>';
+}
+
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
@@ -240,7 +279,7 @@ function renderCard(build) {
       '<div class="pokemon-type-accent" aria-hidden="true"></div>'+
       '<div class="pokemon-intro">'+
         '<div class="card-topline"><span class="card-kicker">PERSONALITY POKÉMON</span><span class="result-id">#'+build.tritype+' / '+escapeHtml(build.identity)+'</span></div>'+
-        '<h3>'+escapeHtml(build.title)+'</h3>'+
+        '<h3>'+escapeHtml(build.title)+'</h3><p class="archetype-tagline">'+escapeHtml(build.archetype.signature)+'</p>'+
         '<div class="pokemon-identity-row">'+
           '<div class="type-chips">'+build.types.map(typeChip).join('')+'</div>'+
           '<span class="pokemon-subtitle">'+escapeHtml(build.nature)+' · '+escapeHtml(build.role.primary.name+roleSecondary)+' · '+escapeHtml(build.ability.name)+'</span>'+
@@ -279,6 +318,7 @@ function renderCard(build) {
       '</section>'+
       '<div class="result-section-title"><h4>Signature moveset</h4><span>04 MOVES</span></div>'+
       '<div class="moves">'+moveHtml+'</div>'+
+      renderFieldReport(build)+
       renderMatchups(build.types)+
       '<details class="explain"><summary>How was this build calculated? +</summary>'+
         '<p><strong>Typing:</strong> '+escapeHtml(build.types[0])+' comes from Enneagram core '+build.core+
@@ -290,6 +330,7 @@ function renderCard(build) {
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
+        '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. Item candidates are filtered for compatibility with the generated typing and selected moves. They remain thematic and do not modify calculated stats or type matchups.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
