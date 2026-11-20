@@ -5,6 +5,8 @@ import {
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs?v=coherent-moves-1';
 import { chooseHeldItem } from './held-items.mjs';
+import { classifyArchetype } from './archetypes.mjs';
+import { composeFieldReport } from './profile-analysis.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -439,18 +441,26 @@ export function generateBuild(input) {
     role,types,moves,ability,hasBigFive:input.bigFive!=null
   });
   const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
-  const archetype={1:'Reformer',2:'Guardian',3:'Achiever',4:'Visionary',5:'Architect',6:'Sentinel',7:'Catalyst',8:'Vanguard',9:'Anchor'}[core];
-  return {
+  const build={
     mbti, identity, nature,
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
     oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
     tritype, suggestedTritype, suggestedType, wing:selectedWing, typingWing,
-    core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'The '+archetype,
+    core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings
   };
+  // Archetype is a *summary* of the complete build, never an input to typing,
+  // base stats, role, abilities, moves, or held-item selection.
+  build.archetype=classifyArchetype({
+    enneagramScores:enneaScores,mbtiScores,bigFive:ocean,
+    mbti,core,second,third,role
+  });
+  build.title=build.archetype.title;
+  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores});
+  return build;
 }
