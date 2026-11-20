@@ -81,6 +81,12 @@ try{
     'Synthetic sample should render the complete Trainer Field Report');
   assert.equal((html.match(/class="report-tile"/g)||[]).length,8,
     'Report must include all eight analysis sections');
+  assert.ok(html.includes('POKÉDEX ENTRY'),
+    'Generated report should include the new Pokédex field entry');
+  assert.equal((html.match(/class="trainer-step"/g)||[]).length,3,
+    'Trainer guide must contain exactly three actionable training directives');
+  assert.ok(html.includes('TRAINER PLAYBOOK'),
+    'Trainer field guide should present the training steps');
   assert.ok(html.includes('Show the receipts'),
     'Archetype scoring explanation should be visible in results markup');
   assert.equal((html.match(/class="report-score-row"/g)||[]).length,4,
