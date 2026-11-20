@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {renderLiveCornerArtwork,renderLiveTankWatermark} from '../src/card-art.mjs';
-import {DEMOS} from '../src/data.mjs';
+import {DEMOS,TYPE_COLORS} from '../src/data.mjs';
 import {generateBuild} from '../src/engine.mjs';
 
 const app=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
@@ -36,13 +36,29 @@ test('Ice/Steel corners display as two independently positioned, namespaced SVGs
   assert.ok(!html.includes('fill="url(#ice-crystal)"'));
 });
 
-test('supported type in either corner and monotypes both work; others remain undecorated',()=>{
-  assert.equal((renderLiveCornerArtwork(['Steel','Ice']).match(/<svg /g)||[]).length,2);
-  assert.equal((renderLiveCornerArtwork(['Steel']).match(/<svg /g)||[]).length,2);
-  assert.equal((renderLiveCornerArtwork(['Ice']).match(/<svg /g)||[]).length,2);
-  assert.equal((renderLiveCornerArtwork(['Water','Steel']).match(/<svg /g)||[]).length,1);
-  assert.equal(renderLiveCornerArtwork(['Fire','Water']),'');
+test('all 18 types render in either live corner and repeat for monotypes',()=>{
+  const types=Object.keys(TYPE_COLORS);
+  assert.equal(types.length,18);
+  for(const type of types) {
+    const html=renderLiveCornerArtwork([type]);
+    const shape='class="type-art-'+type.toLowerCase()+'"';
+    assert.equal((html.match(/<svg /g)||[]).length,2,type+' must have both SVG corners');
+    assert.equal(html.split(shape).length-1,2,type+' motif must appear twice');
+    if(type!=='Ice'&&type!=='Steel') {
+      assert.ok(html.includes('id="live-primary-elemental-'+type.toLowerCase()+'"'),type+' primary gradient');
+      assert.ok(html.includes('id="live-secondary-elemental-'+type.toLowerCase()+'"'),type+' secondary gradient');
+      assert.ok(html.includes('fill="url(#live-primary-elemental-'+type.toLowerCase()+')"'),type+' primary paint');
+      assert.ok(html.includes('fill="url(#live-secondary-elemental-'+type.toLowerCase()+')"'),type+' secondary paint');
+    }
+  }
+  for(const pair of [['Steel','Ice'],['Water','Steel'],['Fire','Water'],['Grass','Fairy'],['Ghost','Dark']]) {
+    const html=renderLiveCornerArtwork(pair);
+    assert.equal((html.match(/<svg /g)||[]).length,2,pair.join('/')+' must render both SVGs');
+    assert.ok(html.includes('class="type-art-'+pair[0].toLowerCase()+'"'));
+    assert.ok(html.includes('class="type-art-'+pair[1].toLowerCase()+'"'));
+  }
   assert.equal(renderLiveCornerArtwork([]),'');
+  assert.equal(renderLiveCornerArtwork(['Unknown','Other']),'');
 });
 
 test('Tank watermark appears in live stat panel; other roles do not invent emblems',()=>{

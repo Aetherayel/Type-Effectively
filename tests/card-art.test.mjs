@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DEMOS } from '../src/data.mjs';
+import { DEMOS, TYPE_COLORS } from '../src/data.mjs';
+import { EXTRA_ELEMENT_TYPES, additionalTypeDefinitions, renderAdditionalTypeMotif } from '../src/type-motifs.mjs';
 import { generateBuild } from '../src/engine.mjs';
 import { buildCardSvg } from '../src/export-card.mjs';
 import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from '../src/card-art.mjs';
@@ -13,25 +14,45 @@ const example=generateBuild({
   tritypeOverride:'593'
 });
 
-test('Ice and Steel corners compose by position, with monotypes filling both corners',()=>{
-  const combos=[
-    {types:['Ice','Steel'],primary:'ice',secondary:'steel'},
-    {types:['Steel','Ice'],primary:'steel',secondary:'ice'},
-    {types:['Ice'],primary:'ice',secondary:'ice'},
-    {types:['Steel'],primary:'steel',secondary:'steel'},
-    {types:['Grass','Steel'],primary:null,secondary:'steel'},
-    {types:['Ice','Fire'],primary:'ice',secondary:null},
-    {types:['Fire','Water'],primary:null,secondary:null}
-  ];
-  for(const {types,primary,secondary} of combos){
-    const art=renderTypeCornerArtwork(types);
-    const first=art.match(/<g class="type-corner type-corner-primary"[^>]*>([\s\S]*?)<\/g>/)?.[1]??'';
-    const second=art.match(/<g class="type-corner type-corner-secondary"[^>]*>([\s\S]*?)<\/g>/)?.[1]??'';
-    assert.equal(first.includes('type-art-'+primary),primary!==null,'primary '+types);
-    assert.equal(second.includes('type-art-'+secondary),secondary!==null,'secondary '+types);
-    assert.equal(art.includes('class="type-corner type-corner-primary"'),primary!==null);
-    assert.equal(art.includes('class="type-corner type-corner-secondary"'),secondary!==null);
+test('all 18 types render distinct local SVG artwork in both corners and on monotypes',()=>{
+  const types=Object.keys(TYPE_COLORS);
+  assert.equal(types.length,18);
+  assert.equal(EXTRA_ELEMENT_TYPES.length,16);
+  assert.deepEqual(
+    new Set([...EXTRA_ELEMENT_TYPES,'Ice','Steel']),
+    new Set(types)
+  );
+  for(const type of types) {
+    const typeClass='type-art-'+type.toLowerCase();
+    const art=renderTypeCornerArtwork([type,type]);
+    assert.ok(art.includes('class="'+typeClass+'"'),type+' motif missing');
+    assert.equal((art.match(new RegExp('class="'+typeClass+'"','g'))||[]).length,2,type+' should appear twice');
+    assert.ok(art.includes('class="type-corner type-corner-primary"'),type+' primary');
+    assert.ok(art.includes('class="type-corner type-corner-secondary"'),type+' secondary');
+    assert.ok(art.includes('translate(932 1674) rotate(180)'),type+' rotated secondary');
     assert.ok(!art.includes('<image')&&!art.includes('<foreignObject'));
+    if(type!=='Ice'&&type!=='Steel') {
+      assert.ok(renderAdditionalTypeMotif(type).includes('url(#elemental-'+type.toLowerCase()+')'),type+' gradient reference');
+    }
+  }
+  assert.equal(renderAdditionalTypeMotif('Unknown'),'');
+  assert.equal(renderTypeCornerArtwork([]),'');
+});
+
+test('every possible two-type pairing composes both independently positioned motifs',()=>{
+  const types=Object.keys(TYPE_COLORS);
+  const defs=cardArtDefinitions();
+  for(const left of types) {
+    for(const right of types) {
+      const art=renderTypeCornerArtwork([left,right]);
+      const pos=art.indexOf('class="type-corner type-corner-secondary"');
+      assert.ok(pos>0,left+'/'+right+' needs both corners');
+      assert.ok(art.slice(0,pos).includes('class="type-art-'+left.toLowerCase()+'"'),left+'/'+right+' primary motif');
+      assert.ok(art.slice(pos).includes('class="type-art-'+right.toLowerCase()+'"'),left+'/'+right+' secondary motif');
+      for(const type of [left,right]){
+        if(type!=='Ice'&&type!=='Steel') assert.ok(defs.includes('id="elemental-'+type.toLowerCase()+'"'));
+      }
+    }
   }
 });
 
@@ -61,23 +82,34 @@ test('real Ice/Steel Tank card has clipped corner motifs and shield behind text 
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
 });
 
-test('other typing and role exports preserve the original plain surface',()=>{
+test('new elemental motifs export without adding unfinished role emblems',()=>{
   const other=generateBuild({
     mbtiScores:DEMOS.catalyst.mbti,
     enneagramScores:DEMOS.catalyst.enneagram,
     bigFive:DEMOS.catalyst.bigfive,
     typeOverride:'ESFP',tritypeOverride:'714'
   });
-  const plain=buildCardSvg({...other,role:{...other.role,primary:{...other.role.primary,name:'Support'}},types:['Water','Grass']});
-  assert.ok(!plain.includes('class="type-corner type-corner-primary"'));
-  assert.ok(!plain.includes('class="type-corner type-corner-secondary"'));
-  assert.ok(!plain.includes('class="role-watermark role-watermark-tank"'));
+  const svg=buildCardSvg({...other,role:{...other.role,primary:{...other.role.primary,name:'Support'}},types:['Water','Grass']});
+  assert.ok(svg.includes('class="type-corner type-corner-primary"'));
+  assert.ok(svg.includes('class="type-corner type-corner-secondary"'));
+  assert.ok(svg.includes('class="type-art-water"'));
+  assert.ok(svg.includes('class="type-art-grass"'));
+  assert.ok(!svg.includes('class="role-watermark role-watermark-tank"'));
+  assert.match(svg,/535 BST/);
+  assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
 });
 
 test('artwork definitions use local SVG fills and transparent edge falloff',()=>{
   const defs=cardArtDefinitions();
-  for(const id of ['ice-crystal','ice-shadow','steel-face','steel-edge','type-corner-mask'])
+  for(const id of ['ice-crystal','ice-shadow','steel-face','steel-edge','type-corner-mask',...EXTRA_ELEMENT_TYPES.map(t=>'elemental-'+t.toLowerCase())])
     assert.ok(defs.includes('id="'+id+'"'));
   assert.match(defs,/stop-opacity="0"/);
   assert.doesNotMatch(defs,/https?:|url\(https?:/);
+});
+
+test('sixteen additional gradients are defined exactly once and retain a restrained fade',()=>{
+  const defs=additionalTypeDefinitions();
+  assert.equal((defs.match(/<linearGradient /g)||[]).length,16);
+  assert.equal((defs.match(/stop-opacity=".09"/g)||[]).length,16);
+  assert.ok(!defs.includes('http'));
 });
