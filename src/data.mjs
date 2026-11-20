@@ -240,23 +240,23 @@ export const MOVE_PURPOSES={
 // expression only from within these semantically validated lesson pools.
 export const GROWTH_MOVES = {
   1:{choices:['Rest','Helping Hand','Life Dew','Recover','Wish'],
-    reason:'Learning that worth is not earned by constant correction.'},
+    reason:'It learns that worth is not earned by constant correction.'},
   2:{choices:['Recover','Rest','Aqua Ring','Calm Mind','Protect'],
-    reason:'Making room for your own needs, not only those of others.'},
+    reason:'It makes room for its own needs, not only those of others.'},
   3:{choices:['Helping Hand','Baton Pass','Reflect','Tailwind','Wish'],
-    reason:'Making success shared rather than merely visible.'},
+    reason:'It learns to share success rather than merely display it.'},
   4:{choices:['Calm Mind','Rest','Aqua Ring','Recover','Reflect'],
-    reason:'Discovering steadiness beyond the pursuit of uniqueness.'},
+    reason:'It finds steadiness beyond the pursuit of uniqueness.'},
   5:{choices:['Baton Pass','Helping Hand','Tailwind','Light Screen','Reflect'],
-    reason:'Letting understanding become a gift to others.'},
+    reason:'It learns to turn understanding into a gift to others.'},
   6:{choices:['Endure','Work Up','Taunt','Agility','Bulk Up'],
-    reason:'Acting with courage even when certainty is incomplete.'},
+    reason:'It acts with courage even when certainty is incomplete.'},
   7:{choices:['Endure','Rest','Calm Mind','Aqua Ring','Grassy Terrain'],
-    reason:'Learning that freedom also includes the ability to remain.'},
+    reason:'It learns that freedom includes the ability to remain.'},
   8:{choices:['Protect','Helping Hand','Reflect','Safeguard','Life Dew'],
-    reason:'Using strength to protect instead of always control.'},
+    reason:'It uses strength to protect instead of always controlling.'},
   9:{choices:['Work Up','Taunt','Swords Dance','Agility','Bulk Up'],
-    reason:'Choosing to take up space and act with intention.'}
+    reason:'It learns to take initiative and act with intention.'}
 };
 
 // Used by eligibility and tactical fitting: all other moves are Status moves.
