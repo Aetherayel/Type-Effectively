@@ -8,7 +8,7 @@ import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { downloadCardPng } from './export-card.mjs';
 import { itemSpriteUrl } from './item-sprites.mjs';
-import { renderLiveCornerArtwork, renderLiveTankWatermark } from './card-art.mjs';
+import { renderLiveCornerArtwork, renderLiveTankWatermark } from './card-art.mjs?v=art-preview-1';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
