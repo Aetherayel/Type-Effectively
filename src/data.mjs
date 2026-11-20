@@ -191,9 +191,12 @@ export const ROLE_MOVES = {
     physical:['Bulk Up','Drain Punch','Coil','Curse','Dragon Dance','Iron Defense'],
     special:['Calm Mind','Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia']
   },
+  // Pivoting repositions the *user's* team. Baton Pass is treated as a
+  // setup-transfer/growth move; Dragon Tail phazes, Rapid Spin clears hazards,
+  // and Tailwind supports Speed without switching the user.
   Pivot:{
-    physical:['U-turn','Flip Turn','Parting Shot','Baton Pass','Dragon Tail','Rapid Spin'],
-    special:['Volt Switch','Chilly Reception','Parting Shot','Baton Pass','Teleport','Tailwind']
+    physical:['U-turn','Flip Turn','Parting Shot','Shed Tail','Chilly Reception','Teleport'],
+    special:['Volt Switch','Chilly Reception','Parting Shot','Teleport','Shed Tail','U-turn']
   },
   Support:{
     physical:['Helping Hand','Reflect','Synthesis','Wish','Aromatherapy','Safeguard'],
@@ -262,6 +265,7 @@ export const MOVE_SYNERGIES = {
   'U-turn':{types:['Bug','Flying'],fixes:[2,3,7]},
   'Flip Turn':{types:['Water','Ice'],fixes:[2,7,9]},
   'Parting Shot':{types:['Dark','Poison','Ghost'],fixes:[4,5,8]},
+  'Shed Tail':{types:['Grass','Poison','Dragon','Ghost'],fixes:[2,5,6,9]},
   'Baton Pass':{types:['Psychic','Fairy','Bug'],fixes:[2,3,5]},
   'Dragon Tail':{types:['Dragon','Fighting'],fixes:[6,8]},
   'Rapid Spin':{types:['Ground','Rock','Steel'],fixes:[1,6,9]},
