@@ -5,6 +5,10 @@ import { ENNEAGRAM_NAMES, STAT_KEYS, STAT_NAMES } from './data.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 
 const words=n=>ENNEAGRAM_NAMES[n] || 'Unknown';
+// Archetype gifts are complete third-person sentences: “Finds a route.”
+// Convert the first verb only when explicitly adding “This Pokémon” as subject.
+const lowerInitial=text=>text.charAt(0).toLowerCase()+text.slice(1);
+const sentence=text=>/[.!?]$/.test(text.trim())?text.trim():text.trim()+'.';
 const join=xs=>xs.length<2 ? xs.join('') : xs.length===2 ? xs.join(' and ') : xs.slice(0,-1).join(', ')+', and '+xs.at(-1);
 const highs=['openness','conscientiousness','extraversion','agreeableness','neuroticism'];
 const oceanNotes={
@@ -81,7 +85,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
   const weak=defense.weak.map(x=>x.type);
   const safe=[...defense.immune,...defense.strongResist].map(x=>x.type);
   const risk=severe.length ? 'Watch out for '+join(severe)+' attacks: that is a four-times weakness, not a personality flaw.' :
-    weak.length ? 'Watch out for '+join(weak.slice(0,3))+' attacks. Type matchups remain gloriously indifferent to your self-awareness.' :
+    weak.length ? 'Watch out for '+join(weak.slice(0,3))+' attacks. The type chart does not care how confident this Pokémon feels.' :
     'The typing avoids ordinary weaknesses. This is an excellent excuse to check the rest of the battle mechanics.';
   const shield=safe.length?'On the upside, '+join(safe.slice(0,3))+' gives you some particularly favorable defensive matchups.':'';
   const style=build.mbti.startsWith('I')?'more inward-facing':'more outward-facing';
@@ -112,7 +116,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
     else if(bigFive[4]<=30 && severe.length)
       twist='Low reported stress sensitivity, high vulnerability to '+severe[0]+'. Confidence does not cancel the damage chart.';
     else if(bigFive[1]>=75 && role.primary.name==='Pivot')
-      twist='A structured temperament paired with a Pivot role: you may love a plan, but your best move is knowing when to change positions.';
+      twist='A structured temperament paired with a Pivot role: it may prefer a plan, yet its best move is knowing when to change positions.';
     else
       twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 535-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 140.';
   }
@@ -123,10 +127,11 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
   const combat='Deploy this '+types.join(' / ')+' Pokémon as a '+role.primary.name+': it '+ROLE_FLAIR[role.primary.name]+
     '. Its strongest effective stats are '+join(top)+'. '+build.nature+' Nature modifies the base spread after the fixed 535-point budget.'+
     (role.secondary?' '+role.secondary.name+' is a close alternative style; keep a second plan in the bag.':'');
-  const growth='Teach and reinforce '+build.moves[3].name+', the growth move associated with core '+core+'. '+build.moves[3].why+
-    ' The goal is to expand the Pokémon’s options beyond its favorite trick, not to schedule it a therapy appointment.';
+  const growth='Teach and reinforce '+build.moves[3].name+', the growth move associated with core '+core+'. '+
+    sentence(build.moves[3].why)+' The goal is to expand the Pokémon’s options beyond its favorite trick, not to schedule it a therapy appointment.';
   const titleWhy=a.title+' pairs '+a.modeLabel.toLowerCase()+' with a '+a.role+' battle expression. '+
-    a.signature+'. Other close classifications for this specimen were '+join(a.alternatives.slice(0,2).map(item=>item.title))+
+    'The field guide sums up its pattern as “'+a.signature+'”. Other close classifications for this specimen were '+
+    join(a.alternatives.slice(0,2).map(item=>item.title))+
     '. All are game-design similarities, not odds of being that kind of person.';
   const confidence=a.margin<=1?'This was a photo finish: a tiny change could pick another title. That is a feature of close scoring, not an identity crisis.':
     a.margin<=3?'A few archetypes are close. Apparently even fictional creatures contain multitudes.':
@@ -144,17 +149,18 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
     {label:'PACK COVERAGE',title:'Protect the weak matchups',
       text:matchups+' '+ROLE_PARTNERS[role.primary.name]},
     {label:'LEVEL UP',title:'Teach it one move beyond instinct',
-      text:'Give '+growthMove+' deliberate practice. '+build.moves[3].why+
+      text:'Give '+growthMove+' deliberate practice. '+sentence(build.moves[3].why)+
         ' There is no XP bonus for practicing only what is already comfortable.'}
   ];
   return {
     dexEntry,trainerTips,
-    opener:'Field observation: this specimen specializes in '+a.gift+'. '+a.modeJoke,
+    opener:'This Pokémon '+lowerInitial(sentence(a.gift))+' '+sentence(a.modeJoke),
     motives:motivations,
     thinking:cognitive,
     temperament,
     combat,
-    tradeoff:'Keep an eye on this tendency: '+a.shadow+'. '+a.modeSnag+'. '+risk+' '+shield,
+    tradeoff:'Trainer caution: '+sentence(a.shadow)+' A recurring blind spot is '+a.modeSnag+'. '+
+      risk+(shield?' '+shield:''),
     twist,
     team:ROLE_TEAM[role.primary.name],
     growth,
