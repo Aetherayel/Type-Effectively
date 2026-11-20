@@ -24,3 +24,5 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
+      - name: Browser startup — verify all 19 sliders render
+        run: node scripts/smoke-browser.mjs
