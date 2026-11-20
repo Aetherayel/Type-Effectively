@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Your personality has a moveset.",
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/check-syntax.mjs && node --test tests/*.test.mjs",
     "dev": "python3 -m http.server 4173",
     "refresh:pokedex": "node scripts/refresh-pokedex.mjs"
   }
