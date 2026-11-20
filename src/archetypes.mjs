@@ -53,6 +53,11 @@ const modes = [
   }
 ];
 
+// Export a read-only prototype snapshot for reachability regression tests.
+export const ARCHETYPE_PROTOTYPES = Object.freeze(modes.map(({id,ennea,mbti,ocean})=>Object.freeze({
+  id,ennea:Object.freeze([...ennea]),mbti:Object.freeze([...mbti]),ocean:Object.freeze([...ocean])
+})));
+
 // Columns: Sweeper, Wall, Tank, Pivot, Support, Controller.
 // Names, signatures, and pressure points are individually authored, not concatenated labels.
 const identities = {
