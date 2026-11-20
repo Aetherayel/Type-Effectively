@@ -6,9 +6,9 @@ import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engi
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng } from './export-card.mjs';
+import { downloadCardPng } from './export-card.mjs?v=role-emblems-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
-import { renderLiveCornerArtwork, renderLiveTankWatermark } from './card-art.mjs?v=art-preview-1';
+import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -230,7 +230,7 @@ function renderCard(build) {
   const moveHtml=build.moves.map((move,i)=>'<div class="move"><span class="mini-label">'+escapeHtml(move.category)+'</span><strong>'+escapeHtml(move.name)+'</strong><p>'+escapeHtml(move.why)+'</p></div>').join('');
   const roleSecondary=build.role.secondary?' / '+build.role.secondary.name:'';
   const cornerArtwork=renderLiveCornerArtwork(build.types);
-  const tankWatermark=renderLiveTankWatermark(build.role.primary.name);
+  const roleWatermark=renderLiveRoleWatermark(build.role.primary.name);
   $('result-container').innerHTML=
     '<article class="result-card'+(build.monotype?' monotype':'')+(cornerArtwork?' has-type-art':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
     (cornerArtwork?'<div class="result-artwork" aria-hidden="true">'+cornerArtwork+'</div>':'')+
@@ -247,7 +247,7 @@ function renderCard(build) {
     '</div>'+
     '<div class="result-body">'+
       '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
-      '<div class="stat-visual">'+tankWatermark+renderStatRadar(build.baseStats,build.effectiveStats)+
+      '<div class="stat-visual">'+roleWatermark+renderStatRadar(build.baseStats,build.effectiveStats)+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
