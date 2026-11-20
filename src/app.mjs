@@ -1,8 +1,8 @@
 import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs';
+} from './data.mjs?v=typing17-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=typing17-1';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
@@ -281,9 +281,13 @@ function renderCard(build) {
       '<div class="moves">'+moveHtml+'</div>'+
       renderMatchups(build.types)+
       '<details class="explain"><summary>How was this build calculated? +</summary>'+
-        '<p><strong>Typing:</strong> Core '+build.core+' pairs with '+build.second+' ('+escapeHtml(build.types[0])+') and '+build.third+' ('+escapeHtml(build.types[1]||build.types[0])+'). '+
-        (build.monotype?'Both pairings match, so this is a monotype; the hidden '+escapeHtml(build.hiddenType)+' pairing supplies coverage. ':'')+
-        'The '+escapeHtml(build.hiddenType)+' hidden pairing influences the Hidden Ability.</p>'+
+        '<p><strong>Typing:</strong> '+escapeHtml(build.types[0])+' comes from Enneagram core '+build.core+
+        (build.typingWing!=null?' (88% core, 12% wing '+build.typingWing+'). ':' alone; no unverified wing was assumed. ')+
+        (build.monotype?'The supporting motivations converge on the same element, creating a monotype. ':
+          'The '+escapeHtml(build.types[1])+' secondary type blends fix '+build.second+' (65%), fix '+build.third+' (30%) and the core (5%). ')+
+        'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
+        ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
+        'It differs from the visible type(s) and influences the Hidden Ability.</p>'+
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Abilities and moves are then matched to the role and personality themes, not necessarily to any official species learnset.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. The item is for humor and does not modify calculated stats or type matchups.</p>'+

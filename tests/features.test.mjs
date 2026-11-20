@@ -72,7 +72,7 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,new RegExp('width="'+CARD_WIDTH+'" height="'+CARD_HEIGHT+'"'));
   assert.match(svg,/The Architect/);
   assert.match(svg,/>ICE<\/text>/);
-  assert.match(svg,/>STEEL<\/text>/);
+  assert.match(svg,/>WATER<\/text>/);
   assert.match(svg,/Quiet/);
   assert.match(svg,/535 BST/);
   assert.ok(svg.includes(sample.ability.name));

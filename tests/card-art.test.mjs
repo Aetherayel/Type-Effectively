@@ -93,14 +93,14 @@ test('all six roles export their primary emblem under the radar, never a hybrid 
   }
 });
 
-test('real Ice/Steel Tank card has clipped corner motifs and shield behind text and radar',()=>{
-  assert.deepEqual(example.types,['Ice','Steel']);
+test('real 593 Ice/Water Tank card has clipped corner motifs and shield behind text and radar',()=>{
+  assert.deepEqual(example.types,['Ice','Water']);
   assert.equal(example.role.primary.name,'Tank');
   const svg=buildCardSvg(example);
   assert.match(svg,/id="type-corner-mask"/);
   assert.match(svg,/id="rounded-card"/);
   assert.ok(svg.includes('type-art-ice'));
-  assert.ok(svg.includes('type-art-steel'));
+  assert.ok(svg.includes('type-art-water'));
   assert.ok(svg.includes('role-watermark-tank'));
   assert.ok(svg.indexOf('class="type-corner type-corner-primary"')<svg.indexOf('>BASE STATS<'));
   assert.ok(svg.indexOf('class="role-watermark role-watermark-tank"')<svg.indexOf('class="stat-radar"'));

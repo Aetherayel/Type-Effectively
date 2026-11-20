@@ -18,27 +18,27 @@ test('PokéAPI data snapshot provides complete six-stat records and ability list
   }
 });
 
-test('593 Ice / Steel finds Alolan Sandshrew and Sandslash despite form-only typing',()=>{
-  const matches=matchPokemon(build('593'),index.pokemon);
+test('Ice / Steel matching finds Alolan Sandshrew and Sandslash despite form-only typing',()=>{
+  const matches=matchPokemon({...build('593'),types:['Ice','Steel']},index.pokemon);
   assert.equal(matches.typeKind,'exact');
   const names=matches.typeTwins.map(p=>p.name);
   assert.ok(names.includes('Sandshrew (Alolan)'));
   assert.ok(names.includes('Sandslash (Alolan)'));
 });
 
-test('714 Electric / Ghost finds Rotom',()=>{
-  const matches=matchPokemon(build('714'),index.pokemon);
+test('Electric / Ghost typing matching finds Rotom',()=>{
+  const matches=matchPokemon({...build('714'),types:['Electric','Ghost']},index.pokemon);
   assert.equal(matches.typeKind,'exact');
   assert.ok(matches.typeTwins.some(p=>p.name==='Rotom'));
 });
 
 test('matching ability includes Pokémon with the ability in any slot',()=>{
-  const a=matchPokemon(build('593'),index.pokemon);
+  const a=matchPokemon({...build('593'),ability:{name:'Analytic'},hiddenAbility:'Adaptability'},index.pokemon);
   assert.ok(a.standardAbility.length);
   assert.ok(a.hiddenAbility.length);
   assert.ok(a.standardAbility.every(p=>p.abilities.some(x=>x.name==='analytic')));
   assert.ok(a.hiddenAbility.every(p=>p.abilities.some(x=>x.name==='adaptability')));
-  const b=matchPokemon(build('714'),index.pokemon);
+  const b=matchPokemon({...build('714'),hiddenAbility:'Ice Scales'},index.pokemon);
   assert.ok(b.hiddenAbility.some(p=>p.name==='Frosmoth'));
 });
 

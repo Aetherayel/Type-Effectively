@@ -9,15 +9,60 @@ export const TYPE_COLORS = {
   Steel: '#60A1B8', Fairy: '#EF70EF'
 };
 
-export const PAIR_TYPES = {
-  '1-2':'Fairy','1-3':'Steel','1-4':'Ice','1-5':'Psychic','1-6':'Rock','1-7':'Electric','1-8':'Fighting','1-9':'Ground',
-  '2-3':'Fire','2-4':'Water','2-5':'Bug','2-6':'Fairy','2-7':'Flying','2-8':'Dragon','2-9':'Grass',
-  '3-4':'Fire','3-5':'Steel','3-6':'Normal','3-7':'Electric','3-8':'Dragon','3-9':'Normal',
-  '4-5':'Ghost','4-6':'Dark','4-7':'Ghost','4-8':'Poison','4-9':'Water',
-  '5-6':'Psychic','5-7':'Flying','5-8':'Poison','5-9':'Ice',
-  '6-7':'Bug','6-8':'Fighting','6-9':'Rock',
-  '7-8':'Dark','7-9':'Grass','8-9':'Ground'
-};
+// The seventeen generated elemental identities represent ways motivations
+// engage the world. Scores are game-design affinities (0–100), not measured
+// probabilities or psychometric assessments. Normal remains a real Pokémon
+// type for defenses and comparisons, but is not a generated identity.
+export const GENERATED_TYPES = Object.freeze(
+  Object.keys(TYPE_COLORS).filter(type=>type!=='Normal')
+);
+
+export const TYPE_AFFINITY = Object.freeze({
+  // 1 — Reformer: principle, correction, integrity
+  1: {Fire:72,Water:39,Electric:42,Grass:78,Ice:82,Fighting:86,
+      Poison:42,Ground:88,Flying:30,Psychic:63,Bug:68,Rock:96,
+      Ghost:39,Dragon:72,Dark:33,Steel:100,Fairy:48},
+
+  // 2 — Helper: connection, nurture, belonging
+  2: {Fire:62,Water:93,Electric:82,Grass:92,Ice:30,Fighting:40,
+      Poison:27,Ground:63,Flying:57,Psychic:60,Bug:89,Rock:40,
+      Ghost:52,Dragon:29,Dark:22,Steel:55,Fairy:100},
+
+  // 3 — Achiever: effectiveness, ambition, recognition
+  3: {Fire:98,Water:58,Electric:100,Grass:53,Ice:46,Fighting:92,
+      Poison:54,Ground:52,Flying:74,Psychic:52,Bug:58,Rock:45,
+      Ghost:32,Dragon:87,Dark:45,Steel:83,Fairy:41},
+
+  // 4 — Individualist: identity, depth, significance
+  4: {Fire:80,Water:81,Electric:40,Grass:48,Ice:57,Fighting:42,
+      Poison:94,Ground:30,Flying:67,Psychic:96,Bug:46,Rock:37,
+      Ghost:100,Dragon:64,Dark:97,Steel:41,Fairy:88},
+
+  // 5 — Investigator: understanding, autonomy, observation
+  5: {Fire:30,Water:42,Electric:67,Grass:38,Ice:100,Fighting:28,
+      Poison:70,Ground:75,Flying:70,Psychic:98,Bug:37,Rock:74,
+      Ghost:65,Dragon:55,Dark:95,Steel:82,Fairy:43},
+
+  // 6 — Loyalist: security, vigilance, commitment
+  6: {Fire:40,Water:72,Electric:53,Grass:72,Ice:90,Fighting:70,
+      Poison:90,Ground:100,Flying:45,Psychic:66,Bug:98,Rock:96,
+      Ghost:49,Dragon:46,Dark:72,Steel:83,Fairy:68},
+
+  // 7 — Enthusiast: possibility, freedom, stimulation
+  7: {Fire:94,Water:89,Electric:98,Grass:68,Ice:21,Fighting:53,
+      Poison:52,Ground:42,Flying:100,Psychic:73,Bug:75,Rock:33,
+      Ghost:34,Dragon:82,Dark:61,Steel:37,Fairy:86},
+
+  // 8 — Challenger: agency, strength, resistance
+  8: {Fire:90,Water:78,Electric:78,Grass:52,Ice:44,Fighting:99,
+      Poison:98,Ground:85,Flying:45,Psychic:39,Bug:32,Rock:83,
+      Ghost:35,Dragon:100,Dark:89,Steel:76,Fairy:31},
+
+  // 9 — Peacemaker: harmony, steadiness, accommodation
+  9: {Fire:28,Water:98,Electric:32,Grass:100,Ice:67,Fighting:53,
+      Poison:35,Ground:91,Flying:65,Psychic:57,Bug:70,Rock:92,
+      Ghost:55,Dragon:39,Dark:32,Steel:48,Fairy:83}
+});
 
 export const CENTERS = { gut:[8,9,1], heart:[2,3,4], head:[5,6,7] };
 export const ENNEAGRAM_NAMES = {

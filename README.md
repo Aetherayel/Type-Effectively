@@ -1,5 +1,7 @@
 # Type Effectively
 
+**Version 1.0.0 — First complete personality Pokémon generator**
+
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
 Ever wondered what kind of Pokémon your personality would make you?
@@ -30,7 +32,7 @@ The **Randomize ↻** button beside the results heading instantly creates a **sy
 
 The result clearly reads **RANDOM SAMPLE · SYNTHETIC SCORES**, not a personal assessment. A manual Generate action returns to normal results; Reset clears the sample. Share links preserve the sample label, and randomizing clears any old share-link hash. All work remains local in the browser.
 
-**Current typing-map limitation:** the Enneagram pair mappings for **Fire** (2–3 and 3–4) and **Ground** (1–9 and 8–9) use two types from the *same* Enneagram center. Because a valid tritype selects only one digit per center, those typings cannot arise from an authentic generated tritype. Randomization deliberately does **not** override computed typing or alter that mapping; the corresponding artwork is already implemented for when the source mapping is reviewed.
+**v1.0 note:** Randomized profiles now use the 17-type motivational affinity model. All 17 generated types are reachable across valid tritypes and wings; Normal remains part of official Pokémon mechanics but is not generated as a personality type.
 
 ### Manual overrides
 
@@ -42,30 +44,57 @@ A tritype must have exactly one number from each center:
 - Heart: 2, 3, 4
 - Head: 5, 6, 7
 
-There are 27 distinct center combinations and **162 ordered tritypes**. Pairings are symmetric (5+9 equals 9+5), but the core and fix ordering changes typing order and thematic choices. Two pairings can map to the same elemental type; those builds become valid **monotypes** rather than invalid duplicate typings.
+There are **27 distinct center combinations** and **162 ordered tritypes**. Each of the nine Enneagram motivations has an explicit affinity score for every one of the **17 generated Pokémon types**; Normal is excluded only from personality typing. Ordered core, second and third fixes—and an evidenced wing when available—determine the elemental result. Two independently scored roles can select the same type, creating a genuine **monotype**.
 
-## Generation model (v0.1)
+
+### Meanings of the 17 generated elemental identities
+
+| Type | Motivation-level meaning |
+| --- | --- |
+| Fire | Intensity, passion and decisive transformation |
+| Water | Adaptation, responsiveness and finding a way through |
+| Electric | Momentum, activation and rapid connection |
+| Grass | Cultivation, patience and restoration |
+| Ice | Restraint, preservation and protective distance |
+| Fighting | Confrontation, discipline and overcoming resistance |
+| Poison | Counterpressure, deterrence and strategic boundaries |
+| Ground | Rootedness, pragmatism and dependability |
+| Flying | Freedom, exploration and expanded perspective |
+| Psychic | Insight, abstraction and foresight |
+| Bug | Interdependence, persistence and specialized cooperation |
+| Rock | Fortitude, steadfastness and resistance to change |
+| Ghost | Interior depth, introspection and mystery |
+| Dragon | Sovereignty, agency and commanding presence |
+| Dark | Cunning, privacy and indirect strategic advantage |
+| Steel | Structure, precision and principled consistency |
+| Fairy | Enchantment, imaginative connection and encouragement |
+
+All affinity values are **authored game-design interpretations**, not measured likelihoods or psychological diagnoses. The nine Enneagram rows each contain a score for every one of these 17 meanings. See `TYPE_AFFINITY` in `src/data.mjs`. The complete 162 ordered-tritype × 2 valid-wing space is tested for reachability; Pokémon mechanics still operate on all 18 official types.
+
+## Generation model (v1.0)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
-1. **Elemental typing:** Lookup core + second fix and core + third fix in the 36-pair matrix. The fix-to-fix pair determines the Hidden Ability's thematic type.
+1. **Elemental typing:** Score each of the 17 elements against all nine Enneagram motivations using `TYPE_AFFINITY`. **Primary:** core 88% + wing 12% (or core 100% if wing is unknown). **Secondary:** second fix 65% + third fix 30% + core 5%. **Hidden affinity:** third fix 60% + second fix 30% + wing 10% (or 70% third / 30% second if wing is unknown); exclude both visible types. All three selections are deterministic. Monotypes arise only when primary and secondary independently coincide.
 2. **Nature:** Map the four-letter personality type onto one of 16 existing Pokémon Natures.
 3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% 16Personalities dimension percentages**.
 4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.1, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
 6. **Battle role:** Match the effective stat distribution against six reference profiles. Role suitability is **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**. Near-ties are shown as hybrid roles.
-7. **Abilities and moves:** Rank standard Ability candidates by role, typing, stat synergy, and second fix. Choose a separate Hidden Ability from the hidden pairing, and four moves: primary STAB, secondary STAB/coverage, role tactic, and a growth-themed move.
+7. **Abilities and moves:** Rank standard Ability candidates by role, typing, stat synergy, and second fix. Choose a separate Hidden Ability from the hidden affinity, and four moves: primary STAB, secondary STAB/coverage, role tactic, and a growth-themed move.
 8. **Held item:** Rank **72 real Pokémon held items** across **nine behavioral families** using Enneagram core/fixes, the Big Five profile, and battle role. Use a small deterministic full-input tie-breaker to diversify close fits, and explain the choice using actual input patterns. Items are thematic and **do not modify the calculated stats, moves, or matchups**.
 
 The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label.
 
 ### Examples
 
-| Profile | Typing | Nature | Hidden pairing |
+| Profile | Typing | Nature | Hidden affinity |
 | --- | --- | --- | --- |
-| INTJ-A · 593 | Ice / Steel | Quiet | Normal |
-| ESFP-T · 714 | Electric / Ghost | Jolly | Ice |
-| Any type · 351 | Steel (mono) | Depends on type | Psychic |
+| INTJ-A · 593 (5w6) | Ice / Water | Quiet | Fighting |
+| ESFP · 714 (7w8) | Electric / Steel | Jolly | Psychic |
+| INTJ · 514 (5w4) | Psychic / Steel | Quiet | Ghost |
+
+These are examples of actual supported profiles. If the visitor supplies only a tritype with no wing or measured Enneagram scores, typing uses the core alone rather than inferring a wing from proxy data.
 
 ## Pokémon Relatives: real Pokémon comparisons
 
@@ -83,9 +112,9 @@ A static **Understanding your stats** section appears below the input/results wo
 
 The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / 16Personalities** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
-## Elemental card artwork: all 18 types
+## Elemental card artwork: 17 generated identities, 18 supported Pokémon types
 
-The **visible results card and downloaded PNG** use one shared, browser-generated SVG motif system covering **all 18 Pokémon types**. Each element has a distinct visual identity: Normal (engraved geometry), Fire (flame tongues/embers), Water (rolling waves), Electric (lightning), Grass (vines/leaves), Ice (crystalline shards), Fighting (impact fractures), Poison (dripping toxins), Ground (layered earth), Flying (wind/feathers), Psychic (concentric rings/prisms), Bug (chitin/wing cells), Rock (stone slabs), Ghost (spectral wisps), Dragon (scales/claws), Dark (shadow tendrils), Steel (riveted beams), and Fairy (ribbons/starlight).
+The **visible results card and downloaded PNG** use one shared, browser-generated SVG motif system covering **all 18 official Pokémon types**. **Normal remains supported for official defensive matchups, real-Pokémon comparisons and existing artwork, but is not generated as a motivational typing**. Each element has a distinct visual identity: Normal (engraved geometry), Fire (flame tongues/embers), Water (rolling waves), Electric (lightning), Grass (vines/leaves), Ice (crystalline shards), Fighting (impact fractures), Poison (dripping toxins), Ground (layered earth), Flying (wind/feathers), Psychic (concentric rings/prisms), Bug (chitin/wing cells), Rock (stone slabs), Ghost (spectral wisps), Dragon (scales/claws), Dark (shadow tendrils), Steel (riveted beams), and Fairy (ribbons/starlight).
 
 The **primary type enters from the top-left**, while the **secondary type enters from the bottom-right**. Monotypes use their motif in both corners. Layers fade toward the card content; live SVG gradients are namespaced per corner to prevent conflicts. The PNG exports through the existing SVG-to-Canvas renderer. **No pre-rendered pairings, server, or third-party artwork fetch is needed.**
 
@@ -93,7 +122,7 @@ All **six battle roles** now receive a faint, monochrome watermark behind the ra
 
 [Review the six generated role emblems](previews/battle-role-emblems.svg). This gallery brightens the marks for visual inspection; the cards render them at much lower opacity.
 
-Actual exporter samples: [Ice/Steel Tank](previews/ice-steel-tank.svg), [Grass/Flying Pivot](previews/grass-flying-card.svg), and [Water/Ghost Pivot](previews/water-ghost-card.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG samples use their fallback icons.
+Older visual-composition samples from the pair-mapping version: [Ice/Steel Tank](previews/ice-steel-tank.svg), [Grass/Flying Pivot](previews/grass-flying-card.svg), and [Water/Ghost Pivot](previews/water-ghost-card.svg). These demonstrate the SVG artwork renderer, **not** the 17-type algorithm's current outputs. In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG samples use their fallback icons.
 
 ## Downloadable card and defensive matchups
 

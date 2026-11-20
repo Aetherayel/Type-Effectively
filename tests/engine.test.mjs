@@ -3,43 +3,85 @@ import assert from 'node:assert/strict';
 import {
   applyNature, deriveMbti, deriveTritype, generateBuild,
   inferredEnneagramScores, isValidTritype, normalizeStats,
-  pairType, rankingToScores
+  deriveTyping, rankingToScores
 } from '../src/engine.mjs';
-import { DEMOS, PAIR_TYPES, TYPE_COLORS } from '../src/data.mjs';
+import { DEMOS, GENERATED_TYPES, TYPE_AFFINITY, TYPE_COLORS } from '../src/data.mjs';
 
 const sum = stats => Object.values(stats).reduce((a,b)=>a+b,0);
 const baseInput = {
   mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,bigFive:DEMOS.architect.bigfive
 };
 
-test('36 unique pairings cover the 18 standard types exactly twice',()=>{
-  assert.equal(Object.keys(PAIR_TYPES).length,36);
-  for(const type of Object.keys(TYPE_COLORS)){
-    assert.equal(Object.values(PAIR_TYPES).filter(x=>x===type).length,2,type);
+test('all 9 Enneagram motivations have explicit scores for exactly 17 generated elements',()=>{
+  assert.equal(GENERATED_TYPES.length,17);
+  assert.ok(!GENERATED_TYPES.includes('Normal'));
+  assert.equal(Object.keys(TYPE_COLORS).length,18,'Pokémon mechanics still support Normal');
+  const expected=[...GENERATED_TYPES].sort();
+  for(let core=1;core<=9;core++){
+    const row=TYPE_AFFINITY[core];
+    assert.deepEqual(Object.keys(row).sort(),expected,'incomplete affinities for '+core);
+    for(const [type,value] of Object.entries(row))
+      assert.ok(Number.isInteger(value)&&value>=0&&value<=100,core+' / '+type);
   }
-  assert.equal(pairType(5,9),'Ice');
-  assert.equal(pairType(9,5),'Ice');
-  assert.equal(pairType(5,3),'Steel');
+});
+
+test('typing separates core+evidenced wing from supporting and hidden motivations',()=>{
+  const noWing=deriveTyping({core:5,second:9,third:3});
+  assert.deepEqual(noWing.types,['Ice','Water']);
+  assert.equal(noWing.hiddenType,'Fighting');
+  assert.deepEqual(deriveTyping({core:5,second:1,third:4,wing:4}).types,['Psychic','Steel']);
+  assert.deepEqual(deriveTyping({core:5,second:1,third:4,wing:6}).types,['Ice','Steel']);
+  assert.throws(()=>deriveTyping({core:1,second:2,third:3}),/one Enneagram fix from each center/);
+  assert.throws(()=>deriveTyping({core:5,second:9,third:3,wing:8}),/adjacent/);
+});
+
+test('every one of 324 valid tritype/wing configurations reaches valid 17-type mechanics',()=>{
+  const perms=xs=>xs.length===1?[xs]:xs.flatMap((n,i)=>perms(xs.filter((_,j)=>i!==j)).map(p=>[n,...p]));
+  const visible=new Set(),hidden=new Set(),typings=new Set();
+  let count=0,monotypes=0;
+  for(const gut of [8,9,1])for(const heart of [2,3,4])for(const head of [5,6,7]){
+    for(const [core,second,third] of perms([gut,heart,head])){
+      for(const wing of [core===1?9:core-1,core===9?1:core+1]){
+        const t=deriveTyping({core,second,third,wing});
+        assert.ok(t.types.length===1||t.types.length===2);
+        for(const type of t.types) {
+          assert.ok(GENERATED_TYPES.includes(type));
+          visible.add(type);
+        }
+        assert.ok(GENERATED_TYPES.includes(t.hiddenType));
+        assert.ok(!t.types.includes(t.hiddenType),'hidden affinity must differ from visible types');
+        hidden.add(t.hiddenType);
+        typings.add(t.types.join('/'));
+        if(t.types.length===1)monotypes++;
+        count++;
+      }
+    }
+  }
+  assert.equal(count,324);
+  assert.deepEqual(visible,new Set(GENERATED_TYPES),'every non-Normal type must be reachable');
+  assert.deepEqual(hidden,new Set(GENERATED_TYPES),'every type must be possible as hidden affinity');
+  assert.ok(typings.size>=100,'typing should remain varied');
+  assert.ok(monotypes>0,'independent scoring must allow genuine monotypes');
 });
 
 test('score-derived and manually overridden identities',()=>{
   const b=generateBuild(baseInput);
   assert.equal(b.tritype,'593');
   assert.equal(b.identity,'INTJ-A');
-  assert.deepEqual(b.types,['Ice','Steel']);
-  assert.equal(b.hiddenType,'Normal');
+  assert.deepEqual(b.types,['Ice','Water']);
+  assert.equal(b.hiddenType,'Fighting');
   assert.equal(b.nature,'Quiet');
 
   const reversed=generateBuild({...baseInput,tritypeOverride:'539'});
-  assert.deepEqual(reversed.types,['Steel','Ice']);
-  assert.equal(reversed.hiddenType,'Normal');
+  assert.deepEqual(reversed.types,['Ice','Electric']);
+  assert.equal(reversed.hiddenType,'Water');
 
   const wife=generateBuild({...baseInput,...{
     mbtiScores:DEMOS.catalyst.mbti,enneagramScores:DEMOS.catalyst.enneagram,
     bigFive:DEMOS.catalyst.bigfive,typeOverride:'ESFP',tritypeOverride:'714'
   }});
-  assert.deepEqual(wife.types,['Electric','Ghost']);
-  assert.equal(wife.hiddenType,'Ice');
+  assert.deepEqual(wife.types,['Electric','Steel']);
+  assert.equal(wife.hiddenType,'Psychic');
   assert.equal(wife.nature,'Jolly');
 });
 
@@ -84,12 +126,15 @@ test('all 162 ordered tritypes are valid builds, with exactly four distinct move
   assert.equal(count,162);
 });
 
-test('monotype pairings collapse duplicate types while preserving hidden coverage',()=>{
-  const build=generateBuild({...baseInput,tritypeOverride:'351'});
-  assert.deepEqual(build.types,['Steel']);
+test('monotype arises only when primary and secondary independently converge',()=>{
+  const build=generateBuild({
+    ...baseInput,tritypeOverride:'836',wingOverride:9
+  });
   assert.equal(build.monotype,true);
-  assert.equal(build.hiddenType,'Psychic');
+  assert.equal(build.types.length,1);
+  assert.ok(!build.types.includes(build.hiddenType));
   assert.equal(build.moves.length,4);
+  assert.ok(build.moves[1].category.includes('hidden affinity'));
 });
 
 test('stat normalization holds under severe extremes',()=>{
@@ -123,9 +168,14 @@ test('seeded randomized builds preserve total, limits, determinism, and move uni
   assert.equal(roles.size,6,'every battle role should be attainable');
 });
 
-test('type-only inputs are supported but marked as estimated',()=>{
+test('type-only inputs do not fabricate a wing for elemental identity',()=>{
   const b=generateBuild({typeOverride:'INTJ',tritypeOverride:'593'});
   assert.equal(b.identity,'INTJ');
   assert.equal(b.warnings.length,3);
+  assert.equal(b.typingWing,null);
+  assert.deepEqual(b.types,['Ice','Water']);
   assert.equal(sum(b.baseStats),535);
+  const override=generateBuild({typeOverride:'INTJ',tritypeOverride:'514',wingOverride:4});
+  assert.equal(override.typingWing,4);
+  assert.deepEqual(override.types,['Psychic','Steel']);
 });
