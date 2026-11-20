@@ -33,6 +33,26 @@ test('every selectable role or growth move has defined elemental and fix meaning
   }
 });
 
+test('Pivot tactics switch our own Pokémon; setup passing and other utility stay distinct',()=>{
+  // Baton Pass can switch in the game, but this app reserves Pivot for
+  // tempo/repositioning rather than passing setup boosts to a teammate.
+  const selfSwitches=new Set([
+    'U-turn','Flip Turn','Volt Switch','Parting Shot',
+    'Chilly Reception','Teleport','Shed Tail'
+  ]);
+  for(const [style,moves] of Object.entries(ROLE_MOVES.Pivot)){
+    assert.equal(moves.length,6,style);
+    assert.equal(new Set(moves).size,moves.length,style);
+    assert.ok(moves.every(move=>selfSwitches.has(move)),
+      'non-pivot move listed for '+style+': '+moves.filter(move=>!selfSwitches.has(move)));
+    assert.ok(!moves.includes('Baton Pass'),style);
+  }
+  assert.ok(GROWTH_MOVES[5].choices.includes('Baton Pass'),
+    'keep Baton Pass where its sharing/setup meaning belongs');
+  assert.ok(MOVE_SYNERGIES['Shed Tail'],
+    'every new self-switch move needs affinity weights');
+});
+
 test('Fire/Fighting and Water/Ice Hidden Abilities are compatible with their visible typing',()=>{
   const stats={hp:95,atk:115,def:100,spa:70,spd:90,spe:65};
   for(const [types,role,second,third,standard,forbidden] of [
