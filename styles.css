@@ -118,6 +118,30 @@ a{color:inherit}
 @keyframes blink{50%{opacity:0}}
 .result-disclaimer{font-size:11px;line-height:1.7;color:#748985;margin:14px 4px 0}
 
+/* Match the visible result card to the PNG's shared Ice / Steel / Tank art.
+   Separate corners preserve proportions on narrow phones and tall result cards. */
+.result-card.has-type-art{position:relative;isolation:isolate;overflow:hidden;background:#111e25}
+.result-card.has-type-art>.pokemon-header,.result-card.has-type-art>.result-body{
+  position:relative;z-index:1
+}
+.result-card.has-type-art>.pokemon-header{background:transparent}
+.result-artwork{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.result-art-corner{position:absolute;display:block;width:min(69%,330px);height:auto;aspect-ratio:1;opacity:.83}
+.result-art-primary{top:-18px;left:-22px}
+.result-art-secondary{bottom:-18px;right:-22px;transform:rotate(180deg)}
+.stat-visual{position:relative;isolation:isolate}
+.stat-role-watermark{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:82%;max-width:340px;height:90%;z-index:0;pointer-events:none
+}
+.stat-role-watermark .role-watermark-tank{opacity:.13}
+.stat-visual>.stat-radar{position:relative;z-index:1}
+@media(max-width:560px){
+  .result-art-corner{width:min(73%,280px)}
+  .result-art-primary{top:-12px;left:-18px}
+  .result-art-secondary{bottom:-12px;right:-18px}
+}
+
 /* Compact Pokédex identity: the type colors are an accent, not a hero panel. */
 .pokemon-header{background:#141f24;border-bottom:1px solid #334448}
 .pokemon-type-accent{height:7px;background:linear-gradient(135deg,var(--pcolor),var(--scolor))}
