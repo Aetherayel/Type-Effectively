@@ -118,7 +118,7 @@ a{color:inherit}
 @keyframes blink{50%{opacity:0}}
 .result-disclaimer{font-size:11px;line-height:1.7;color:#748985;margin:14px 4px 0}
 
-/* Match the visible result card to the PNG's shared Ice / Steel / Tank art.
+/* Match the live result card to the PNG's shared elemental and battle role art.
    Separate corners preserve proportions on narrow phones and tall result cards. */
 .result-card.has-type-art{position:relative;isolation:isolate;overflow:hidden;background:#111e25}
 .result-card.has-type-art>.pokemon-header,.result-card.has-type-art>.result-body{
@@ -134,7 +134,7 @@ a{color:inherit}
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:82%;max-width:340px;height:90%;z-index:0;pointer-events:none
 }
-.stat-role-watermark .role-watermark-tank{opacity:.13}
+.stat-role-watermark .role-watermark{opacity:.13}
 .stat-visual>.stat-radar{position:relative;z-index:1}
 @media(max-width:560px){
   .result-art-corner{width:min(73%,280px)}
