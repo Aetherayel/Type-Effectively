@@ -77,9 +77,9 @@ The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Ennea
 
 ## Prototype card artwork: Ice / Steel / Tank
 
-The PNG renderer now composes a **first-pass elemental card illustration** from local, pure SVG shapes. **Ice** adds angular translucent crystal shards; **Steel** adds riveted plates and beams. The primary type enters from the **top-left**, the secondary type from the **bottom-right**, and monotypes use the same element in both corners. These two motifs work in either corner. Types other than Ice and Steel retain the existing plain background for now.
+Both the **visible results card and the downloadable PNG** now compose a first-pass elemental illustration from the same local SVG shapes. Previously, only the export implemented these elements, so the artwork was absent from the on-site result. **Ice** adds angular translucent crystal shards; **Steel** adds riveted plates and beams. The primary type enters from the **top-left**, the secondary type from the **bottom-right**, and monotypes use the same element in both corners. These two motifs work in either corner. Types other than Ice and Steel retain the existing plain background for now.
 
-A **Tank** battle role adds a faint fortress-shield watermark beneath the stat radar and other content. Other battle roles remain unillustrated until their icons are designed. Every artwork layer is clipped to the rounded card and fades toward the central text. The generated PNG continues to use the existing local SVG-to-Canvas export and the optional held-item icon. **No 324-combination image library or additional image request is needed for the artwork.**
+A **Tank** battle role adds a faint fortress-shield watermark behind the stat radar on the site and in the exported card. Other battle roles remain unillustrated until their icons are designed. Every artwork layer is clipped to the rounded card and fades toward the central text. The generated PNG continues to use the existing local SVG-to-Canvas export and the optional held-item icon. **No 324-combination image library or additional image request is needed for the artwork.**
 
 [View the Ice/Steel Tank SVG render used by the exporter](previews/ice-steel-tank.svg). This static visual sample includes the default icon placeholder; the actual browser-exported PNG overlays the selected held item's sprite afterward.
 
