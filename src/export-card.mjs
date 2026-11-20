@@ -104,7 +104,6 @@ export function buildCardSvg(build) {
     text{font-family:Arial,Helvetica,sans-serif}
     .overline{font-size:18px;font-weight:700;letter-spacing:2px;fill:#a6beb8}
     .title{font-size:58px;font-weight:800;letter-spacing:-2px;fill:#f3fbf7}
-    .subline{font-size:23px;font-weight:500;fill:#c6d9d3}
     .type-text{font-size:20px;font-weight:800;fill:#102126}
     .stat-radar-ring{fill:none;stroke:#accbcb;stroke-opacity:.24;stroke-width:1}
     .stat-radar-outer{stroke-opacity:.44}
@@ -133,7 +132,6 @@ export function buildCardSvg(build) {
   <rect x="596" y="244" width="288" height="48" rx="9" fill="#20333a" stroke="#65877e" stroke-opacity=".7"/>
   <text x="611" y="261" font-size="11" font-weight="700" letter-spacing="1" fill="#9eb9b0">BATTLE ROLE</text>
   <text x="611" y="283" font-size="19" font-weight="700" fill="#edf9f2">${esc(role)}</text>
-  <text x="76" y="333" class="subline">${esc(build.nature)} Nature · ${esc(build.ability.name)} Ability</text>
   <line x1="76" x2="884" y1="364" y2="364" stroke="#4b6964"/>
   <text x="76" y="399" class="overline">BASE STATS</text>
   <text x="882" y="399" text-anchor="end" class="overline">535 BST</text>
