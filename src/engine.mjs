@@ -3,7 +3,7 @@ import {
   MOVE_SYNERGIES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=move-coherence-1';
+} from './data.mjs?v=pivot-tactics-1';
 import { chooseHeldItem } from './held-items.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
