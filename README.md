@@ -83,7 +83,7 @@ The **primary type enters from the top-left**, while the **secondary type enters
 
 The **Tank battle role** continues to use a faint fortress-shield watermark beneath the radar. Other battle-role emblems remain intentionally unimplemented until designed.
 
-[View the original Ice/Steel Tank exporter sample](previews/ice-steel-tank.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG sample uses its fallback icon.
+Actual exporter samples: [Ice/Steel Tank](previews/ice-steel-tank.svg), [Grass/Flying Pivot](previews/grass-flying-card.svg), and [Water/Ghost Pivot](previews/water-ghost-card.svg). In the browser PNG, the selected held-item sprite is drawn afterward; the static SVG samples use their fallback icons.
 
 ## Downloadable card and defensive matchups
 
