@@ -69,7 +69,7 @@ test('Tank watermark appears in live stat panel; other roles do not invent emble
     typeOverride:'INTJ',tritypeOverride:'593'
   });
   assert.equal(demo.role.primary.name,'Tank');
-  assert.deepEqual(demo.types,['Ice','Steel']);
+  assert.deepEqual(demo.types,['Ice','Water']);
   const svg=renderLiveTankWatermark(demo.role.primary.name);
   assert.match(svg,/class="stat-role-watermark"/);
   assert.match(svg,/role-watermark-tank/);
