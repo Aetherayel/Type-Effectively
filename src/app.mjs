@@ -8,6 +8,7 @@ import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { downloadCardPng } from './export-card.mjs';
 import { itemSpriteUrl } from './item-sprites.mjs';
+import { renderLiveCornerArtwork, renderLiveTankWatermark } from './card-art.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -228,8 +229,11 @@ function renderCard(build) {
   const warningHtml=build.warnings.length?'<div class="warning-note"><strong>Estimated input:</strong><br />'+build.warnings.map(escapeHtml).join('<br />')+'</div>':'';
   const moveHtml=build.moves.map((move,i)=>'<div class="move"><span class="mini-label">'+escapeHtml(move.category)+'</span><strong>'+escapeHtml(move.name)+'</strong><p>'+escapeHtml(move.why)+'</p></div>').join('');
   const roleSecondary=build.role.secondary?' / '+build.role.secondary.name:'';
+  const cornerArtwork=renderLiveCornerArtwork(build.types);
+  const tankWatermark=renderLiveTankWatermark(build.role.primary.name);
   $('result-container').innerHTML=
-    '<article class="result-card'+(build.monotype?' monotype':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
+    '<article class="result-card'+(build.monotype?' monotype':'')+(cornerArtwork?' has-type-art':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
+    (cornerArtwork?'<div class="result-artwork" aria-hidden="true">'+cornerArtwork+'</div>':'')+
     '<div class="pokemon-header">'+
       '<div class="pokemon-type-accent" aria-hidden="true"></div>'+
       '<div class="pokemon-intro">'+
@@ -243,7 +247,7 @@ function renderCard(build) {
     '</div>'+
     '<div class="result-body">'+
       '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
-      '<div class="stat-visual">'+renderStatRadar(build.baseStats,build.effectiveStats)+
+      '<div class="stat-visual">'+tankWatermark+renderStatRadar(build.baseStats,build.effectiveStats)+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
