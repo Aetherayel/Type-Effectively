@@ -62,9 +62,13 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
     temperament='Big Five scores were not supplied, so this creature trained with neutral placeholder values. Any OCEAN commentary would be fan fiction; we will not pretend otherwise.';
     twist='Missing temperament data is the biggest wildcard in this build. The archetype is playable, but less personalized.';
   } else {
-    const strong=bigFive.map((value,i)=>({value,key:highs[i],index:i})).sort((a,b)=>Math.abs(b.value-50)-Math.abs(a.value-50)||a.index-b.index).slice(0,3);
-    temperament='The loudest OCEAN signals suggest '+join(strong.map(item=>oceanNotes[item.key][item.value>=50?0:1]))+
-      '. These are tendencies, not commands.';
+    const strong=bigFive.map((value,i)=>({value,key:highs[i],index:i}))
+      .filter(item=>Math.abs(item.value-50)>=15)
+      .sort((a,b)=>Math.abs(b.value-50)-Math.abs(a.value-50)||a.index-b.index).slice(0,3);
+    temperament=strong.length ?
+      'The clearer OCEAN signals suggest '+join(strong.map(item=>oceanNotes[item.key][item.value>=50?0:1]))+
+      '. These are tendencies, not commands.' :
+      'The five OCEAN scores sit fairly close to the midpoint. Instead of pretending that 51 means a dramatic character arc, this report treats the temperament as broadly balanced.';
     if(bigFive[0]>=65 && bigFive[1]>=65)
       twist='Interesting combination: high curiosity with high structure. The mind wants an unexplored region; the calendar wants the expedition planned.';
     else if(bigFive[0]>=65 && bigFive[1]<=40)
