@@ -2,7 +2,7 @@ import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=typing17-1';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=typing17-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=move-coherence-1';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
@@ -259,7 +259,7 @@ function renderCard(build) {
       '<div class="result-section-title"><h4>Abilities</h4><span>PRIMARY / HIDDEN</span></div>'+
       '<div class="ability-list">'+
         '<div class="ability-box"><span class="mini-label">Standard ability</span><strong>'+escapeHtml(build.ability.name)+'</strong><p>'+escapeHtml(build.ability.desc)+'</p></div>'+
-        '<div class="ability-box hidden-ability"><span class="mini-label">Hidden ability · '+escapeHtml(build.hiddenType)+'</span><strong>'+escapeHtml(build.hiddenAbility)+'</strong><p>Derived from the relationship between fixes '+build.second+' and '+build.third+'. Alternative ability, not active simultaneously.</p></div>'+
+        '<div class="ability-box hidden-ability"><span class="mini-label">Hidden ability · alternate strength</span><strong>'+escapeHtml(build.hiddenAbility)+'</strong><p>Matches your visible typing and battle role, with supporting motivations '+build.second+' and '+build.third+' influencing the choice. Not active alongside the standard Ability.</p></div>'+
       '</div>'+
       '<section class="held-item-section" aria-label="Thematic held item">'+
         '<div class="result-section-title"><h4>Held item</h4><span>PERSONALITY FLAVOR</span></div>'+
@@ -287,7 +287,7 @@ function renderCard(build) {
           'The '+escapeHtml(build.types[1])+' secondary type blends fix '+build.second+' (65%), fix '+build.third+' (30%) and the core (5%). ')+
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
-        'It differs from the visible type(s) and influences the Hidden Ability.</p>'+
+        'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Abilities and moves are then matched to the role and personality themes, not necessarily to any official species learnset.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. The item is for humor and does not modify calculated stats or type matchups.</p>'+
