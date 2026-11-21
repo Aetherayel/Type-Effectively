@@ -336,10 +336,29 @@ const MOVE_EFFECT_GROUPS={
   'Light Screen':'screen','Reflect':'screen','Aurora Veil':'screen'
 };
 
+// Baton Pass is a growth/setup-transfer move, not a generic Pivot switch.
+// It needs a transferable stat stage established by one of the other three
+// moves or by the *active standard Ability*. Weather, screens, Tailwind and
+// defensive typing bonuses do not create Baton Passable stat stages.
+const BATON_PASS_SETUP_MOVES=new Set([
+  'Swords Dance','Dragon Dance','Flame Charge','Agility','Hone Claws',
+  'Nasty Plot','Calm Mind','Quiver Dance','Growth','Charge Beam','Work Up',
+  'Iron Defense','Amnesia','Stockpile','Cotton Guard','Cosmic Power',
+  'Acid Armor','Bulk Up','Coil','Curse','Charge'
+]);
+const BATON_PASS_SETUP_ABILITIES=new Set(['Speed Boost']);
+
+export function hasBatonPassSetup({moves=[],ability=null}={}) {
+  const abilityName=typeof ability==='string'?ability:ability?.name;
+  return BATON_PASS_SETUP_ABILITIES.has(abilityName) ||
+    moves.some(move=>BATON_PASS_SETUP_MOVES.has(typeof move==='string'?move:move.name));
+}
+
 // Duplicate defensive effects are invalid, not merely an affinity penalty.
 // The growth slot should add new behavior rather than repeat an existing shield.
-export function isMovePairCompatible(tactic,growth,{strategy=null}={}) {
+export function isMovePairCompatible(tactic,growth,{strategy=null,attacks=[],ability=null}={}) {
   if(tactic===growth)return false;
+  if(growth==='Baton Pass' && !hasBatonPassSetup({moves:[...attacks,tactic],ability}))return false;
   if((tactic==='Aurora Veil' && ['Reflect','Light Screen'].includes(growth)) ||
      (growth==='Aurora Veil' && ['Reflect','Light Screen'].includes(tactic)))return false;
   if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growth)) ||
@@ -363,7 +382,7 @@ function roleTacticScore(name,role,types,stats,second,third) {
   return score;
 }
 
-function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strategy=null) {
+function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strategy=null,standardAbility=null) {
   const physical=stats.atk>=stats.spa;
   const style=physical?'physical':'special';
   const attacks=attackTypes.map(type=>{
@@ -401,7 +420,9 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   // Semantic growth eligibility is guaranteed by the curated core lesson pool.
   const pairs=[];
   for(const tactic of validRole)for(const growthName of validGrowth){
-    if(!isMovePairCompatible(tactic,growthName,{strategy}))continue;
+    if(!isMovePairCompatible(tactic,growthName,{
+      strategy,attacks,ability:strategy?.ability||standardAbility
+    }))continue;
     const roleScore=roleTacticScore(tactic,role,visibleTypes,stats,second,third);
     const growthScore=scoreMove(growthName,visibleTypes,stats,second,third);
     const duplicateEffect=MOVE_EFFECT_GROUPS[tactic] &&
@@ -511,7 +532,7 @@ export function generateBuild(input) {
     types,stats:effectiveStats,second,third,standard:ability
   });
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
-  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third,signatureStrategy);
+  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third,signatureStrategy,ability);
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   // Item choice follows move choice: equipment must actually work with its
   // holder and the four signature moves.
