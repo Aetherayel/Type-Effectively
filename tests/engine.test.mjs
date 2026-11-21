@@ -5,7 +5,10 @@ import {
   inferredEnneagramScores, isValidTritype, normalizeStats,
   deriveTyping, rankingToScores
 } from '../src/engine.mjs';
-import { DEMOS, GENERATED_TYPES, TYPE_AFFINITY, TYPE_COLORS } from '../src/data.mjs';
+import {
+  DEMOS, GENERATED_TYPES, ROLE_TEMPLATES, ROLE_CALIBRATED_TEMPLATES,
+  ROLE_TEMPLATE_SCALE, STAT_KEYS, TYPE_AFFINITY, TYPE_COLORS
+} from '../src/data.mjs';
 
 const sum = stats => Object.values(stats).reduce((a,b)=>a+b,0);
 const baseInput = {
@@ -23,6 +26,52 @@ test('all 9 Enneagram motivations have explicit scores for exactly 17 generated 
     for(const [type,value] of Object.entries(row))
       assert.ok(Number.isInteger(value)&&value>=0&&value<=100,core+' / '+type);
   }
+});
+
+test('v1.1 role calibration preserves six role shapes and the 535-point reference budget',()=>{
+  assert.equal(ROLE_TEMPLATE_SCALE,0.75);
+  assert.deepEqual(Object.keys(ROLE_CALIBRATED_TEMPLATES),Object.keys(ROLE_TEMPLATES));
+  for(const [role,original] of Object.entries(ROLE_TEMPLATES)) {
+    const calibrated=ROLE_CALIBRATED_TEMPLATES[role];
+    assert.equal(calibrated.length,STAT_KEYS.length,role);
+    const originalMean=sum(Object.fromEntries(STAT_KEYS.map((key,i)=>[key,original[i]])))/STAT_KEYS.length;
+    const targetMean=535/STAT_KEYS.length;
+    for(let i=0;i<STAT_KEYS.length;i++) {
+      const expected=targetMean+ROLE_TEMPLATE_SCALE*(original[i]-targetMean);
+      assert.ok(Math.abs(calibrated[i]-expected)<1e-10,role+' stat '+i);
+      assert.ok((calibrated[i]-targetMean)*(original[i]-targetMean)>=0,role+' must keep stat direction');
+    }
+    assert.ok(Math.abs(calibrated.reduce((a,b)=>a+b,0)-535)<1e-8,role+' must keep 535 reference total');
+    assert.ok(Math.abs(originalMean-targetMean)<1e-8,role+' original must have 535 reference total');
+  }
+});
+
+test('seeded role-balance regression preserves role reachability and complete-build coherence',()=>{
+  // Guard against the previous Pivot-heavy geometry; not an equal-frequency quota.
+  let seed=314159;
+  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+  const roles=new Map();
+  const total=1500;
+  for(let i=0;i<total;i++) {
+    const scores=()=>Array.from({length:5},()=>Math.floor(random()*101));
+    const build=generateBuild({
+      mbtiScores:scores(),
+      enneagramScores:Array.from({length:9},()=>Math.floor(random()*101)),
+      bigFive:scores()
+    });
+    roles.set(build.role.primary.name,(roles.get(build.role.primary.name)||0)+1);
+    assert.equal(sum(build.baseStats),535);
+    assert.equal(build.archetype.role,build.role.primary.name);
+    assert.equal(build.title,build.archetype.title);
+    assert.equal(new Set(build.moves.map(move=>move.name)).size,4);
+    assert.ok(build.heldItem.name && build.ability.name && build.hiddenAbility.name);
+    assert.ok(build.report.combat.includes(build.role.primary.name));
+    assert.ok(build.report.trainerTips[0].text.includes(build.moves[2].name));
+    assert.ok(build.report.trainerTips[2].text.includes(build.moves[3].name));
+  }
+  assert.equal(roles.size,6,'every role must remain reachable');
+  assert.ok(roles.get('Pivot')/total < 0.32,'Pivot domination returned: '+roles.get('Pivot')+'/'+total);
+  assert.ok(roles.get('Wall')/total > 0.05,'Wall remains suppressed: '+roles.get('Wall')+'/'+total);
 });
 
 test('typing separates core+evidenced wing from supporting and hidden motivations',()=>{
