@@ -55,22 +55,34 @@
           <a href="#bigfive-section"><span>03</span> Big Five</a>
         </div>
 
+        <div class="assessment-panel" aria-label="Recommended personality tests">
+          <div class="assessment-heading"><strong>Choose your testing path</strong><span>Both lead to the same Pokémon builder.</span></div>
+          <div class="mode-switch assessment-switch" role="group" aria-label="Testing path">
+            <button type="button" class="mode-button active" data-test-mode="quick" aria-pressed="true">Quick &amp; simple</button>
+            <button type="button" class="mode-button" data-test-mode="advanced" aria-pressed="false">Comprehensive</button>
+          </div>
+          <p class="mini-note" id="assessment-note">Shorter tests with straightforward scores. You can still enter detailed data below.</p>
+        </div>
+
         <form id="build-form" novalidate>
           <section class="panel input-panel" id="mbti-section" aria-labelledby="mbti-title">
             <div class="panel-heading">
               <span class="step-number">01 / MIND</span>
               <span class="panel-icon">◈</span>
             </div>
-            <h3 id="mbti-title">Your personality type</h3>
-            <p class="panel-subtitle">Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.</p>
-            <div class="test-line"><a href="https://www.16personalities.com/free-personality-test" target="_blank" rel="noopener noreferrer">Take the free 16Personalities test ↗</a><span>~10 min · external site</span></div>
-            <div class="mode-switch" role="group" aria-label="16Personalities input mode">
+            <h3 id="mbti-title">Your cognitive style</h3>
+            <p class="panel-subtitle" id="mbti-subtitle">Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.</p>
+            <div class="test-line"><a id="mind-test-link" href="https://www.16personalities.com/free-personality-test" target="_blank" rel="noopener noreferrer">Take the free 16Personalities test ↗</a><span id="mind-test-detail">~10 min · external site</span></div>
+            <div class="mode-switch" role="group" aria-label="Cognitive input mode">
               <button type="button" class="mode-button active" data-mbti-mode="scores" aria-pressed="true">Enter my scores</button>
               <button type="button" class="mode-button" data-mbti-mode="type" aria-pressed="false">I know my type</button>
+              <button type="button" class="mode-button" data-mbti-mode="functions" aria-pressed="false">8 functions</button>
             </div>
             <div id="mbti-score-fields" class="slider-stack"></div>
-            <p class="mini-note">Select the trait shown on your report and enter its percentage. For example: 71% Extraverted = 71 + Extraverted.</p>
-            <div class="field-grid">
+            <p class="mini-note" id="mbti-score-help">Select the trait shown on your report and enter its percentage. For example: 71% Extraverted = 71 + Extraverted.</p>
+            <div id="function-score-fields" class="function-grid hidden" aria-label="Eight cognitive-function scores"></div>
+            <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. Function scores influence the build continuously; a four-letter label is inferred only to keep existing game mechanics compatible.</p>
+            <div class="field-grid" id="mbti-type-fields">
               <label class="field">
                 <span>Type override <span class="muted">(optional with scores)</span></span>
                 <select id="mbti-override"><option value="">Auto-detect from scores</option></select>
@@ -86,13 +98,14 @@
             </div>
             <h3 id="ennea-title">Your Enneagram</h3>
             <p class="panel-subtitle">All nine scores shape the build. We infer your ordered tritype, but you get the final say.</p>
-            <div class="test-line"><a href="https://findmynine.com/test" target="_blank" rel="noopener noreferrer">Take the free Find My Nine test ↗</a><span>Full nine-score results</span></div>
+            <div class="test-line"><a id="ennea-test-link" href="https://findmynine.com/test" target="_blank" rel="noopener noreferrer">Take the free Find My Nine test ↗</a><span id="ennea-test-detail">Full nine-score results</span></div>
             <div class="mode-switch" role="group" aria-label="Enneagram input mode">
               <button type="button" class="mode-button active" data-ennea-mode="scores" aria-pressed="true">9 scores</button>
               <button type="button" class="mode-button" data-ennea-mode="ranking" aria-pressed="false">Ranking</button>
               <button type="button" class="mode-button" data-ennea-mode="tritype" aria-pressed="false">Tritype only</button>
             </div>
             <div id="ennea-score-fields" class="ennea-grid"></div>
+            <p class="mini-note" id="ennea-score-help">Scores in this form are 0–100; if your test uses another scale, scale all nine values consistently before entering them.</p>
             <div id="ennea-ranking-fields" class="field hidden">
               <label for="ennea-ranking">Order all nine types from strongest to weakest</label>
               <input type="text" id="ennea-ranking" placeholder="5 9 3 6 1 4 8 7 2" inputmode="text" />
@@ -118,9 +131,9 @@
             </div>
             <h3 id="bigfive-title">Your Big Five</h3>
             <p class="panel-subtitle">The statistical backbone. Your scores shape the spread; nobody gets extra base stat points.</p>
-            <div class="test-line"><a href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span>50 questions · free scores</span></div>
+            <div class="test-line"><a id="bigfive-test-link" href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span id="bigfive-test-detail">50 questions · free scores</span></div>
             <div id="bigfive-fields" class="slider-stack"></div>
-            <p class="mini-note">Starting values of 50 are neutral placeholders, not guesses about you. Replace them with your actual results.</p>
+            <p class="mini-note">Starting values of 50 are neutral placeholders, not guesses about you. Enter the five domain percentiles (O, C, E, A, N), not the 30 separate facets. IPIP-NEO lists the domains in a different order.</p>
           </section>
 
           <div id="form-error" class="form-error hidden" role="alert"></div>
@@ -178,11 +191,11 @@
         <div class="stat-guide-note">
           <h3>How the numbers work</h3>
           <p>Every build receives exactly <strong>535 base stat points</strong>. The spread emphasizes relative tendencies, not overall worth: higher Attack is not inherently better than lower Attack.</p>
-          <p>The six base stats blend <strong>70% Big Five</strong>, <strong>20% Enneagram</strong>, and <strong>10% 16Personalities</strong> scores. The final stats are bounded and normalized, so they are not direct psychological test scores.</p>
+          <p>The six base stats blend <strong>70% Big Five</strong>, <strong>20% Enneagram</strong>, and <strong>10% cognitive-style</strong> scores (16Personalities dimensions or function-derived contrasts). The final stats are bounded and normalized, so they are not direct psychological test scores.</p>
         </div>
         <div class="stat-guide-note">
           <h3>Nature, OCEAN &amp; modifiers</h3>
-          <p>Your four-letter personality type determines your <strong>Nature</strong>, which raises one non-HP stat by 10% and lowers another by 10%. When modified, the radar shows the adjusted number above its base value.</p>
+          <p>Your four-letter personality type or the label inferred from function scores determines your <strong>Nature</strong>, which raises one non-HP stat by 10% and lowers another by 10%. When modified, the radar shows the adjusted number above its base value.</p>
           <p><strong>OCEAN</strong> stands for <strong>Openness, Conscientiousness, Extraversion, Agreeableness,</strong> and <strong>Neuroticism</strong> (emotional sensitivity). On shared cards, <strong>H</strong> means a score of 50 or higher and <strong>L</strong> means below 50; “Estimated” means no Big Five scores were entered.</p>
         </div>
       </div>
