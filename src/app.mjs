@@ -138,6 +138,7 @@ function setupFields() {
     state.touched.rowe=true;updateDerived();
   }));
   $('mbti-override').addEventListener('change',()=>{updateDerived();});
+  $('function-identity').addEventListener('change',()=>{updateDerived();});
   document.querySelectorAll('[id^="function-"][type="number"]').forEach(el=>el.addEventListener('input',()=>{
     state.touched.functions=true;updateDerived();
   }));
@@ -176,12 +177,18 @@ function setMode(group,mode) {
     $('mbti-score-help').classList.toggle('hidden',mode!=='scores');
     $('function-score-fields').classList.toggle('hidden',mode!=='functions');
     $('function-help').classList.toggle('hidden',mode!=='functions');
-    $('mbti-type-fields').classList.toggle('hidden',mode==='functions');
+    $('mbti-type-fields').classList.remove('hidden');
+    $('function-identity-fields').classList.toggle('hidden',mode!=='functions');
+    $('function-identity-help').classList.toggle('hidden',mode!=='functions');
+    $('mbti-override-label').innerHTML=mode==='functions'?
+      'Four-letter type override <span class="muted">(optional; e.g. Sakinorva result)</span>':
+      'Type override <span class="muted">(optional with scores)</span>';
     $('mbti-subtitle').textContent=mode==='functions'?
       'Eight cognitive functions, entered directly. Their contrasts influence stats and classification without adding a second scoring engine.':
       'Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.';
     $('mbti-derived').textContent=mode==='type'?'Select the four-letter type you identify with. We will use estimated percentage scores where needed.':'Your percentages determine the suggested type. You can override it below.';
-    $('mbti-override').options[0].textContent=mode==='type'?'Choose a type…':'Auto-detect from scores';
+    $('mbti-override').options[0].textContent=mode==='type'?'Choose a type…':
+      mode==='functions'?'Use function-derived suggestion':'Auto-detect from scores';
   } else {
     $('ennea-score-fields').classList.toggle('hidden',mode!=='scores');
     $('ennea-ranking-fields').classList.toggle('hidden',mode!=='ranking');
@@ -214,7 +221,8 @@ function inferredTritype() {
   return '';
 }
 function updateDerived() {
-  const override=state.mbtiMode==='functions'?'':$('mbti-override').value;
+  const override=$('mbti-override').value;
+  const selectedAT=state.mbtiMode==='functions'?$('function-identity').value:'';
   const canSuggest=state.mbtiMode==='scores'&&state.touched.mbti;
   let suggested=canSuggest?deriveMbti(readScores('mbti',5)):'';
   if(state.mbtiMode==='functions') {
@@ -223,8 +231,13 @@ function updateDerived() {
     } catch { suggested=''; }
   }
   $('mbti-derived').textContent=state.mbtiMode==='functions'?
-    (suggested?'Game-derived preference: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]+' · A/T unspecified':
-    'Enter all eight overall function totals to infer a game-compatible preference.'):
+    (suggested
+      ? (override?'Selected type: '+override+' · function-derived suggestion: '+suggested:
+        'Game-derived preference: '+suggested)+
+        ' · Nature: '+NATURE_BY_MBTI[override||suggested]+
+        ' · '+(selectedAT?'Identity: '+selectedAT+' (estimated strength)':'A/T not provided')
+      : (override?'Selected type: '+override+' · ':'')+
+        'Enter all eight overall function totals to infer a game-compatible preference.'):
     override?'Selected: '+override+(suggested && suggested!==override?' · test-derived suggestion: '+suggested:''):
     suggested?'Suggested type: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]:
     state.mbtiMode==='type'?'Choose your four-letter type above to continue.':'Enter your percentages to infer your type, or choose an override.';
@@ -254,8 +267,9 @@ function updateDerived() {
   }
 }
 function collectInput() {
-  const typeOverride=state.mbtiMode==='functions'?'':$('mbti-override').value;
+  const typeOverride=$('mbti-override').value;
   const functionScores=state.mbtiMode==='functions'?readFunctionScores():null;
+  const identityPreference=state.mbtiMode==='functions'?($('function-identity').value||null):null;
   const tritypeOverride=$('tritype-override').value.trim();
   if(tritypeOverride&&!isValidTritype(tritypeOverride)) throw new Error('Tritype needs exactly one gut (8/9/1), heart (2/3/4), and head (5/6/7) type.');
   const mbtiScores=state.mbtiMode==='scores' && state.touched.mbti ? readScores('mbti',5):null;
@@ -269,7 +283,7 @@ function collectInput() {
   }
   if(!enneagramScores&&!enneagramRanking&&!roweScores&&!tritypeOverride) throw new Error('Enter Enneagram scores, Rowe raw totals, a complete ranking, or a valid tritype.');
   return {
-    mbtiScores,typeOverride,functionScores,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
+    mbtiScores,typeOverride,functionScores,identityPreference,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
     bigFive:state.touched.bigfive?readScores('bigfive',5):null
   };
