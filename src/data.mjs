@@ -108,6 +108,18 @@ export const ROLE_TEMPLATES = {
   Support:[105,55,90,70,120,95],
   Controller:[80,65,80,115,80,115]
 };
+
+// v1.1 battle-role balance: the original tactical silhouettes were substantially
+// more specialized than the actual 535-BST personality outputs. Score against
+// profiles 25% closer to the six-stat mean, without changing generated stats,
+// role affinity weights, role labels, or the five-point hybrid threshold.
+export const ROLE_TEMPLATE_SCALE = 0.75;
+export const ROLE_CALIBRATED_TEMPLATES = Object.freeze(Object.fromEntries(
+  Object.entries(ROLE_TEMPLATES).map(([role,template])=>[
+    role,Object.freeze(template.map(value=>
+      535/STAT_KEYS.length + ROLE_TEMPLATE_SCALE*(value-535/STAT_KEYS.length)))
+  ])
+));
 export const ROLE_DESCRIPTIONS = {
   Sweeper:'Wins by applying focused offensive pressure.',
   Wall:'Absorbs pressure, stabilizes, and outlasts.',
