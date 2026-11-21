@@ -26,11 +26,12 @@ const MULTI_HIT_MOVES=new Set(['Icicle Spear','Bullet Seed','Rock Blast','Scale 
 const BINDING_MOVES=new Set(['Wrap','Bind','Fire Spin','Whirlpool','Sand Tomb','Infestation']);
 const CHARGING_MOVES=new Set(['Solar Beam','Solar Blade','Sky Attack','Meteor Beam']);
 
-export function isHeldItemCompatible(item,{types,moves}){
+export function isHeldItemCompatible(item,{types,moves,ability=null}){
   const name=typeof item==='string'?item:item.name;
   if(!Array.isArray(types)||!types.length||!Array.isArray(moves)||!moves.length)
     throw new Error('Item compatibility requires typing and moves.');
   const names=new Set(moves.map(move=>typeof move==='string'?move:move.name));
+  const abilityName=typeof ability==='string'?ability:ability?.name;
   const hasSome=set=>[...set].some(name=>names.has(name));
   if(name==='Assault Vest')return false; // Slot 3 and 4 are always status/utility.
   if(['Choice Band','Choice Specs','Choice Scarf'].includes(name))return false;
@@ -51,7 +52,8 @@ export function isHeldItemCompatible(item,{types,moves}){
     'Heat Rock':'Sunny Day','Damp Rock':'Rain Dance',
     'Icy Rock':'Snowscape','Smooth Rock':'Sandstorm'
   };
-  if(weather[name])return names.has(weather[name]);
+  if(weather[name])return names.has(weather[name]) ||
+    ({'Icy Rock':'Snow Warning','Heat Rock':'Drought','Damp Rock':'Drizzle'}[name]===abilityName);
   if(name==='Protective Pads')return hasSome(CONTACT_MOVES);
   // No evolutionary stage exists for an original generated personality Pokémon.
   if(name==='Eviolite'||name==='Everstone')return false;
@@ -78,7 +80,7 @@ export function chooseHeldItem({
     return [key,.68*coreSignal+.32*traits];
   }));
   const seed=[tritype,wing,...mbtiScores,...enneagramScores,...bigFive,role.primary.name].join('|');
-  const sorted=HELD_ITEMS.filter(item=>isHeldItemCompatible(item,{types,moves})).map(item=>{
+  const sorted=HELD_ITEMS.filter(item=>isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
     const familyScore=familyScores[item.family];
     const traits=traitFit(bigFive,item.targets);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
