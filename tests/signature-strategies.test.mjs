@@ -114,7 +114,7 @@ test('seeded population retains generalists and validates any specialized packag
   let seed=123456789;
   const random=()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
   const counts={generalist:0};
-  for(let i=0;i<1200;i++){
+  for(let i=0;i<4000;i++){
     const b=generateBuild(generateRandomBuildInput(random));
     const s=b.signatureStrategy;
     if(!s){counts.generalist++;continue;}
@@ -127,6 +127,7 @@ test('seeded population retains generalists and validates any specialized packag
     assert.equal(Object.values(b.baseStats).reduce((a,n)=>a+n,0),535);
     assert.ok(b.report.combat.includes(s.name));
   }
-  assert.ok(counts.generalist>400,'specialists should not dominate random builds: '+JSON.stringify(counts));
+  console.log('Signature strategy audit, 4,000 seeded builds:',JSON.stringify(counts));
+  assert.ok(counts.generalist>2000,'specialists should not dominate random builds: '+JSON.stringify(counts));
   assert.ok(Object.keys(counts).length>=2,'at least one package should occur naturally: '+JSON.stringify(counts));
 });
