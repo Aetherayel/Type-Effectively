@@ -11,6 +11,7 @@ import { downloadCardPng } from './export-card.mjs?v=role-emblems-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
+import { cardVersionFooter, normalizeBuildVersion } from './build-version.mjs';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -27,6 +28,24 @@ const oceanDetails=[
 const FUNCTION_LABELS=['Extraverted intuition','Introverted intuition','Extraverted sensing','Introverted sensing','Extraverted thinking','Introverted thinking','Extraverted feeling','Introverted feeling'];
 const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
 let toastTimeout;
+
+function activeBuildVersion() {
+  const raw=document.querySelector('meta[name="application-version"]')?.content;
+  return normalizeBuildVersion('v'+raw);
+}
+function refreshVersionFooter(build) {
+  const node=$('build-version-footer');
+  if(node)node.textContent=cardVersionFooter(build);
+}
+function refreshPublishedBuildVersion(version) {
+  const build=state.lastBuild;
+  if(!build || !normalizeBuildVersion(version))return;
+  build.renderVersion=version;
+  // Confirm the version for builds generated before async release lookup finishes.
+  // A restored shared card always keeps its original release provenance.
+  if(!build.restoredFromShare)build.createdVersion=version;
+  refreshVersionFooter(build);
+}
 
 function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -442,7 +461,9 @@ function renderCard(build) {
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
       '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
       '<button type="button" id="share-build" class="outline-button">Copy share link ↗</button></div>'+
-    '</div></article>';
+    '</div>'+
+    '<footer class="build-version-footer" id="build-version-footer">'+escapeHtml(cardVersionFooter(build))+'</footer>'+
+    '</article>';
   $('result-status').classList.add('ready');
   $('result-status').innerHTML='<span></span> '+(state.isSample?'RANDOM SAMPLE':'BUILD COMPLETE');
   $('download-card').addEventListener('click',async()=>{
@@ -475,6 +496,7 @@ function buildSummary(b) {
     'Ability: '+b.ability.name+' · Hidden: '+b.hiddenAbility,
     'Held item: '+b.heldItem.name+' — '+b.heldItem.quip,
     'Moves: '+b.moves.map(m=>m.name).join(' / '),
+    'Version: '+cardVersionFooter(b),
     'Unofficial personality Pokémon, not scientific assessment.'
   ].join('\n');
 }
@@ -490,7 +512,7 @@ async function copyText(value,message) {
 }
 function copyShareLink() {
   if(!state.lastInput)return;
-  const payload={version:1,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample};
+  const payload={version:1,buildVersion:state.lastBuild?.createdVersion||null,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample};
   const hash='#build='+encodeURIComponent(JSON.stringify(payload));
   const url=location.origin+location.pathname+location.search+hash;
   copyText(url,'Link copied. Anyone with it can view these personality scores.');
@@ -503,10 +525,13 @@ function setError(message) {
   $('form-error').textContent=message;
   $('form-error').classList.toggle('hidden',!message);
 }
-function runBuild(scroll=true,isSample=false) {
+function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
   try {
     const input=collectInput();
     const build=generateBuild(input);
+    build.renderVersion=activeBuildVersion();
+    build.restoredFromShare=sharedVersion!==undefined;
+    build.createdVersion=build.restoredFromShare?normalizeBuildVersion(sharedVersion):build.renderVersion;
     state.isSample=isSample;
     state.lastBuild=build;state.lastInput=input;setError('');renderCard(build);
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
@@ -557,7 +582,7 @@ function restoreShared() {
     setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
     setMode('ennea',input.roweScores?'rowe':['scores','ranking','tritype','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
-    runBuild(false,payload.sample===true);
+    runBuild(false,payload.sample===true,payload.buildVersion??null);
     showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
   }catch {showToast('That shared build link could not be read.');}
 }
@@ -595,6 +620,9 @@ function init() {
   $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild();});
   $('reset-button').addEventListener('click',clearAll);
   $('randomize-button').addEventListener('click',randomizeBuild);
+  document.addEventListener('type-effectively:release-version',event=>{
+    refreshPublishedBuildVersion(event.detail?.version);
+  });
   updateDerived();
   restoreShared();
 }
