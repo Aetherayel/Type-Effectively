@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { SIGNATURE_STRATEGIES, selectSignatureStrategy, signatureHeldItem } from '../src/strategies.mjs';
 import { ABILITIES, GROWTH_MOVES, MOVE_PURPOSES, ROLE_MOVES, ROLE_PURPOSES } from '../src/data.mjs';
-import { isMoveEligible, generateBuild } from '../src/engine.mjs';
+import { isMoveEligible, isMovePairCompatible, generateBuild } from '../src/engine.mjs';
 import { isHeldItemCompatible } from '../src/held-items.mjs';
 import { buildCardSvg } from '../src/export-card.mjs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
@@ -15,8 +15,8 @@ const ctx=({types=['Ice','Steel'],name='Wall',motives=[5,1,3],bigFive=[62,83,28,
   bigFive,hasBigFive
 });
 
-test('six packages have distinct coherent mechanics and real item/ability references',()=>{
-  assert.equal(SIGNATURE_STRATEGIES.length,6);
+test('twelve packages have distinct coherent mechanics and real item/ability references',()=>{
+  assert.equal(SIGNATURE_STRATEGIES.length,12);
   const ids=new Set();
   for(const s of SIGNATURE_STRATEGIES){
     assert.ok(!ids.has(s.id),'duplicate signature '+s.id);
@@ -29,7 +29,7 @@ test('six packages have distinct coherent mechanics and real item/ability refere
     const item=signatureHeldItem(s);
     assert.equal(item.name,s.item);
     assert.ok(isHeldItemCompatible(item,{
-      types:s.requiredTypes,moves:[{name:s.tactic}],ability
+      types:s.requiredTypes,moves:[s.tactic,s.attackSwap?.move].filter(Boolean),ability
     }),'item must work in chosen package: '+s.id);
     assert.ok(item.why.includes(s.mechanism));
   }
@@ -69,10 +69,44 @@ test('each other specialization is meaningfully reachable with matching complete
     {id:'barbed-bulwark',input:ctx({types:['Steel','Ice'],name:'Wall',motives:[1,8,3],
       values:{hp:115,atk:64,def:132,spa:65,spd:92,spe:67},bigFive:[43,86,41,32,48]})},
     {id:'grassy-sanctuary',input:ctx({types:['Grass','Fairy'],name:'Support',motives:[9,2,6],
-      values:{hp:112,atk:65,def:92,spa:85,spd:119,spe:86},bigFive:[64,67,48,82,39]})}
+      values:{hp:112,atk:65,def:92,spa:85,spd:119,spe:86},bigFive:[64,67,48,82,39]})},
+    {id:'ashen-vanguard',input:ctx({types:['Fighting','Rock'],name:'Tank',motives:[8,3,6],
+      values:{hp:107,atk:122,def:102,spa:67,spd:92,spe:68},bigFive:[55,82,64,39,51]})},
+    {id:'venom-alchemist',input:ctx({types:['Grass','Ground'],name:'Wall',motives:[9,5,6],
+      values:{hp:119,atk:76,def:112,spa:81,spd:108,spe:47},bigFive:[67,72,29,60,47]})},
+    {id:'sandbound-citadel',input:ctx({types:['Rock','Ground'],name:'Wall',motives:[1,5,6],
+      values:{hp:112,atk:77,def:123,spa:65,spd:109,spe:62},bigFive:[61,90,29,42,45]})},
+    {id:'arcane-catalyst',input:ctx({types:['Psychic','Ghost'],name:'Sweeper',motives:[5,3,7],
+      values:{hp:81,atk:62,def:71,spa:127,spd:80,spe:117},bigFive:[92,62,54,29,38]})},
+    {id:'circuit-architect',input:ctx({types:['Electric','Steel'],name:'Sweeper',motives:[3,5,7],
+      values:{hp:83,atk:60,def:84,spa:119,spd:81,spe:123},bigFive:[78,76,79,35,39]})},
+    {id:'misty-custodian',input:ctx({types:['Fairy','Psychic'],name:'Support',motives:[2,1,6],
+      values:{hp:108,atk:70,def:93,spa:76,spd:121,spe:83},bigFive:[67,73,47,88,47]})}
   ];
   for(const {id,input} of examples)
     assert.equal(selectSignatureStrategy(input)?.id,id,id+' should be reachable');
+});
+
+test('move-pair compatibility rejects redundant screens and self-sabotaging growth',()=>{
+  assert.equal(isMovePairCompatible('Aurora Veil','Reflect'),false);
+  assert.equal(isMovePairCompatible('Aurora Veil','Light Screen'),false);
+  assert.equal(isMovePairCompatible('Aurora Veil','Helping Hand'),true);
+  assert.equal(isMovePairCompatible('Light Screen','Reflect'),true);
+  assert.equal(isMovePairCompatible('Protect','Rest',{strategy:{ability:'Poison Heal'}}),false);
+  assert.equal(isMovePairCompatible('Bulk Up','Rest',{strategy:{ability:'Guts'}}),false);
+  assert.equal(isMovePairCompatible('Heal Bell','Safeguard',{strategy:{ability:'Misty Surge'}}),false);
+});
+
+test('type and offense gates rule out mechanically impossible packages',()=>{
+  assert.equal(selectSignatureStrategy(ctx({types:['Fire','Fighting'],name:'Tank',motives:[8,3,6],
+    values:{hp:107,atk:122,def:102,spa:67,spd:92,spe:68},
+    bigFive:[55,82,64,39,51]})),null);
+  assert.equal(selectSignatureStrategy(ctx({types:['Grass','Poison'],name:'Wall',motives:[9,5,6],
+    values:{hp:119,atk:76,def:112,spa:81,spd:108,spe:47},
+    bigFive:[67,72,29,60,47]})),null);
+  assert.equal(selectSignatureStrategy(ctx({types:['Electric','Steel'],name:'Sweeper',motives:[3,5,7],
+    values:{hp:83,atk:125,def:84,spa:109,spd:81,spe:123},
+    bigFive:[78,76,79,35,39]})),null);
 });
 
 test('theme alone does not force specialization, and missing Big Five raises the bar',()=>{
@@ -116,12 +150,20 @@ test('seeded population retains generalists and validates any specialized packag
   const counts={generalist:0};
   for(let i=0;i<4000;i++){
     const b=generateBuild(generateRandomBuildInput(random));
+    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{strategy:b.signatureStrategy}),
+      'redundant or contradictory growth move: '+b.moves[2].name+' / '+b.moves[3].name);
+    if(b.moves[2].name==='Aurora Veil')
+      assert.ok(!['Reflect','Light Screen'].includes(b.moves[3].name),
+        'Aurora Veil must never repeat its protective effect in slot 4');
     const s=b.signatureStrategy;
     if(!s){counts.generalist++;continue;}
     counts[s.id]=(counts[s.id]||0)+1;
     assert.equal(b.ability.name,s.ability);
     assert.equal(b.moves[2].name,s.tactic);
     assert.equal(b.heldItem.name,s.item);
+    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{strategy:s}));
+    if(s.attackSwap)
+      assert.ok(b.moves.slice(0,2).some(m=>m.name===s.attackSwap.move));
     assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}));
     assert.ok(GROWTH_MOVES[b.core].choices.includes(b.moves[3].name));
     assert.equal(Object.values(b.baseStats).reduce((a,n)=>a+n,0),535);
@@ -129,5 +171,6 @@ test('seeded population retains generalists and validates any specialized packag
   }
   console.log('Signature strategy audit, 4,000 seeded builds:',JSON.stringify(counts));
   assert.ok(counts.generalist>2000,'specialists should not dominate random builds: '+JSON.stringify(counts));
-  assert.ok(Object.keys(counts).length>=2,'at least one package should occur naturally: '+JSON.stringify(counts));
+  for(const strategy of SIGNATURE_STRATEGIES)
+    assert.ok(counts[strategy.id]>0,'specialty unreachable in a full-engine seeded population: '+strategy.id);
 });

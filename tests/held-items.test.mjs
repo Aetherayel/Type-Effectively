@@ -14,13 +14,17 @@ const architectInput={
   typeOverride:'INTJ',tritypeOverride:'593'
 };
 
-test('exactly 72 distinct real held item names in nine balanced behavioral families',()=>{
+test('72 balanced general-purpose held items and two gated specialist orbs are unique',()=>{
   const names=HELD_ITEMS.map(item=>item.name);
-  assert.equal(names.length,72);
-  assert.equal(new Set(names).size,72);
+  assert.equal(names.length,74);
+  assert.equal(new Set(names).size,74);
+  assert.deepEqual(HELD_ITEMS.filter(x=>x.strategyOnly).map(x=>x.name).sort(),
+    ['Flame Orb','Toxic Orb']);
+  const general=HELD_ITEMS.filter(x=>!x.strategyOnly);
+  assert.equal(general.length,72);
   assert.equal(Object.keys(ITEM_FAMILIES).length,9);
   for(const [key,family] of Object.entries(ITEM_FAMILIES)) {
-    const members=HELD_ITEMS.filter(item=>item.family===key);
+    const members=general.filter(item=>item.family===key);
     assert.equal(members.length,8,key+' must have eight distinct items');
     assert.equal(family.ennea.length,9);
     assert.equal(family.target.length,5);
@@ -107,6 +111,7 @@ test('hard item eligibility rules prevent incompatible equipment',()=>{
   for(const name of ['Assault Vest','Black Sludge','Big Root','Light Clay',
     'Choice Band','Choice Specs','Choice Scarf','Grip Claw','Binding Band',
     'Loaded Dice','Heat Rock','Damp Rock','Icy Rock','Smooth Rock',
+    'Flame Orb','Toxic Orb',
     'Terrain Extender','Misty Seed','Electric Seed','Psychic Seed',
     'Eviolite','Everstone','Room Service']){
     assert.equal(isHeldItemCompatible(name,kit),false,name);
@@ -121,6 +126,34 @@ test('hard item eligibility rules prevent incompatible equipment',()=>{
     {...kit,moves:['Surf','Ice Beam','Trick Room','Endure']}),true);
   assert.equal(isHeldItemCompatible('Grassy Seed',
     {...kit,moves:['Surf','Ice Beam','Grassy Terrain','Rest']}),true);
+  assert.equal(isHeldItemCompatible('Flame Orb',{
+    types:['Fighting','Steel'],moves:['Close Combat','Facade','Bulk Up','Protect'],
+    ability:'Guts'
+  }),true);
+  assert.equal(isHeldItemCompatible('Flame Orb',{
+    types:['Fire','Fighting'],moves:['Close Combat','Facade','Bulk Up','Protect'],
+    ability:'Guts'
+  }),false);
+  assert.equal(isHeldItemCompatible('Toxic Orb',{
+    types:['Grass','Ground'],moves:['Energy Ball','Earth Power','Protect','Helping Hand'],
+    ability:'Poison Heal'
+  }),true);
+  assert.equal(isHeldItemCompatible('Toxic Orb',{
+    types:['Grass','Poison'],moves:['Energy Ball','Sludge Bomb','Protect','Helping Hand'],
+    ability:'Poison Heal'
+  }),false);
+  assert.equal(isHeldItemCompatible('Smooth Rock',{
+    types:['Rock','Ground'],moves:['Stone Edge','Earthquake','Shore Up','Endure'],
+    ability:'Sand Stream'
+  }),true);
+  assert.equal(isHeldItemCompatible('Misty Seed',{
+    types:['Fairy'],moves:['Moonblast','Psychic','Heal Bell','Wish'],
+    ability:'Misty Surge'
+  }),true);
+  assert.equal(isHeldItemCompatible('Terrain Extender',{
+    types:['Electric'],moves:['Thunderbolt','Psychic','Charge','Rest'],
+    ability:'Electric Surge'
+  }),true);
 });
 
 test('actual generated builds never equip items that contradict their moves or typing',()=>{

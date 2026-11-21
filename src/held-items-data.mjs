@@ -1,4 +1,5 @@
-// 72 real Pokémon held items, grouped by *thematic* behavioral strategies.
+// 72 general-purpose held items across nine balanced families, plus two
+// strategy-only orbs whose self-inflicted status needs an explicit ability.
 // The item's in-game effect and the intentionally dry caption are separate.
 // This is a playful analogy, not a clinical assessment or a battle simulation.
 export const ITEM_FAMILIES = Object.freeze({
@@ -610,6 +611,24 @@ export const HELD_ITEMS = Object.freeze([
       "Tank",
       "Controller"
     ]
+  },
+  {
+    "name": "Flame Orb",
+    "family": "ambition",
+    "effect": "Burns the holder after a turn; used to trigger Guts.",
+    "quip": "Motivation by manageable self-inflicted emergency.",
+    "targets": [62,81,69,42,50],
+    "roles": ["Tank", "Sweeper"],
+    "strategyOnly": true
+  },
+  {
+    "name": "Toxic Orb",
+    "family": "recovery",
+    "effect": "Badly poisons the holder after a turn; Poison Heal turns it into recovery.",
+    "quip": "The poison is now part of the wellness plan.",
+    "targets": [69,73,28,57,48],
+    "roles": ["Wall", "Tank"],
+    "strategyOnly": true
   },
   {
     "name": "Life Orb",

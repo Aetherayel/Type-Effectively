@@ -2,6 +2,14 @@
 
 **Live release numbering:** The v1.1.x patch series covers releases through merged PR #23. PR #24 introduces the **v1.2.0** minor release; later merged PRs increment v1.2.x. Release tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## Unreleased — Signature strategy expansion and move coherence
+
+- Add six whole-build specializations (Ashen Vanguard, Venom Alchemist, Sandbound Citadel, Arcane Catalyst, Circuit Architect, Misty Custodian), keeping the original six, with no forced assignments.
+- Support specialist-only **Flame Orb / Toxic Orb**, status recovery and boosts, automatic sand and terrain setters, and specific tactic / item prerequisites. Preserve the existing balanced pool of 72 regular items.
+- Introduce tightly gated **Facade** and **Rising Voltage** offensive substitutions while preserving the other attack, role tactic, and Enneagram growth move.
+- Forbid **Aurora Veil + Reflect/Light Screen** as duplicate defenses, and rule out other identified self-defeating strategy/growth combinations. Reject incompatible weather/terrain orbs and setters.
+- Validate the full 535-BST generation pipeline, exports, textual results, item consistency and strategy distribution.
+
 ## 1.2.0 — Comprehensive assessment inputs
 
 - Add a **Quick & simple / Comprehensive** testing path with Sakinorva Functions, Sakinorva Rowe Enneagram, and IPIP-NEO-300 links alongside the original short tests.
