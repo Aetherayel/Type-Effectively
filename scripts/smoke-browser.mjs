@@ -39,6 +39,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     input.dispatchEvent(new Event('input',{bubbles:true}));
   });
   document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-rowe-negative',document.getElementById('rowe-6')?.value||'');
 });
 </script>`;
 const server=createServer((req,res)=>{
@@ -124,7 +125,7 @@ try{
     'Advanced input sources must be disclosed in the completed build');
   assert.ok(html.includes('Rowe signed totals were mapped'),
     'Rowe conversion must be disclosed');
-  assert.ok(html.includes('id="rowe-6"') && html.includes('value="-4"'),
+  assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
   assert.ok(html.includes('data-ennea-mode="rowe" aria-pressed="true"'),
     'Comprehensive path should activate signed Rowe input');
