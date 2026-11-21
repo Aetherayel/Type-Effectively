@@ -437,7 +437,7 @@ function renderCard(build) {
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. Item candidates are filtered for compatibility with the generated typing and selected moves. They remain thematic and do not modify calculated stats or type matchups.</p>'+
-        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. ':'')+'These are interpretations, not clinical findings.</p>'+
+        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes Nature and archetype interpretation but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
       '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
@@ -519,7 +519,8 @@ function clearAll() {
   Array.from({length:9},(_,i)=>$('rowe-'+i)).forEach(el=>{el.value='';});
   setScores('bigfive',[50,50,50,50,50]);
   state.touched={mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false};
-  $('mbti-override').value='';$('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
+  $('mbti-override').value='';$('function-identity').value='';
+  $('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
   setTestingPath('quick');setMode('ennea','scores');
   state.lastBuild=null;state.lastInput=null;state.isSample=false;
   $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your personality details to discover the Pokémon they create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
@@ -549,6 +550,8 @@ function restoreShared() {
     }
     if(input.bigFive){setScores('bigfive',input.bigFive);state.touched.bigfive=true;}
     $('mbti-override').value=input.typeOverride||'';
+    $('function-identity').value=input.functionScores&&['A','T'].includes(input.identityPreference)?
+      input.identityPreference:'';
     $('tritype-override').value=input.tritypeOverride||'';
     setTestingPath(payload.mode.testing==='advanced'?'advanced':'quick',false);
     setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
@@ -573,6 +576,7 @@ function randomizeBuild() {
   setScores('bigfive',input.bigFive);
   state.touched={mbti:true,functions:false,enneagram:true,rowe:false,bigfive:true};
   $('mbti-override').value='';
+  $('function-identity').value='';
   $('tritype-override').value='';
   $('wing-override').value='';
   $('ennea-ranking').value='';
