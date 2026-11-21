@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine patch from all PRs merged into main
+      - name: Determine version from merged PR history
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
@@ -30,20 +30,47 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # PR #21 introduced v1.1.0 on 2026-11-21T01:52:00Z.
-          # Count subsequent merged PRs into main, regardless of merge
-          # commit, squash, or rebase strategy. Ignore ordinary pushes.
-          patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
-            jq -s --arg baseline '2026-11-21T01:52:00Z' \
-              --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
-              '[.[][] | select(.merged_at != null and .merged_at > $baseline and
-                (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
-          if [ "$patch" -lt 1 ]; then
-            echo "::error::Could not count this merged PR after the v1.1.0 baseline."
-            exit 1
+          # PR #24 introduces v1.2.0, and subsequent merged PRs get v1.2.x.
+          # PRs merged earlier retain their existing v1.1.x release sequence.
+          v12_at=$(gh api "repos/$GITHUB_REPOSITORY/pulls/24" --jq '.merged_at // empty')
+          v12_after=false
+          if [ -n "$v12_at" ]; then
+            if [[ "$MERGED_AT" > "$v12_at" ]] || \
+              { [[ "$MERGED_AT" == "$v12_at" ]] && [ "$PR_NUMBER" -gt 24 ]; }; then
+              v12_after=true
+            fi
           fi
-          echo "tag=v1.1.$patch" >> "$GITHUB_OUTPUT"
-          echo "Version for merged PR #$PR_NUMBER: v1.1.$patch"
+
+          if [ "$PR_NUMBER" = "24" ]; then
+            tag=v1.2.0
+          elif [ "$v12_after" = true ]; then
+            patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
+              jq -s --arg baseline "$v12_at" \
+                --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+                '[.[][] | select(.merged_at != null and
+                  (.merged_at > $baseline or (.merged_at == $baseline and .number > 24)) and
+                  (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+            if [ "$patch" -lt 1 ]; then
+              echo "::error::Could not count merged PRs since the v1.2.0 baseline."
+              exit 1
+            fi
+            tag="v1.2.$patch"
+          else
+            # Original v1.1 baseline: merged PR #21.
+            patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
+              jq -s --arg baseline '2026-11-21T01:52:00Z' \
+                --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+                '[.[][] | select(.merged_at != null and .merged_at > $baseline and
+                  (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+            if [ "$patch" -lt 1 ]; then
+              echo "::error::Could not count merged PRs since the v1.1.0 baseline."
+              exit 1
+            fi
+            tag="v1.1.$patch"
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Version for merged PR #$PR_NUMBER: $tag"
 
       - name: Wait for this exact commit to go live on GitHub Pages
         env:
