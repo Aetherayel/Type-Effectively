@@ -394,9 +394,18 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
 export function generateBuild(input) {
   const warnings=[];
   const usingFunctions=input.functionScores!=null;
-  if(usingFunctions && (input.mbtiScores!=null || input.typeOverride))
-    throw new Error('Choose cognitive-function scores or 16Personalities data, not both.');
+  if(usingFunctions && input.mbtiScores!=null)
+    throw new Error('Choose cognitive-function scores or 16Personalities percentages, not both.');
+  // A/T is not a cognitive function. When provided without a strength,
+  // reuse the established type-only 75/25 estimate; otherwise stay neutral.
+  const identityPreference=String(input.identityPreference??'').trim().toUpperCase();
+  if(!usingFunctions && identityPreference)
+    throw new Error('A/T identity preference can only accompany cognitive-function scores.');
+  if(identityPreference && !['A','T'].includes(identityPreference))
+    throw new Error('A/T identity preference must be Assertive (A) or Turbulent (T).');
   let mbtiScores=usingFunctions ? deriveFunctionPreferences(input.functionScores) : input.mbtiScores;
+  if(usingFunctions && identityPreference)
+    mbtiScores=[...mbtiScores.slice(0,4),identityPreference==='T'?75:25];
   const override=String(input.typeOverride||'').trim().toUpperCase().replace(/-[AT]$/,'');
   if (mbtiScores == null && !override) throw new Error('Enter your 16Personalities scores or choose a type.');
   if (mbtiScores == null) {
@@ -407,7 +416,15 @@ export function generateBuild(input) {
   const mbti=override || suggestedType;
   if (!NATURE_BY_MBTI[mbti]) throw new Error('Invalid MBTI type.');
   const nature=NATURE_BY_MBTI[mbti];
-  if(usingFunctions) warnings.push('Eight function totals were translated into four preference contrasts for this game; the A/T axis cannot be inferred. This is not Sakinorva’s typing algorithm.');
+  if(usingFunctions) {
+    warnings.push('Eight function totals were translated into four preference contrasts for this game. This is not Sakinorva’s typing algorithm.');
+    if(identityPreference)
+      warnings.push('The supplied '+identityPreference+' identity label uses the existing 75/25 type-only proxy for scoring; no measured A/T percentage was supplied.');
+    else
+      warnings.push('The A/T axis was not provided; its contribution is neutral and no A/T label was inferred.');
+    if(override && override!==suggestedType)
+      warnings.push('Your selected '+override+' type overrides the function-derived '+suggestedType+' label for Nature and archetype interpretation; function contrasts still drive the underlying stat affinities.');
+  }
 
   const usingRowe=input.roweScores!=null;
   if(usingRowe && (input.enneagramScores!=null || input.enneagramRanking!=null))
@@ -464,9 +481,11 @@ export function generateBuild(input) {
     enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
     role,types,moves,ability,hasBigFive:input.bigFive!=null
   });
-  const identity=mbti + (!usingFunctions && input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
+  const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
+    input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const build={
-    mbti, identity, nature, cognitiveSource:usingFunctions?'functions':'16personalities', enneagramSource:usingRowe?'rowe':'standard',
+    mbti, identity, nature, identityPreference:usingFunctions?(identityPreference||null):null,
+    cognitiveSource:usingFunctions?'functions':'16personalities', enneagramSource:usingRowe?'rowe':'standard',
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
     oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
