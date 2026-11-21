@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.1.0 — Role-balance recalibration**
+**Version 1.2.0 — Comprehensive testing and source-aware inputs**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -24,9 +24,15 @@ No sign-in. No backend. No personality data submitted to a server. Just an unrea
 
 These are independent external websites. **No test integration, scraping, affiliation, or automatic import is implied.** Users enter the result numbers manually. Comprehensive means a longer, more detailed questionnaire—not a claim of scientifically superior Enneagram or cognitive-function typing.
 
-**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The five existing cognition dimensions become: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, outward perceiving versus outward judging, and a neutral identity axis of 50. This produces a **project-specific** four-letter label for Nature compatibility, not a reproduction of Sakinorva's various type algorithms or a claim of a measured MBTI type. **No A/T label is invented.** Continuous contrasts also feed stats, held items, and whole-build archetype classification, allowing two profiles with the same derived letters to differ.
+**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The cognition dimensions are: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, and outward perceiving versus outward judging. This produces a **project-specific suggestion** for Nature compatibility, not a reproduction of Sakinorva's various type algorithms or a measured MBTI result. Continuous contrasts also feed stats, held items, and whole-build archetype classification.
 
-**Advanced Enneagram / Big Five:** The nine Enneagram input fields remain 0–100; convert other scoring ranges consistently. Use the five IPIP-NEO **domain percentiles** in the app's O/C/E/A/N order (the report's display order may differ), not its 30 individual facets. Both quick and comprehensive test paths use the same 70/20/10 weighting, the same types, and the same fixed 535-point budget.
+**Optional Sakinorva type override:** Use the existing four-letter type dropdown while entering eight functions. The app still records and scores the **same eight function totals**, but the chosen type controls the displayed identity and Nature, and informs the whole-build archetype interpretation. The function-derived suggestion remains visible for comparison. The Enneagram-derived elemental typing is unaffected by an MBTI override.
+
+**Optional A/T identity:** Functions do not measure the Assertive/Turbulent axis. Leave A/T as **Not provided** to omit the suffix and retain an internal neutral 50 placeholder for compatibility; no measured A/T is claimed. If you know your A or T designation, select it independently. With no measured percentage, the engine uses its existing **type-only 75/25 proxy** (A → 25 and T → 75 on the Turbulent axis), explicitly flagged as an estimate. Input choices are preserved in shared links and reflected on result cards, without exposing raw function scores in PNG exports.
+
+**Advanced Enneagram / Big Five:** Rowe reports nine **signed raw Enneagram type totals** (negative scores are valid) and separate subtype/instinct results. Select **Rowe raw** in the Enneagram panel and transcribe its nine type totals directly. The ordinary **9 scores** input still uses 0–100 values. The quick and comprehensive paths use the same 70/20/10 weighting, typing, and fixed 535-point budget. Use the five IPIP-NEO **domain percentiles** in O/C/E/A/N order (its display order may differ), not the 30 individual facets.
+
+**Rowe normalization (authored game convention, not a validated crosswalk):** Let `low` and `high` be the smallest and largest of the nine raw totals, `mid=(low+high)/2`, and `span=max(50, high-low)`. Each type's internal score becomes `clamp(50 + 80*(raw-mid)/span, 0, 100)`. This maps the profile's relative order and distances onto the same internal domain without pretending Rowe provides percentages or forcing a narrowly spaced test result to 0/100 extremes. The 50-point reference floor and 80-point range are design choices, not empirical calibration, and two sources' resulting profiles cannot be compared as if they were the same instrument. Ties remain ties, so choose a manual tritype override if the reported test or self-typing resolves an important tie. Raw scores remain in a shared build link but are never printed on the exported PNG. Rowe's 27 instinctual subtype totals are currently **not** modeled.
 
 Don't have the full results? You can select an MBTI-style type, enter an ordered Enneagram ranking, or supply a tritype. The result clearly labels estimated inputs. If Big Five is missing, neutral 50-point placeholders are used and disclosed.
 
@@ -81,7 +87,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning.
 
-## Generation model (v1.1; v1.0 personality rules retained)
+## Generation model (v1.2; v1.0 personality rules retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
@@ -145,6 +151,8 @@ Older visual-composition samples from the pair-mapping version: [Ice/Steel Tank]
 
 ## Downloadable card and defensive matchups
 
+**Card version provenance:** Every generated result card and its exported PNG prints the release on which that card was created (for example, **CREATED v1.2.0**) in a restrained bottom footer. The **Copy build** summary includes the same label. **Copy share link** records the origin release separately from the URL schema version. If that link is reopened after the site updates, its inputs are **recalculated using the current engine**; the footer then shows both **CREATED v1.2.0 · RECALCULATED v1.2.3**, so a changed outcome is not mistakenly attributed to the old version. Legacy links that predate this field say **CREATED VERSION UNRECORDED**, not a fabricated release. The card footer updates if the verified published patch arrives after an initial build, while previously shared source-version metadata remains immutable.
+
 **Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Without entered Big Five results, the card reads **OCEAN · Estimated**. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
 
 ### Held items: a little too much personality
@@ -167,9 +175,9 @@ GitHub Pages publishes the static site from `main` through GitHub's built-in bra
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
-**Automatic live patch versions (v1.1.x):** Each pull request merged into `main` after the v1.1.0 baseline (#21) receives a deterministic patch number: #22 → v1.1.1, #23 → v1.1.2, and so on, counting merged PRs into `main` (including merge, squash, and rebase), not arbitrary commits. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages and then creates its GitHub Release/tag. Re-run a failed release job if Pages was delayed or failed.
+**Automatic live releases (v1.2.x):** The comprehensive-testing follow-up PR **#24** establishes **v1.2.0** when merged and published. Each subsequent merged PR increments the **v1.2.x** patch number (v1.2.1, v1.2.2, etc.) using merged-PR history, not arbitrary pushes or commits. Historical v1.1 tags remain valid: #22 was v1.1.1 and #23 was v1.1.2. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer checks the SHA produced by GitHub Pages in `deploy-revision.json` against the tagged releases before displaying a newer version. This prevents a newly merged but still-unpublished commit from appearing live. In local preview or when the GitHub API is unavailable, the page retains its bundled v1.1.0 marker; the release lookup is non-blocking and sends no personality inputs. The `package.json`, static HTML meta, and changelog describe the **v1.1.0 model baseline**, while GitHub Releases and the live marker track subsequent published patch builds. No write-back version commit or second Pages deployment workflow is required.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x and v1.2.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.2.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.2.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 

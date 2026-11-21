@@ -3,16 +3,24 @@
 // slow browser caches cannot make the visible version jump forward.
 const RELEASES_URL = 'https://api.github.com/repos/Aetherayel/Type-Effectively/releases?per_page=100';
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
-const PATCH_TAG_PATTERN = /^v1\.1\.(0|[1-9][0-9]*)$/;
+const PATCH_TAG_PATTERN = /^v1\.(1|2)\.(0|[1-9][0-9]*)$/;
 
 export function versionForRevision(revision, releases) {
   if (!SHA_PATTERN.test(revision) || !Array.isArray(releases)) return null;
-  const match = releases.find(release =>
+  // Keep historical v1.1 releases visible, but prefer v1.2 when multiple
+  // valid release tags happen to point at the same published revision.
+  const matches = releases.filter(release =>
     release?.draft === false &&
     PATCH_TAG_PATTERN.test(release.tag_name) &&
     release.target_commitish?.toLowerCase() === revision.toLowerCase()
   );
-  return match ? match.tag_name.slice(1) : null;
+  const versionParts = release => release.tag_name.slice(1).split('.').map(Number);
+  matches.sort((a,b) => {
+    const left=versionParts(a),right=versionParts(b);
+    for(let i=0;i<3;i++) if(right[i]!==left[i]) return right[i]-left[i];
+    return 0;
+  });
+  return matches.length ? matches[0].tag_name.slice(1) : null;
 }
 
 export async function fetchPublishedVersion(fetcher = fetch) {
@@ -43,6 +51,11 @@ if (typeof document !== 'undefined') {
     if (footer) footer.textContent = 'TYPE EFFECTIVELY / ' + label.toUpperCase();
     const meta = document.querySelector('meta[name="application-version"]');
     if (meta) meta.content = version;
+    // Cards generated before this asynchronous verification can replace their
+    // provisional bundled minor version with the exact published patch number.
+    document.dispatchEvent(new CustomEvent('type-effectively:release-version', {
+      detail: { version: label }
+    }));
   }).catch(() => {
     // An offline connection or GitHub API limit must never block the app.
   });

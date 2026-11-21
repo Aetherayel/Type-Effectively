@@ -1,6 +1,18 @@
 # Changelog
 
-**Live patch releases:** From v1.1.1 onward, every merged PR into `main` is tagged as v1.1.x after the exact commit is confirmed deployed on GitHub Pages. The web app displays the matched published version, while v1.1.0 remains the scoring-model baseline. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+**Live release numbering:** The v1.1.x patch series covers releases through merged PR #23. PR #24 introduces the **v1.2.0** minor release; later merged PRs increment v1.2.x. Release tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+
+## 1.2.0 — Comprehensive assessment inputs
+
+- Add a **Quick & simple / Comprehensive** testing path with Sakinorva Functions, Sakinorva Rowe Enneagram, and IPIP-NEO-300 links alongside the original short tests.
+- Accept **all eight cognitive-function totals** as direct inputs, deriving continuous game-specific cognition preferences without claiming Sakinorva or MBTI equivalence.
+- Allow an **optional four-letter type override** when a user knows their Sakinorva type. The override controls Nature and archetype interpretation while preserving the original function-based affinities.
+- Add **optional Assertive/Turbulent (A/T)** identity. Unspecified stays missing, with a neutral placeholder; chosen A/T uses the documented type-only 75/25 estimate, not a fabricated measured percentage.
+- Accept **signed raw Rowe Enneagram scores**, including negatives. Apply documented within-report relative normalization; retain raw values and manual tritype/wing overrides.
+- Preserve share links, randomized sample builds, original quick inputs, 17-type typing, six battle roles, 36 archetypes, and the fixed **535 base-stat budget** with the **70/20/10 Big Five / Enneagram / cognition** blend.
+- Keep the two test sources explicitly distinguished; Rowe subtype scores and Big Five facets are not silently introduced as new mechanics.
+- Refresh the bundled version and cache keys, extend regression and browser coverage, and advance future automatic releases to **v1.2.x**.
+- Add the **creation-version footer** to live cards, exported PNGs, and copied summaries. Shared links preserve the originating version; older links recalculated under newer releases show both original and current versions.
 
 ## 1.1.0 — Battle role balance
 

@@ -148,8 +148,17 @@ a{color:inherit}
 /* Match the live result card to the PNG's shared elemental and battle role art.
    Separate corners preserve proportions on narrow phones and tall result cards. */
 .result-card.has-type-art{position:relative;isolation:isolate;overflow:hidden;background:#111e25}
-.result-card.has-type-art>.pokemon-header,.result-card.has-type-art>.result-body{
+.result-card.has-type-art>.pokemon-header,.result-card.has-type-art>.result-body,.result-card.has-type-art>.build-version-footer{
   position:relative;z-index:1
+}
+.build-version-footer{
+  padding:13px 24px 16px;
+  border-top:1px solid #304246;
+  background:#102127;
+  color:#a9c5ba;
+  font:10px/1.5 'DM Mono',monospace;
+  letter-spacing:.6px;
+  text-align:right;
 }
 .result-card.has-type-art>.pokemon-header{background:transparent}
 .result-artwork{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}

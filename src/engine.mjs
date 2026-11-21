@@ -75,6 +75,21 @@ export function deriveTritype(scores) {
   return winners.sort((a,b)=>scores[b-1]-scores[a-1] || a-b).join('');
 }
 
+// Rowe's nine type totals can be signed. Keep them distinct from the app's
+// 0–100 scores; only their within-report relationships are comparable.
+// The 50-point span floor damps small differences instead of inventing 0/100
+// extremes. The 80-point output span is a game calibration, not a validated
+// crosswalk to Find My Nine. All scores remain continuous, preserving ties.
+export function normalizeRoweScores(raw) {
+  if(!Array.isArray(raw) || raw.length!==9 ||
+     raw.some(value=>typeof value!=='number' || !Number.isFinite(value)))
+    throw new Error('Rowe results require nine finite numeric type scores (negative values are allowed).');
+  const lowest=Math.min(...raw),highest=Math.max(...raw);
+  const midpoint=(lowest+highest)/2;
+  const referenceSpan=Math.max(50,highest-lowest);
+  return raw.map(value=>clamp(50+80*(value-midpoint)/referenceSpan));
+}
+
 export function rankingToScores(ranking) {
   if (!Array.isArray(ranking) || ranking.length !== 9 ||
       new Set(ranking.map(Number)).size !== 9 || ranking.some(n=>!Number.isInteger(Number(n)) || +n < 1 || +n > 9)) {
@@ -379,9 +394,18 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
 export function generateBuild(input) {
   const warnings=[];
   const usingFunctions=input.functionScores!=null;
-  if(usingFunctions && (input.mbtiScores!=null || input.typeOverride))
-    throw new Error('Choose cognitive-function scores or 16Personalities data, not both.');
+  if(usingFunctions && input.mbtiScores!=null)
+    throw new Error('Choose cognitive-function scores or 16Personalities percentages, not both.');
+  // A/T is not a cognitive function. When provided without a strength,
+  // reuse the established type-only 75/25 estimate; otherwise stay neutral.
+  const identityPreference=String(input.identityPreference??'').trim().toUpperCase();
+  if(!usingFunctions && identityPreference)
+    throw new Error('A/T identity preference can only accompany cognitive-function scores.');
+  if(identityPreference && !['A','T'].includes(identityPreference))
+    throw new Error('A/T identity preference must be Assertive (A) or Turbulent (T).');
   let mbtiScores=usingFunctions ? deriveFunctionPreferences(input.functionScores) : input.mbtiScores;
+  if(usingFunctions && identityPreference)
+    mbtiScores=[...mbtiScores.slice(0,4),identityPreference==='T'?75:25];
   const override=String(input.typeOverride||'').trim().toUpperCase().replace(/-[AT]$/,'');
   if (mbtiScores == null && !override) throw new Error('Enter your 16Personalities scores or choose a type.');
   if (mbtiScores == null) {
@@ -392,9 +416,21 @@ export function generateBuild(input) {
   const mbti=override || suggestedType;
   if (!NATURE_BY_MBTI[mbti]) throw new Error('Invalid MBTI type.');
   const nature=NATURE_BY_MBTI[mbti];
-  if(usingFunctions) warnings.push('Eight function totals were translated into four preference contrasts for this game; the A/T axis cannot be inferred. This is not Sakinorva’s typing algorithm.');
+  if(usingFunctions) {
+    warnings.push('Eight function totals were translated into four preference contrasts for this game. This is not Sakinorva’s typing algorithm.');
+    if(identityPreference)
+      warnings.push('The supplied '+identityPreference+' identity label uses the existing 75/25 type-only proxy for scoring; no measured A/T percentage was supplied.');
+    else
+      warnings.push('The A/T axis was not provided; its contribution is neutral and no A/T label was inferred.');
+    if(override && override!==suggestedType)
+      warnings.push('Your selected '+override+' type overrides the function-derived '+suggestedType+' label for Nature and archetype interpretation; function contrasts still drive the underlying stat affinities.');
+  }
 
-  let enneaScores=input.enneagramScores;
+  const usingRowe=input.roweScores!=null;
+  if(usingRowe && (input.enneagramScores!=null || input.enneagramRanking!=null))
+    throw new Error('Use Rowe raw scores or conventional Enneagram scores/ranking, not both.');
+  let enneaScores=usingRowe ? normalizeRoweScores(input.roweScores) : input.enneagramScores;
+  if(usingRowe) warnings.push('Rowe signed totals were mapped to relative 0–100 game scores (50-point minimum reference span). These are not test percentages or calibrated to Find My Nine; subtype results are not yet modeled.');
   if (enneaScores == null && input.enneagramRanking) {
     enneaScores=rankingToScores(input.enneagramRanking);
     warnings.push('Enneagram ranking was converted into evenly spaced proxy scores.');
@@ -424,7 +460,7 @@ export function generateBuild(input) {
   const effectiveStats=applyNature(baseStats,nature);
   // Do not let fabricated proxy scores supply a typing wing when the visitor
   // entered only a tritype. Explicit wing or actual scores/ranking can do so.
-  const hasRealEnneagramInput=input.enneagramScores!=null || input.enneagramRanking!=null;
+  const hasRealEnneagramInput=input.enneagramScores!=null || input.enneagramRanking!=null || usingRowe;
   const typingWing=(input.wingOverride!=null && input.wingOverride!=='') ||
     hasRealEnneagramInput ? selectedWing : null;
   const {types,hiddenType}=deriveTyping({core,second,third,wing:typingWing});
@@ -445,9 +481,11 @@ export function generateBuild(input) {
     enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
     role,types,moves,ability,hasBigFive:input.bigFive!=null
   });
-  const identity=mbti + (!usingFunctions && input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
+  const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
+    input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const build={
-    mbti, identity, nature, cognitiveSource:usingFunctions?'functions':'16personalities',
+    mbti, identity, nature, identityPreference:usingFunctions?(identityPreference||null):null,
+    cognitiveSource:usingFunctions?'functions':'16personalities', enneagramSource:usingRowe?'rowe':'standard',
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
     oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,

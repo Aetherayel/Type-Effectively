@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10171c" />
-  <meta name="application-version" content="1.1.0" />
+  <meta name="application-version" content="1.2.0" />
   <meta name="description" content="Turn your MBTI, Enneagram, and Big Five results into a custom personality Pokémon. 535 base stat points. Zero scientific claims about your battle potential." />
   <meta property="og:title" content="Type Effectively — your personality has a moveset" />
   <meta property="og:description" content="Three personality tests. One extremely specific Pokémon build." />
   <title>Type Effectively · Your personality has a moveset</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=randomize-1" />
-  <script type="module" src="./src/app.mjs?v=role-balance-1"></script>
-  <script type="module" src="./src/release-version.mjs"></script>
+  <link rel="stylesheet" href="./styles.css?v=1.2.0" />
+  <script type="module" src="./src/app.mjs?v=1.2.0"></script>
+  <script type="module" src="./src/release-version.mjs?v=1.2.0"></script>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -23,7 +23,7 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span>TYPE<span class="brand-accent">/</span>EFFECTIVELY</span>
       </a>
-      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v1.1.0</span>
+      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v1.2.0</span>
       <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a></div>
     </header>
 
@@ -84,10 +84,19 @@
             <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. Function scores influence the build continuously; a four-letter label is inferred only to keep existing game mechanics compatible.</p>
             <div class="field-grid" id="mbti-type-fields">
               <label class="field">
-                <span>Type override <span class="muted">(optional with scores)</span></span>
+                <span id="mbti-override-label">Type override <span class="muted">(optional with scores)</span></span>
                 <select id="mbti-override"><option value="">Auto-detect from scores</option></select>
               </label>
+              <label class="field hidden" id="function-identity-fields">
+                <span>A/T identity <span class="muted">(optional; not measured by functions)</span></span>
+                <select id="function-identity">
+                  <option value="">Not provided (no A/T)</option>
+                  <option value="A">Assertive (A)</option>
+                  <option value="T">Turbulent (T)</option>
+                </select>
+              </label>
             </div>
+            <p class="mini-note hidden" id="function-identity-help">Know your Sakinorva four-letter type? Select it above to override the app suggestion. If you know A/T, select it separately. Unknown A/T remains absent; a selected A/T letter uses an estimated 75/25 game-scoring proxy, not a measured percentage.</p>
             <p class="mini-note" id="mbti-derived">An inferred type will appear here as you enter your scores.</p>
           </section>
 
@@ -102,10 +111,13 @@
             <div class="mode-switch" role="group" aria-label="Enneagram input mode">
               <button type="button" class="mode-button active" data-ennea-mode="scores" aria-pressed="true">9 scores</button>
               <button type="button" class="mode-button" data-ennea-mode="ranking" aria-pressed="false">Ranking</button>
+              <button type="button" class="mode-button" data-ennea-mode="rowe" aria-pressed="false">Rowe raw</button>
               <button type="button" class="mode-button" data-ennea-mode="tritype" aria-pressed="false">Tritype only</button>
             </div>
             <div id="ennea-score-fields" class="ennea-grid"></div>
-            <p class="mini-note" id="ennea-score-help">Scores in this form are 0–100; if your test uses another scale, scale all nine values consistently before entering them.</p>
+            <p class="mini-note" id="ennea-score-help">These are 0–100 scores. For signed Rowe results, use “Rowe raw” instead of manually scaling them.</p>
+            <div id="rowe-score-fields" class="ennea-grid hidden" aria-label="Nine signed Rowe Enneagram type totals"></div>
+            <p class="mini-note hidden" id="rowe-score-help">Enter the nine raw type totals exactly as Rowe reports them. Negative values are supported. The app preserves their relative distances with a conservative, explicitly authored conversion. Rowe subtype scores and instinctual stacking are not used in the Pokémon formula.</p>
             <div id="ennea-ranking-fields" class="field hidden">
               <label for="ennea-ranking">Order all nine types from strongest to weakest</label>
               <input type="text" id="ennea-ranking" placeholder="5 9 3 6 1 4 8 7 2" inputmode="text" />
@@ -202,7 +214,7 @@
       <p class="stat-guide-footnote">These are authored, game-inspired interpretations—not validated measures of resilience, intelligence, character, or mental health.</p>
     </section>
     <footer class="footer">
-      <span id="footer-version">TYPE EFFECTIVELY / V1.1.0</span>
+      <span id="footer-version">TYPE EFFECTIVELY / V1.2.0</span>
       <span>KNOW YOURSELF. KNOW YOUR WEAKNESSES. BLAME TYPE MATCHUPS.</span>
       <a href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">OPEN SOURCE ↗</a>
     </footer>
