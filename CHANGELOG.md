@@ -21,6 +21,12 @@
 - Refresh the browser's JavaScript module cache keys for the app entry and scoring engine after the v1.2.3 Baton Pass fix. The release badge can update faster than browser-cached module scripts; a v1.2.3 badge alone did not prove that the new engine code was loaded.
 - Add a regression check for consistent entry/engine cache keys and document private-window verification for recent deployments.
 
+## Unreleased — Keep specialist commentary in one place
+
+- Confine Signature Strategy names, synergy explanation, and qualification language to the dedicated callout in the results UI.
+- Remove duplicated package commentary from role-move text, held-item rationale, Trainer Guide, calculation notes, copied build summaries, and PNG exports; keep all underlying moves, abilities, items, scoring and package selection unchanged.
+- Apply the same personality rationale to specialist and ordinary held items; refresh affected browser module cache keys and add cross-surface regression coverage.
+
 ## 1.2.0 — Comprehensive assessment inputs
 
 - Add a **Quick & simple / Comprehensive** testing path with Sakinorva Functions, Sakinorva Rowe Enneagram, and IPIP-NEO-300 links alongside the original short tests.
