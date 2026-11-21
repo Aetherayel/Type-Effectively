@@ -1,0 +1,26 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const app=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
+const engine=readFileSync(new URL('../src/engine.mjs',import.meta.url),'utf8');
+
+test('application and scoring engine share a deliberate cache invalidation key',()=>{
+  const entry=html.match(/src="\.\/src\/app\.mjs\?v=([^"]+)"/)?.[1];
+  const scoring=app.match(/from '\.\/engine\.mjs\?v=([^']+)'/)?.[1];
+  assert.ok(entry,'entry script needs a versioned module URL');
+  assert.ok(scoring,'app must version the engine import');
+  assert.equal(entry,scoring,'entry and engine must be refreshed together');
+  assert.notEqual(entry,'1.2.0','scoring engine must not reuse the pre-PR #27 cache key');
+  assert.match(engine,/if\(growth==='Baton Pass' && !hasBatonPassSetup/);
+});
+
+test('release badge and actual engine can have independent cache states',()=>{
+  // The badge is resolved from the published Pages commit asynchronously.
+  // A new release label does not by itself invalidate browser ESM module URLs.
+  const release=readFileSync(new URL('../src/release-version.mjs',import.meta.url),'utf8');
+  assert.match(release,/deploy-revision\.json/);
+  assert.match(release,/type-effectively:release-version/);
+  assert.match(html,/app\.mjs\?v=/);
+});
