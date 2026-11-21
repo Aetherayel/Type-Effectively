@@ -81,7 +81,7 @@ test('randomize fills editable score controls, runs genuine engine, and labels s
   assert.ok(source.includes("setMode('ennea','scores')"));
   for(const [prefix,key] of [['mbti','mbtiScores'],['ennea','enneagramScores'],['bigfive','bigFive']])
     assert.ok(source.includes("setScores('"+prefix+"',input."+key+")"));
-  assert.ok(source.includes("state.touched={mbti:true,functions:false,enneagram:true,bigfive:true}"));
+  assert.ok(source.includes("state.touched={mbti:true,functions:false,enneagram:true,rowe:false,bigfive:true}"));
   assert.ok(source.includes("FUNCTION_KEYS.forEach"),'random builds must clear stale function inputs');
   assert.ok(source.includes('runBuild(false,true)'),'randomized build should stay in result view');
   assert.ok(app.includes("const build=generateBuild(input)"),'use real build engine');
