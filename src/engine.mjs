@@ -333,8 +333,23 @@ const MOVE_EFFECT_GROUPS={
   'Calm Mind':'special-setup','Growth':'special-setup',
   'Agility':'speed-setup','Tailwind':'speed-setup',
   'Rest':'recovery','Recover':'recovery','Aqua Ring':'recovery',
-  'Light Screen':'screen','Reflect':'screen'
+  'Light Screen':'screen','Reflect':'screen','Aurora Veil':'screen'
 };
+
+// Duplicate defensive effects are invalid, not merely an affinity penalty.
+// The growth slot should add new behavior rather than repeat an existing shield.
+export function isMovePairCompatible(tactic,growth,{strategy=null}={}) {
+  if(tactic===growth)return false;
+  if((tactic==='Aurora Veil' && ['Reflect','Light Screen'].includes(growth)) ||
+     (growth==='Aurora Veil' && ['Reflect','Light Screen'].includes(tactic)))return false;
+  if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growth)) ||
+     (growth==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(tactic)))return false;
+  // Repeating an active environment or curing the condition that enables the
+  // specialization works against the chosen four-move plan.
+  if(strategy?.ability==='Misty Surge' && growth==='Safeguard')return false;
+  if(['Guts','Poison Heal'].includes(strategy?.ability) && growth==='Rest')return false;
+  return true;
+}
 
 function roleTacticScore(name,role,types,stats,second,third) {
   let score=scoreMove(name,types,stats,second,third);
@@ -356,7 +371,20 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
     return {name:move[0],category:style==='physical'?'Physical STAB':'Special STAB',
       why:'Its '+type+' typing is expressed through '+style+' offense.'};
   });
+  // A few strategies earn one explicit attack substitution rather than only
+  // changing their ability, role tactic and item. The other attack stays put.
+  if(strategy?.attackSwap){
+    const swap=strategy.attackSwap;
+    const index=Number.isInteger(swap.slot)?swap.slot:attackTypes.indexOf(swap.type);
+    if(index<0||index>1||swap.style!==style ||
+       (swap.type && attackTypes[index]!==swap.type))
+      throw new Error('Invalid signature attack substitution: '+strategy.id);
+    attacks[index]={name:swap.move,
+      category:swap.type?(style==='physical'?'Physical STAB':'Special STAB'):'Signature physical coverage',
+      why:swap.why};
+  }
   const selected=new Set(attacks.map(m=>m.name));
+  if(selected.size!==2)throw new Error('Signature attack substitution duplicated an attack.');
   const validRole=ROLE_MOVES[role.primary.name].filter(name=>
     !selected.has(name) &&
     (!strategy||name===strategy.tactic) &&
@@ -373,11 +401,7 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   // Semantic growth eligibility is guaranteed by the curated core lesson pool.
   const pairs=[];
   for(const tactic of validRole)for(const growthName of validGrowth){
-    if(tactic===growthName)continue;
-    if((tactic==='Trick Room' &&
-      ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growthName)) ||
-      (growthName==='Trick Room' &&
-      ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(tactic)))continue;
+    if(!isMovePairCompatible(tactic,growthName,{strategy}))continue;
     const roleScore=roleTacticScore(tactic,role,visibleTypes,stats,second,third);
     const growthScore=scoreMove(growthName,visibleTypes,stats,second,third);
     const duplicateEffect=MOVE_EFFECT_GROUPS[tactic] &&
@@ -392,7 +416,8 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-      why:'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
+      why:strategy?strategy.mechanism:
+        'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
