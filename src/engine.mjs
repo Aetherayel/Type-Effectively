@@ -4,11 +4,11 @@ import {
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_CALIBRATED_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs?v=role-balance-1';
-import { chooseHeldItem } from './held-items.mjs';
+import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
-import { composeFieldReport } from './profile-analysis.mjs';
+import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences } from './functions.mjs';
-import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs';
+import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
