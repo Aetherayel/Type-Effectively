@@ -51,6 +51,11 @@ if (typeof document !== 'undefined') {
     if (footer) footer.textContent = 'TYPE EFFECTIVELY / ' + label.toUpperCase();
     const meta = document.querySelector('meta[name="application-version"]');
     if (meta) meta.content = version;
+    // Cards generated before this asynchronous verification can replace their
+    // provisional bundled minor version with the exact published patch number.
+    document.dispatchEvent(new CustomEvent('type-effectively:release-version', {
+      detail: { version: label }
+    }));
   }).catch(() => {
     // An offline connection or GitHub API limit must never block the app.
   });
