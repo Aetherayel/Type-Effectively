@@ -2,6 +2,7 @@ import { TYPE_COLORS } from './data.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { loadItemSprite } from './item-sprites.mjs';
 import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs?v=role-emblems-1';
+import { cardVersionLabels } from './build-version.mjs';
 
 // Independent vector artwork; this never serializes the questionnaire, share
 // URL fragment, raw test scores or the current browser DOM.
@@ -86,6 +87,7 @@ export function buildCardSvg(build) {
   const p=TYPE_COLORS[build.types[0]],s=TYPE_COLORS[build.types[1]||build.types[0]];
   const role=build.role.primary.name+(build.role.secondary?' / '+build.role.secondary.name:'');
   const identity=build.identity+' · #'+build.tritype;
+  const versionLabels=cardVersionLabels(build);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}">
   <defs>
@@ -156,6 +158,8 @@ export function buildCardSvg(build) {
   <line x1="76" x2="884" y1="1612" y2="1612" stroke="#4b6964"/>
   <text x="76" y="1640" font-size="17" font-weight="700" fill="#d2e5dd">aetherayel.github.io/Type-Effectively/</text>
   <text x="76" y="1661" font-size="12" fill="#8da69e">Unofficial fan project · OCEAN shown only as high / low</text>
+  <text x="884" y="1640" text-anchor="end" font-family="monospace" font-size="16" font-weight="700" fill="#d2e5dd">${esc(versionLabels.created)}</text>
+  ${versionLabels.recalculated?'<text x="884" y="1661" text-anchor="end" font-family="monospace" font-size="12" fill="#9fbcb4">'+esc(versionLabels.recalculated)+'</text>':''}
 </svg>`;
 }
 
