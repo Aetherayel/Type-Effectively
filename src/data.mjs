@@ -163,7 +163,7 @@ export const ABILITIES = [
   {name:'Drought',roles:['Sweeper'],types:['Fire'],desc:'Summons harsh sunlight on entering battle.',strategyOnly:true},
   {name:'Corrosion',roles:['Controller'],types:['Poison'],desc:'Allows poisoning of Poison- and Steel-type targets.',strategyOnly:true},
   {name:'Iron Barbs',roles:['Wall'],types:['Steel'],desc:'Damages opponents that make contact.',strategyOnly:true},
-  {name:'Magic Bounce',roles:['Controller'],types:['Psychic'],desc:'Reflects eligible incoming status moves.',strategyOnly:true},
+  {name:'Grassy Surge',roles:['Support'],types:['Grass'],desc:'Creates Grassy Terrain on entering battle.',strategyOnly:true},
   {name:'Speed Boost',roles:['Sweeper','Pivot'],types:['Bug','Flying','Electric'],desc:'Raises Speed at the end of each turn.'},
   {name:'Guts',roles:['Tank','Sweeper'],types:['Fighting','Normal'],desc:'Raises Attack while affected by a status condition.'}
 ];
