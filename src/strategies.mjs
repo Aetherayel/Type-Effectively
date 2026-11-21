@@ -51,12 +51,62 @@ export const SIGNATURE_STRATEGIES=Object.freeze([
     mechanism:'Iron Defense strengthens physical staying power while Iron Barbs and Rocky Helmet punish contact.'
   },
   {
-    id:'grassy-sanctuary',name:'Grassy Sanctuary',roles:['Support'],requiredTypes:['Grass'],
+    id:'grassy-sanctuary',name:'Grassy Sanctuary',roles:['Support'],requiredTypes:['Grass'],forbiddenTypes:['Ground'],
     ability:'Grassy Surge',tactic:'Life Dew',item:'Terrain Extender',
     minimum:{hp:80,spd:84},targets:{hp:112,def:92,spd:119,spe:86},
     motivations:[2,6,9],bigFive:[64,67,48,82,39],
     insight:'Changes the surroundings so recovery is normal, then quietly provides even more of it.',
     mechanism:'Grassy Surge establishes healing terrain, Life Dew actively restores allies, and Terrain Extender prolongs passive healing.'
+  },
+  {
+    id:'ashen-vanguard',name:'Ashen Vanguard',roles:['Tank'],requiredTypes:['Fighting'],forbiddenTypes:['Fire'],
+    ability:'Guts',tactic:'Bulk Up',item:'Flame Orb',offensiveStyle:'physical',
+    attackSwap:{slot:1,move:'Facade',style:'physical',why:'Flame Orb activates Guts and doubles Facade. It gives up a second typed attack for dependable status-fueled offense.'},
+    minimum:{atk:98,hp:80},targets:{hp:107,atk:122,def:102,spd:92},
+    motivations:[3,6,8],bigFive:[55,82,64,39,51],
+    insight:'Responds to adversity by improving its stance and hitting harder. This is not permission to create avoidable emergencies.',
+    mechanism:'Flame Orb burns its non-Fire holder, activating Guts; Bulk Up improves Attack and Defense, while Facade doubles in power when burned.'
+  },
+  {
+    id:'venom-alchemist',name:'Venom Alchemist',roles:['Wall'],requiredTypes:['Grass'],forbiddenTypes:['Poison','Steel'],
+    ability:'Poison Heal',tactic:'Protect',item:'Toxic Orb',
+    minimum:{hp:92,def:84},targets:{hp:119,def:112,spd:108},
+    motivations:[5,6,9],bigFive:[67,72,29,60,47],
+    insight:'Converts a persistent irritant into a source of recovery. Would appreciate that the hazard is now documented.',
+    mechanism:'Toxic Orb poisons the holder, Poison Heal converts poison into HP recovery, and Protect buys another recovery turn.'
+  },
+  {
+    id:'sandbound-citadel',name:'Sandbound Citadel',roles:['Wall'],requiredTypes:['Rock'],
+    ability:'Sand Stream',tactic:'Shore Up',item:'Smooth Rock',
+    minimum:{hp:84,def:88,spd:78},targets:{hp:112,def:123,spd:109,spe:62},
+    motivations:[1,5,6],bigFive:[61,90,29,42,45],
+    insight:'Turns bad weather into building material. Every contingency has its own weatherproof folder.',
+    mechanism:'Sand Stream supplies sand, boosting Rock-type special bulk; Shore Up restores more HP during sand and Smooth Rock extends the weather.'
+  },
+  {
+    id:'arcane-catalyst',name:'Arcane Catalyst',roles:['Sweeper'],requiredTypes:['Psychic'],
+    ability:'Magic Guard',tactic:'Nasty Plot',item:'Life Orb',offensiveStyle:'special',
+    minimum:{spa:102,spe:84},targets:{hp:81,spa:127,spe:117},
+    motivations:[3,5,7],bigFive:[92,62,54,29,38],
+    insight:'Makes ambitious plans and extracts the upside without paying the predictable incidental costs. Suspiciously efficient.',
+    mechanism:'Nasty Plot doubles special attacking power; Magic Guard prevents Life Orb HP loss while retaining its damage boost.'
+  },
+  {
+    id:'circuit-architect',name:'Circuit Architect',roles:['Sweeper'],requiredTypes:['Electric'],
+    ability:'Electric Surge',tactic:'Charge',item:'Terrain Extender',offensiveStyle:'special',
+    attackSwap:{type:'Electric',move:'Rising Voltage',style:'special',why:'Electric Surge supplies terrain. Rising Voltage has extra power against grounded targets while the terrain lasts.'},
+    minimum:{spa:100,spe:88},targets:{hp:83,spa:119,spe:123,spd:81},
+    motivations:[3,5,7],bigFive:[78,76,79,35,39],
+    insight:'Improves the operating environment, charges its system, and then announces that everything is proceeding according to the plan.',
+    mechanism:'Electric Surge creates Electric Terrain; Charge strengthens the next Electric attack, Terrain Extender prolongs terrain and Rising Voltage doubles against grounded targets.'
+  },
+  {
+    id:'misty-custodian',name:'Misty Custodian',roles:['Support'],requiredTypes:['Fairy'],
+    ability:'Misty Surge',tactic:'Heal Bell',item:'Misty Seed',
+    minimum:{spd:89,hp:80},targets:{hp:108,def:93,spd:121,spe:83},
+    motivations:[1,2,6],bigFive:[67,73,47,88,47],
+    insight:'Creates room for others to recover and then quietly addresses what was already broken.',
+    mechanism:'Misty Surge shields grounded allies from new major status conditions; Heal Bell cures existing status, while Misty Seed grants one Special Defense boost.'
   }
 ]);
 
@@ -87,6 +137,9 @@ export function selectSignatureStrategy({
   const eligible=SIGNATURE_STRATEGIES.flatMap(strategy=>{
     if(!strategy.roles.includes(role.primary.name) ||
        !strategy.requiredTypes.every(type=>types.includes(type)) ||
+       strategy.forbiddenTypes?.some(type=>types.includes(type)) ||
+       (strategy.offensiveStyle==='physical' && stats.atk<stats.spa) ||
+       (strategy.offensiveStyle==='special' && stats.spa<=stats.atk) ||
        !satisfiesGates(strategy,stats))return [];
     const motive=motivationFit(strategy,{core,second,third});
     if(motive<55)return []; // A thematic match alone cannot force a specialist.
@@ -98,7 +151,7 @@ export function selectSignatureStrategy({
     const item=HELD_ITEMS.find(entry=>entry.name===strategy.item);
     if(!ability||!item||
        !ability.types.some(type=>types.includes(type))||
-       !isHeldItemCompatible(item,{types,moves:[{name:strategy.tactic}],ability}))
+       !isHeldItemCompatible(item,{types,moves:[strategy.tactic,strategy.attackSwap?.move].filter(Boolean),ability}))
       throw new Error('Invalid signature strategy configuration: '+strategy.id);
     return [{...strategy,score:Math.round(score*10)/10}];
   }).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
