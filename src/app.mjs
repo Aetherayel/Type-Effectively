@@ -3,6 +3,7 @@ import {
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=typing17-1';
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=role-balance-1';
+import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
@@ -23,7 +24,8 @@ const oceanDetails=[
   'Curiosity & imagination','Order & follow-through','Social energy & assertion',
   'Cooperation & empathy','Sensitivity to stress'
 ];
-const state={mbtiMode:'scores',enneaMode:'scores',touched:{mbti:false,enneagram:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
+const FUNCTION_LABELS=['Extraverted intuition','Introverted intuition','Extraverted sensing','Introverted sensing','Extraverted thinking','Introverted thinking','Extraverted feeling','Introverted feeling'];
+const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
 let toastTimeout;
 
 function escapeHtml(text) {
@@ -44,8 +46,45 @@ function enneagramMarkup(n) {
     '<input type="range" min="0" max="100" value="50" id="ennea-'+(n-1)+'" data-score="enneagram" aria-label="Type '+n+' '+ENNEAGRAM_NAMES[n]+' score"/>' +
     '<input type="number" min="0" max="100" value="50" id="ennea-'+(n-1)+'-number" data-number-for="ennea-'+(n-1)+'" aria-label="Type '+n+' numeric score"/></div>';
 }
+function functionMarkup(key,index) {
+  return '<label class="function-entry" for="function-'+index+'"><span><strong>'+key+'</strong> · '+FUNCTION_LABELS[index]+'</span>'+
+    '<input id="function-'+index+'" type="number" step="any" inputmode="decimal" placeholder="Score" aria-label="'+key+' overall score" /></label>';
+}
+function readFunctionScores() {
+  const fields=FUNCTION_KEYS.map((_,i)=>$('function-'+i));
+  if(fields.some(field=>field.value.trim()===''))
+    throw new Error('Enter all eight cognitive-function totals before generating.');
+  const scores=fields.map(field=>Number(field.value));
+  if(scores.some(value=>!Number.isFinite(value)))
+    throw new Error('Cognitive-function totals must be finite numbers.');
+  return scores;
+}
+function setTestingPath(mode,chooseInput=true) {
+  state.testMode=mode==='advanced'?'advanced':'quick';
+  document.querySelectorAll('[data-test-mode]').forEach(button=>{
+    const active=button.dataset.testMode===state.testMode;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+  const advanced=state.testMode==='advanced';
+  const entries=[
+    ['mind',advanced?TEST_LINKS.functions:TEST_LINKS.mbti,advanced?'Take the Sakinorva Functions test ↗':'Take the free 16Personalities test ↗',advanced?'256 questions · function domains':'~10 min · external site'],
+    ['ennea',advanced?TEST_LINKS.rowe:TEST_LINKS.enneagram,advanced?'Take the Rowe Enneagram test ↗':'Take the free Find My Nine test ↗',advanced?'306 questions · nine scores':'Full nine-score results'],
+    ['bigfive',advanced?TEST_LINKS.ipipneo300:TEST_LINKS.bigfive,advanced?'Take the IPIP-NEO-300 test ↗':'Take the free Ocean Test ↗',advanced?'300 questions · domain percentiles':'50 questions · free scores']
+  ];
+  entries.forEach(([key,href,title,detail])=>{
+    const link=$(key+'-test-link');
+    link.href=href; link.textContent=title;
+    $(key+'-test-detail').textContent=detail;
+  });
+  $('assessment-note').textContent=advanced?
+    'Longer questionnaires offer more detail, not guaranteed accuracy. Use comparable function totals, nine Enneagram scores, and five Big Five domain percentiles.':
+    'Shorter tests with straightforward scores. You can still enter detailed data below.';
+  if(chooseInput) setMode('mbti',advanced?'functions':'scores');
+}
 function setupFields() {
   $('mbti-score-fields').innerHTML=mbtiAxes.map(([title,left,right],i)=>sliderMarkup('mbti',i,title,left,right)).join('');
+  $('function-score-fields').innerHTML=FUNCTION_KEYS.map(functionMarkup).join('');
   $('ennea-score-fields').innerHTML=Array.from({length:9},(_,i)=>enneagramMarkup(i+1)).join('');
   $('bigfive-fields').innerHTML=OCEAN_LABELS.map((label,i)=>sliderMarkup('bigfive',i,label,oceanDetails[i],'High '+label)).join('');
   const typeSelect=$('mbti-override');
@@ -79,6 +118,9 @@ function setupFields() {
   }));
   $('ennea-ranking').addEventListener('input',()=>{state.touched.enneagram=true;updateDerived();});
   $('mbti-override').addEventListener('change',()=>{updateDerived();});
+  document.querySelectorAll('[id^="function-"][type="number"]').forEach(el=>el.addEventListener('input',()=>{
+    state.touched.functions=true;updateDerived();
+  }));
   $('tritype-override').addEventListener('input',()=>{updateDerived();});
   $('wing-override').addEventListener('change',()=>{});
 }
@@ -111,11 +153,19 @@ function setMode(group,mode) {
   });
   if(group==='mbti') {
     $('mbti-score-fields').classList.toggle('hidden',mode!=='scores');
+    $('mbti-score-help').classList.toggle('hidden',mode!=='scores');
+    $('function-score-fields').classList.toggle('hidden',mode!=='functions');
+    $('function-help').classList.toggle('hidden',mode!=='functions');
+    $('mbti-type-fields').classList.toggle('hidden',mode==='functions');
+    $('mbti-subtitle').textContent=mode==='functions'?
+      'Eight cognitive functions, entered directly. Their contrasts influence stats and classification without adding a second scoring engine.':
+      'Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.';
     $('mbti-derived').textContent=mode==='type'?'Select the four-letter type you identify with. We will use estimated percentage scores where needed.':'Your percentages determine the suggested type. You can override it below.';
     $('mbti-override').options[0].textContent=mode==='type'?'Choose a type…':'Auto-detect from scores';
   } else {
     $('ennea-score-fields').classList.toggle('hidden',mode!=='scores');
     $('ennea-ranking-fields').classList.toggle('hidden',mode!=='ranking');
+    $('ennea-score-help').classList.toggle('hidden',mode!=='scores');
     $('tritype-override').placeholder=mode==='tritype'?'Required, e.g. 593':'e.g. 593';
   }
   updateDerived();
@@ -141,13 +191,20 @@ function inferredTritype() {
   return '';
 }
 function updateDerived() {
-  const override=$('mbti-override').value;
+  const override=state.mbtiMode==='functions'?'':$('mbti-override').value;
   const canSuggest=state.mbtiMode==='scores'&&state.touched.mbti;
   let suggested=canSuggest?deriveMbti(readScores('mbti',5)):'';
-  $('mbti-derived').textContent=override
-    ? 'Selected: '+override+(suggested && suggested!==override?' · test-derived suggestion: '+suggested:'')
-    : suggested?'Suggested type: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]
-    : state.mbtiMode==='type'?'Choose your four-letter type above to continue.':'Enter your percentages to infer your type, or choose an override.';
+  if(state.mbtiMode==='functions') {
+    try {
+      suggested=deriveMbti(deriveFunctionPreferences(readFunctionScores()));
+    } catch { suggested=''; }
+  }
+  $('mbti-derived').textContent=state.mbtiMode==='functions'?
+    (suggested?'Game-derived preference: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]+' · A/T unspecified':
+    'Enter all eight overall function totals to infer a game-compatible preference.'):
+    override?'Selected: '+override+(suggested && suggested!==override?' · test-derived suggestion: '+suggested:''):
+    suggested?'Suggested type: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]:
+    state.mbtiMode==='type'?'Choose your four-letter type above to continue.':'Enter your percentages to infer your type, or choose an override.';
 
   const tritypeOverride=$('tritype-override').value.trim();
   const derived=inferredTritype();
@@ -173,11 +230,12 @@ function updateDerived() {
   }
 }
 function collectInput() {
-  const typeOverride=$('mbti-override').value;
+  const typeOverride=state.mbtiMode==='functions'?'':$('mbti-override').value;
+  const functionScores=state.mbtiMode==='functions'?readFunctionScores():null;
   const tritypeOverride=$('tritype-override').value.trim();
   if(tritypeOverride&&!isValidTritype(tritypeOverride)) throw new Error('Tritype needs exactly one gut (8/9/1), heart (2/3/4), and head (5/6/7) type.');
   const mbtiScores=state.mbtiMode==='scores' && state.touched.mbti ? readScores('mbti',5):null;
-  if(!mbtiScores&&!typeOverride) throw new Error('Please enter your 16Personalities scores or select your four-letter type.');
+  if(!mbtiScores&&!typeOverride&&!functionScores) throw new Error('Please enter your 16Personalities scores, a four-letter type, or eight function scores.');
   let enneagramScores=null,enneagramRanking=null;
   if(state.enneaMode==='scores'&&state.touched.enneagram) enneagramScores=readScores('ennea',9);
   if(state.enneaMode==='ranking'){
@@ -186,7 +244,7 @@ function collectInput() {
   }
   if(!enneagramScores&&!enneagramRanking&&!tritypeOverride) throw new Error('Enter Enneagram scores, a complete ranking, or a valid tritype.');
   return {
-    mbtiScores,typeOverride,enneagramScores,enneagramRanking,tritypeOverride,
+    mbtiScores,typeOverride,functionScores,enneagramScores,enneagramRanking,tritypeOverride,
     wingOverride:$('wing-override').value,
     bigFive:state.touched.bigfive?readScores('bigfive',5):null
   };
