@@ -39,6 +39,17 @@ window.addEventListener('DOMContentLoaded',()=>{
     input.dispatchEvent(new Event('input',{bubbles:true}));
   });
   document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-before-identity',document.querySelector('.result-id')?.textContent||'');
+  document.documentElement.setAttribute('data-before-suggestion',document.getElementById('mbti-derived')?.textContent||'');
+  // Override the reported four-letter type without changing any function totals.
+  document.getElementById('mbti-override').value='ENFP';
+  document.getElementById('mbti-override').dispatchEvent(new Event('change',{bubbles:true}));
+  document.getElementById('function-identity').value='A';
+  document.getElementById('function-identity').dispatchEvent(new Event('change',{bubbles:true}));
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-after-identity',document.querySelector('.result-id')?.textContent||'');
+  document.documentElement.setAttribute('data-after-suggestion',document.getElementById('mbti-derived')?.textContent||'');
+  document.documentElement.setAttribute('data-after-nature',document.querySelector('.nature-summary')?.textContent||'');
   document.documentElement.setAttribute('data-rowe-negative',document.getElementById('rowe-6')?.value||'');
 });
 </script>`;
@@ -117,8 +128,16 @@ try{
   assert.equal(result.status,0,'Chrome exited unsuccessfully');
   assert.deepEqual(counts,{mbti:5,enneagram:9,bigfive:5,functions:8,rowe:9},
     'All 19 sliders, eight function fields and nine Rowe fields must exist after initialization');
-  assert.ok(html.includes('Game-derived preference: INTJ'),
-    'Function mode should show a game-derived identity');
+  assert.match(html,/data-before-suggestion="[^"]*Game-derived preference: INTJ/,
+    'Function mode should show its initial inferred identity');
+  assert.match(html,/data-before-identity="[^"]*INTJ"/,
+    'Unknown A\/T should not create a letter suffix');
+  assert.match(html,/data-after-identity="[^"]*ENFP-A"/,
+    'Sakinorva four-letter override and optional A\/T should be reflected in results');
+  assert.match(html,/data-after-suggestion="[^"]*function-derived suggestion: INTJ/,
+    'Original function-derived suggestion should remain visible beside the manual type');
+  assert.match(html,/data-after-nature="[^"]*Naive Nature/,
+    'Override should control Nature while keeping raw function totals');
   assert.ok(html.includes('data-test-mode="advanced" aria-pressed="true"'),
     'Comprehensive path should activate');
   assert.ok(html.includes('Input notes:'),
