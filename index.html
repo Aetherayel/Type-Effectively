@@ -102,10 +102,13 @@
             <div class="mode-switch" role="group" aria-label="Enneagram input mode">
               <button type="button" class="mode-button active" data-ennea-mode="scores" aria-pressed="true">9 scores</button>
               <button type="button" class="mode-button" data-ennea-mode="ranking" aria-pressed="false">Ranking</button>
+              <button type="button" class="mode-button" data-ennea-mode="rowe" aria-pressed="false">Rowe raw</button>
               <button type="button" class="mode-button" data-ennea-mode="tritype" aria-pressed="false">Tritype only</button>
             </div>
             <div id="ennea-score-fields" class="ennea-grid"></div>
-            <p class="mini-note" id="ennea-score-help">Scores in this form are 0–100; if your test uses another scale, scale all nine values consistently before entering them.</p>
+            <p class="mini-note" id="ennea-score-help">These are 0–100 scores. For signed Rowe results, use “Rowe raw” instead of manually scaling them.</p>
+            <div id="rowe-score-fields" class="ennea-grid hidden" aria-label="Nine signed Rowe Enneagram type totals"></div>
+            <p class="mini-note hidden" id="rowe-score-help">Enter the nine raw type totals exactly as Rowe reports them. Negative values are supported. The app preserves their relative distances with a conservative, explicitly authored conversion. Rowe subtype scores and instinctual stacking are not used in the Pokémon formula.</p>
             <div id="ennea-ranking-fields" class="field hidden">
               <label for="ennea-ranking">Order all nine types from strongest to weakest</label>
               <input type="text" id="ennea-ranking" placeholder="5 9 3 6 1 4 8 7 2" inputmode="text" />
