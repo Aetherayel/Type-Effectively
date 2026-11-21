@@ -31,6 +31,13 @@ window.addEventListener('DOMContentLoaded',()=>{
     input.value=String(value);
     input.dispatchEvent(new Event('input',{bubbles:true}));
   });
+  const rowe=[32,3,4,4,32,14,-4,15,16];
+  rowe.forEach((value,index)=>{
+    const input=document.getElementById('rowe-'+index);
+    if(!input)return;
+    input.value=String(value);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   document.getElementById('generate-button')?.click();
 });
 </script>`;
@@ -97,7 +104,8 @@ try{
     mbti:(html.match(/data-score="mbti"/g)||[]).length,
     enneagram:(html.match(/data-score="enneagram"/g)||[]).length,
     bigfive:(html.match(/data-score="bigfive"/g)||[]).length,
-    functions:(html.match(/aria-label="[A-Z][a-z] overall score"/g)||[]).length
+    functions:(html.match(/aria-label="[A-Z][a-z] overall score"/g)||[]).length,
+    rowe:(html.match(/aria-label="Rowe type [1-9] raw total"/g)||[]).length
   };
   console.log('Browser initialization:',JSON.stringify({counts,diagnostics,status:result.status}));
   if(counts.mbti!==5||counts.enneagram!==9||counts.bigfive!==5){
@@ -106,14 +114,20 @@ try{
     console.error('Module and HTML context:',html.slice(0,1800));
   }
   assert.equal(result.status,0,'Chrome exited unsuccessfully');
-  assert.deepEqual(counts,{mbti:5,enneagram:9,bigfive:5,functions:8},
-    'All 19 sliders and eight function fields must exist after initialization');
+  assert.deepEqual(counts,{mbti:5,enneagram:9,bigfive:5,functions:8,rowe:9},
+    'All 19 sliders, eight function fields and nine Rowe fields must exist after initialization');
   assert.ok(html.includes('Game-derived preference: INTJ'),
     'Function mode should show a game-derived identity');
   assert.ok(html.includes('data-test-mode="advanced" aria-pressed="true"'),
     'Comprehensive path should activate');
   assert.ok(html.includes('Input notes:'),
-    'Function scoring must disclose its interpretation in the completed build');
+    'Advanced input sources must be disclosed in the completed build');
+  assert.ok(html.includes('Rowe signed totals were mapped'),
+    'Rowe conversion must be disclosed');
+  assert.ok(html.includes('id="rowe-6"') && html.includes('value="-4"'),
+    'Negative Rowe scores must survive direct entry');
+  assert.ok(html.includes('data-ennea-mode="rowe" aria-pressed="true"'),
+    'Comprehensive path should activate signed Rowe input');
   assert.ok(html.includes('sakinorva.net/test/function_bunya'),
     'Comprehensive path should link to the suggested function test');
   assert.equal(diagnostics,'','Browser reported an uncaught initialization error');
@@ -131,5 +145,5 @@ try{
     'Archetype scoring explanation should be visible in results markup');
   assert.equal((html.match(/class="report-score-row"/g)||[]).length,4,
     'Every archetype report should expose four score components');
-  console.log('All 19 sliders and eight function inputs rendered; advanced build generated.');
+  console.log('All 19 sliders, eight function inputs and nine Rowe inputs rendered; advanced build generated.');
 }finally{server.close();}
