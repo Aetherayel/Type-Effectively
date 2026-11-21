@@ -2,7 +2,7 @@ import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=typing17-1';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=role-balance-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=role-balance-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
@@ -25,7 +25,7 @@ const oceanDetails=[
   'Cooperation & empathy','Sensitivity to stress'
 ];
 const FUNCTION_LABELS=['Extraverted intuition','Introverted intuition','Extraverted sensing','Introverted sensing','Extraverted thinking','Introverted thinking','Extraverted feeling','Introverted feeling'];
-const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
+const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
 let toastTimeout;
 
 function escapeHtml(text) {
@@ -45,6 +45,19 @@ function enneagramMarkup(n) {
   return '<div class="ennea-score"><div class="ennea-head"><span>TYPE '+n+'</span><strong id="ennea-'+(n-1)+'-readout">50</strong></div>' +
     '<input type="range" min="0" max="100" value="50" id="ennea-'+(n-1)+'" data-score="enneagram" aria-label="Type '+n+' '+ENNEAGRAM_NAMES[n]+' score"/>' +
     '<input type="number" min="0" max="100" value="50" id="ennea-'+(n-1)+'-number" data-number-for="ennea-'+(n-1)+'" aria-label="Type '+n+' numeric score"/></div>';
+}
+function roweMarkup(n) {
+  return '<label class="ennea-score rowe-score" for="rowe-'+(n-1)+'">'+
+    '<span>TYPE '+n+'</span><input type="number" step="any" inputmode="decimal" id="rowe-'+(n-1)+'" placeholder="Raw score" aria-label="Rowe type '+n+' raw total"/></label>';
+}
+function readRoweScores() {
+  const fields=Array.from({length:9},(_,i)=>$('rowe-'+i));
+  if(fields.some(field=>field.value.trim()===''))
+    throw new Error('Enter all nine raw Rowe Enneagram scores, including negative values.');
+  const values=fields.map(field=>Number(field.value));
+  if(values.some(value=>!Number.isFinite(value)))
+    throw new Error('All nine Rowe scores must be finite numbers.');
+  return values;
 }
 function functionMarkup(key,index) {
   return '<label class="function-entry" for="function-'+index+'"><span><strong>'+key+'</strong> · '+FUNCTION_LABELS[index]+'</span>'+
@@ -80,12 +93,16 @@ function setTestingPath(mode,chooseInput=true) {
   $('assessment-note').textContent=advanced?
     'Longer questionnaires offer more detail, not guaranteed accuracy. Use comparable function totals, nine Enneagram scores, and five Big Five domain percentiles.':
     'Shorter tests with straightforward scores. You can still enter detailed data below.';
-  if(chooseInput) setMode('mbti',advanced?'functions':'scores');
+  if(chooseInput) {
+    setMode('mbti',advanced?'functions':'scores');
+    setMode('ennea',advanced?'rowe':'scores');
+  }
 }
 function setupFields() {
   $('mbti-score-fields').innerHTML=mbtiAxes.map(([title,left,right],i)=>sliderMarkup('mbti',i,title,left,right)).join('');
   $('function-score-fields').innerHTML=FUNCTION_KEYS.map(functionMarkup).join('');
   $('ennea-score-fields').innerHTML=Array.from({length:9},(_,i)=>enneagramMarkup(i+1)).join('');
+  $('rowe-score-fields').innerHTML=Array.from({length:9},(_,i)=>roweMarkup(i+1)).join('');
   $('bigfive-fields').innerHTML=OCEAN_LABELS.map((label,i)=>sliderMarkup('bigfive',i,label,oceanDetails[i],'High '+label)).join('');
   const typeSelect=$('mbti-override');
   Object.keys(NATURE_BY_MBTI).sort().forEach(type=>{
@@ -117,6 +134,9 @@ function setupFields() {
     syncSlider(ref,score);updateDerived();
   }));
   $('ennea-ranking').addEventListener('input',()=>{state.touched.enneagram=true;updateDerived();});
+  document.querySelectorAll('[id^="rowe-"][type="number"]').forEach(el=>el.addEventListener('input',()=>{
+    state.touched.rowe=true;updateDerived();
+  }));
   $('mbti-override').addEventListener('change',()=>{updateDerived();});
   document.querySelectorAll('[id^="function-"][type="number"]').forEach(el=>el.addEventListener('input',()=>{
     state.touched.functions=true;updateDerived();
@@ -166,6 +186,8 @@ function setMode(group,mode) {
     $('ennea-score-fields').classList.toggle('hidden',mode!=='scores');
     $('ennea-ranking-fields').classList.toggle('hidden',mode!=='ranking');
     $('ennea-score-help').classList.toggle('hidden',mode!=='scores');
+    $('rowe-score-fields').classList.toggle('hidden',mode!=='rowe');
+    $('rowe-score-help').classList.toggle('hidden',mode!=='rowe');
     $('tritype-override').placeholder=mode==='tritype'?'Required, e.g. 593':'e.g. 593';
   }
   updateDerived();
@@ -178,9 +200,10 @@ function parseRanking() {
   return parts.map(Number);
 }
 function inferredTritype() {
-  if(state.enneaMode==='tritype'||!state.touched.enneagram) return '';
+  if(state.enneaMode==='tritype'||(state.enneaMode==='rowe'?!state.touched.rowe:!state.touched.enneagram)) return '';
   try {
     if(state.enneaMode==='scores') return deriveTritype(readScores('ennea',9));
+    if(state.enneaMode==='rowe') return deriveTritype(normalizeRoweScores(readRoweScores()));
     if(state.enneaMode==='ranking'){
       const ranking=parseRanking();if(!ranking)return '';
       const scores=Array(9).fill(0);
@@ -212,6 +235,7 @@ function updateDerived() {
     ? 'Selected tritype: '+tritypeOverride+(derived&&derived!==tritypeOverride?' · score-derived suggestion: '+derived:'')
     : derived?'Suggested tritype: '+derived
     : state.enneaMode==='ranking'?'Enter a complete ranking of all nine types.':
+    state.enneaMode==='rowe'?'Enter the nine signed raw totals from your Rowe report.':
     state.enneaMode==='tritype'?'Enter your three-number tritype above.':'Add your nine scores or an override to determine your tritype.';
 
   const coreString=isValidTritype(tritypeOverride)?tritypeOverride:derived;
@@ -236,15 +260,16 @@ function collectInput() {
   if(tritypeOverride&&!isValidTritype(tritypeOverride)) throw new Error('Tritype needs exactly one gut (8/9/1), heart (2/3/4), and head (5/6/7) type.');
   const mbtiScores=state.mbtiMode==='scores' && state.touched.mbti ? readScores('mbti',5):null;
   if(!mbtiScores&&!typeOverride&&!functionScores) throw new Error('Please enter your 16Personalities scores, a four-letter type, or eight function scores.');
-  let enneagramScores=null,enneagramRanking=null;
+  let enneagramScores=null,enneagramRanking=null,roweScores=null;
   if(state.enneaMode==='scores'&&state.touched.enneagram) enneagramScores=readScores('ennea',9);
+  if(state.enneaMode==='rowe') roweScores=readRoweScores();
   if(state.enneaMode==='ranking'){
     enneagramRanking=parseRanking();
     if(!enneagramRanking) throw new Error('Your ranking must contain each digit 1–9 exactly once.');
   }
-  if(!enneagramScores&&!enneagramRanking&&!tritypeOverride) throw new Error('Enter Enneagram scores, a complete ranking, or a valid tritype.');
+  if(!enneagramScores&&!enneagramRanking&&!roweScores&&!tritypeOverride) throw new Error('Enter Enneagram scores, Rowe raw totals, a complete ranking, or a valid tritype.');
   return {
-    mbtiScores,typeOverride,functionScores,enneagramScores,enneagramRanking,tritypeOverride,
+    mbtiScores,typeOverride,functionScores,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
     bigFive:state.touched.bigfive?readScores('bigfive',5):null
   };
@@ -476,8 +501,9 @@ function clearAll() {
   setScores('mbti',[50,50,50,50,50]);
   FUNCTION_KEYS.forEach((_,i)=>{$('function-'+i).value='';});
   setScores('ennea',[50,50,50,50,50,50,50,50,50]);
+  Array.from({length:9},(_,i)=>$('rowe-'+i)).forEach(el=>{el.value='';});
   setScores('bigfive',[50,50,50,50,50]);
-  state.touched={mbti:false,functions:false,enneagram:false,bigfive:false};
+  state.touched={mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false};
   $('mbti-override').value='';$('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
   setTestingPath('quick');setMode('ennea','scores');
   state.lastBuild=null;state.lastInput=null;state.isSample=false;
@@ -501,12 +527,17 @@ function restoreShared() {
     }
     if(input.enneagramScores){setScores('ennea',input.enneagramScores);state.touched.enneagram=true;}
     if(input.enneagramRanking){$('ennea-ranking').value=input.enneagramRanking.join(' ');state.touched.enneagram=true;}
+    if(input.roweScores){
+      if(!Array.isArray(input.roweScores)||input.roweScores.length!==9) throw new Error('Invalid Rowe scores.');
+      input.roweScores.forEach((value,i)=>{$('rowe-'+i).value=String(value);});
+      state.touched.rowe=true;
+    }
     if(input.bigFive){setScores('bigfive',input.bigFive);state.touched.bigfive=true;}
     $('mbti-override').value=input.typeOverride||'';
     $('tritype-override').value=input.tritypeOverride||'';
     setTestingPath(payload.mode.testing==='advanced'?'advanced':'quick',false);
     setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
-    setMode('ennea',['scores','ranking','tritype'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
+    setMode('ennea',input.roweScores?'rowe':['scores','ranking','tritype','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
     runBuild(false,payload.sample===true);
     showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
@@ -519,12 +550,13 @@ function randomizeBuild() {
   const input=generateRandomBuildInput();
   setTestingPath('quick');
   FUNCTION_KEYS.forEach((_,i)=>{$('function-'+i).value='';});
+  Array.from({length:9},(_,i)=>$('rowe-'+i)).forEach(el=>{el.value='';});
   setMode('mbti','scores');
   setMode('ennea','scores');
   setScores('mbti',input.mbtiScores);
   setScores('ennea',input.enneagramScores);
   setScores('bigfive',input.bigFive);
-  state.touched={mbti:true,functions:false,enneagram:true,bigfive:true};
+  state.touched={mbti:true,functions:false,enneagram:true,rowe:false,bigfive:true};
   $('mbti-override').value='';
   $('tritype-override').value='';
   $('wing-override').value='';
