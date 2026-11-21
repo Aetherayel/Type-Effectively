@@ -56,7 +56,7 @@ export const SIGNATURE_STRATEGIES=Object.freeze([
     maximum:{spe:75},targets:{hp:111,def:102,spd:114,spe:42},
     motivations:[5,6,9],bigFive:[87,72,21,47,53],
     insight:'Changes the rules of tempo, then uses its apparent slowness as a tactical advantage.',
-    mechanism:'Trick Room reverses ordinary move order; Room Service lowers Speed when it activates. Magic Bounce protects against reflected disruption.'
+    mechanism:'Trick Room reverses ordinary move order; Room Service lowers Speed when it activates. Magic Bounce reflects eligible incoming status moves.'
   }
 ]);
 
