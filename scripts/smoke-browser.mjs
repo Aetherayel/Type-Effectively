@@ -22,6 +22,16 @@ window.addEventListener('unhandledrejection',event=>{
 window.addEventListener('DOMContentLoaded',()=>{
   // Exercise the actual results UI, not merely the slider bootstrap.
   document.getElementById('randomize-button')?.click();
+  // Switch to the comprehensive path and exercise real eight-score submission.
+  document.querySelector('[data-test-mode="advanced"]')?.click();
+  const scores=[20,90,20,30,75,40,25,60];
+  scores.forEach((value,index)=>{
+    const input=document.getElementById('function-'+index);
+    if(!input)return;
+    input.value=String(value);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  document.getElementById('generate-button')?.click();
 });
 </script>`;
 const server=createServer((req,res)=>{
@@ -86,7 +96,8 @@ try{
   const counts={
     mbti:(html.match(/data-score="mbti"/g)||[]).length,
     enneagram:(html.match(/data-score="enneagram"/g)||[]).length,
-    bigfive:(html.match(/data-score="bigfive"/g)||[]).length
+    bigfive:(html.match(/data-score="bigfive"/g)||[]).length,
+    functions:(html.match(/aria-label="[A-Z][a-z] overall score"/g)||[]).length
   };
   console.log('Browser initialization:',JSON.stringify({counts,diagnostics,status:result.status}));
   if(counts.mbti!==5||counts.enneagram!==9||counts.bigfive!==5){
@@ -95,8 +106,16 @@ try{
     console.error('Module and HTML context:',html.slice(0,1800));
   }
   assert.equal(result.status,0,'Chrome exited unsuccessfully');
-  assert.deepEqual(counts,{mbti:5,enneagram:9,bigfive:5},
-    'Form sliders must exist in a real browser after module initialization');
+  assert.deepEqual(counts,{mbti:5,enneagram:9,bigfive:5,functions:8},
+    'All 19 sliders and eight function fields must exist after initialization');
+  assert.ok(html.includes('Game-derived preference: INTJ'),
+    'Function mode should show a game-derived identity');
+  assert.ok(html.includes('data-test-mode="advanced" aria-pressed="true"'),
+    'Comprehensive path should activate');
+  assert.ok(html.includes('Input notes:'),
+    'Function scoring must disclose its interpretation in the completed build');
+  assert.ok(html.includes('sakinorva.net/test/function_bunya'),
+    'Comprehensive path should link to the suggested function test');
   assert.equal(diagnostics,'','Browser reported an uncaught initialization error');
   assert.ok(html.includes('class="field-report"'),
     'Synthetic sample should render the complete Trainer Field Report');
@@ -112,5 +131,5 @@ try{
     'Archetype scoring explanation should be visible in results markup');
   assert.equal((html.match(/class="report-score-row"/g)||[]).length,4,
     'Every archetype report should expose four score components');
-  console.log('All 19 input sliders rendered successfully.');
+  console.log('All 19 sliders and eight function inputs rendered; advanced build generated.');
 }finally{server.close();}
