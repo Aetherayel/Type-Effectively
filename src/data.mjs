@@ -164,6 +164,11 @@ export const ABILITIES = [
   {name:'Corrosion',roles:['Controller'],types:['Poison'],desc:'Allows poisoning of Poison- and Steel-type targets.',strategyOnly:true},
   {name:'Iron Barbs',roles:['Wall'],types:['Steel'],desc:'Damages opponents that make contact.',strategyOnly:true},
   {name:'Grassy Surge',roles:['Support'],types:['Grass'],desc:'Creates Grassy Terrain on entering battle.',strategyOnly:true},
+  {name:'Poison Heal',roles:['Wall'],types:['Grass','Ground'],desc:'Restores HP instead of taking poison damage.',strategyOnly:true},
+  {name:'Sand Stream',roles:['Wall'],types:['Rock'],desc:'Summons a sandstorm on entering battle.',strategyOnly:true},
+  {name:'Magic Guard',roles:['Sweeper'],types:['Psychic'],desc:'Prevents indirect damage, including Life Orb HP loss.',strategyOnly:true},
+  {name:'Electric Surge',roles:['Sweeper'],types:['Electric'],desc:'Creates Electric Terrain on entering battle.',strategyOnly:true},
+  {name:'Misty Surge',roles:['Support'],types:['Fairy'],desc:'Creates Misty Terrain on entering battle.',strategyOnly:true},
   {name:'Speed Boost',roles:['Sweeper','Pivot'],types:['Bug','Flying','Electric'],desc:'Raises Speed at the end of each turn.'},
   {name:'Guts',roles:['Tank','Sweeper'],types:['Fighting','Normal'],desc:'Raises Attack while affected by a status condition.'}
 ];
@@ -200,9 +205,9 @@ export const TYPE_ATTACKS = {
 // These sets are functional contracts for role-tactic selection.
 export const ROLE_MOVES = {
   Sweeper:['Swords Dance','Dragon Dance','Flame Charge','Agility','Hone Claws',
-    'Nasty Plot','Calm Mind','Quiver Dance','Growth','Charge Beam','Work Up'],
+    'Nasty Plot','Calm Mind','Quiver Dance','Growth','Charge Beam','Work Up','Charge'],
   Wall:['Iron Defense','Protect','Amnesia','Stockpile','Cotton Guard','Aurora Veil',
-    'Light Screen','Reflect','Mist','Recover','Cosmic Power','Acid Armor'],
+    'Light Screen','Reflect','Mist','Recover','Cosmic Power','Acid Armor','Shore Up'],
   Tank:['Bulk Up','Drain Punch','Coil','Curse','Iron Defense','Calm Mind',
     'Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia','Recover'],
   // Only moves which switch or reposition the user's Pokémon are pivots.
@@ -237,7 +242,8 @@ export const MOVE_PURPOSES={
   'Acid Armor':['fortification','endurance'],
   'Bulk Up':['endurance'],'Drain Punch':['endurance'],
   'Coil':['endurance'],'Curse':['endurance'],
-  'Aqua Ring':['endurance'],'Charge':['endurance'],
+  'Aqua Ring':['endurance'],'Charge':['endurance','offense'],
+  'Shore Up':['fortification'],
   'U-turn':['reposition'],'Flip Turn':['reposition'],
   'Volt Switch':['reposition'],'Parting Shot':['reposition'],
   'Chilly Reception':['reposition'],'Teleport':['reposition'],
@@ -306,6 +312,7 @@ export const MOVE_SYNERGIES = {
   'Aqua Ring':{types:['Water','Ice'],fixes:[2,6,9]},
   'Acid Armor':{types:['Poison','Water','Ice'],fixes:[4,6,9]},
   'Charge':{types:['Electric','Steel'],fixes:[3,5,6]},
+  'Shore Up':{types:['Rock','Ground'],fixes:[1,5,6,9]},
   'U-turn':{types:['Bug','Flying'],fixes:[2,3,7]},
   'Flip Turn':{types:['Water','Ice'],fixes:[2,7,9]},
   'Parting Shot':{types:['Dark','Poison','Ghost'],fixes:[4,5,8]},
