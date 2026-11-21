@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.1.0 — Role-balance recalibration**
+**Version 1.2.0 — Comprehensive testing and source-aware inputs**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -87,7 +87,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning.
 
-## Generation model (v1.1; v1.0 personality rules retained)
+## Generation model (v1.2; v1.0 personality rules retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
@@ -173,9 +173,9 @@ GitHub Pages publishes the static site from `main` through GitHub's built-in bra
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
-**Automatic live patch versions (v1.1.x):** Each pull request merged into `main` after the v1.1.0 baseline (#21) receives a deterministic patch number: #22 → v1.1.1, #23 → v1.1.2, and so on, counting merged PRs into `main` (including merge, squash, and rebase), not arbitrary commits. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages and then creates its GitHub Release/tag. Re-run a failed release job if Pages was delayed or failed.
+**Automatic live releases (v1.2.x):** The comprehensive-testing follow-up PR **#24** establishes **v1.2.0** when merged and published. Each subsequent merged PR increments the **v1.2.x** patch number (v1.2.1, v1.2.2, etc.) using merged-PR history, not arbitrary pushes or commits. Historical v1.1 tags remain valid: #22 was v1.1.1 and #23 was v1.1.2. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer checks the SHA produced by GitHub Pages in `deploy-revision.json` against the tagged releases before displaying a newer version. This prevents a newly merged but still-unpublished commit from appearing live. In local preview or when the GitHub API is unavailable, the page retains its bundled v1.1.0 marker; the release lookup is non-blocking and sends no personality inputs. The `package.json`, static HTML meta, and changelog describe the **v1.1.0 model baseline**, while GitHub Releases and the live marker track subsequent published patch builds. No write-back version commit or second Pages deployment workflow is required.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x and v1.2.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.2.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.2.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 
