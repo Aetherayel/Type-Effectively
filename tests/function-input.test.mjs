@@ -27,6 +27,7 @@ test('function input yields a coherent 535-point build without fabricated A/T',(
   assert.equal(build.cognitiveSource,'functions');
   assert.equal(build.mbti,'INTJ');
   assert.equal(build.identity,'INTJ');
+  assert.equal(build.identityPreference,null);
   assert.equal(build.nature,'Quiet');
   assert.equal(build.baseStats.hp+build.baseStats.atk+build.baseStats.def+build.baseStats.spa+build.baseStats.spd+build.baseStats.spe,535);
   assert.ok(build.warnings.some(w=>w.includes('A/T axis')));
@@ -48,10 +49,44 @@ test('function input stays mutually exclusive with legacy cognition and validate
   assert.throws(()=>deriveFunctionPreferences([...totals.slice(0,7),Number.NaN]),/eight numeric/);
   assert.throws(()=>deriveFunctionPreferences([...totals.slice(0,7),'50']),/eight numeric/);
   assert.throws(()=>generateBuild({...input,mbtiScores:DEMOS.architect.mbti}),/not both/);
-  assert.throws(()=>generateBuild({...input,typeOverride:'INTJ'}),/not both/);
+  assert.throws(()=>generateBuild({...input,identityPreference:'X'}),/must be Assertive/);
+  assert.throws(()=>generateBuild({...input,mbtiScores:DEMOS.architect.mbti,typeOverride:'INFJ'}),/not both/);
+  assert.throws(()=>generateBuild({mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,identityPreference:'A'}),/only accompany/);
   const previous=generateBuild({mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,bigFive:DEMOS.architect.bigfive});
   assert.equal(previous.identity,'INTJ-A');
   assert.equal(previous.cognitiveSource,'16personalities');
+});
+
+test('optional A/T uses a disclosed type-only proxy, never a fabricated measurement',()=>{
+  const unspecified=generateBuild(input);
+  const assertive=generateBuild({...input,identityPreference:'A'});
+  const turbulent=generateBuild({...input,identityPreference:'T'});
+  assert.equal(unspecified.identity,'INTJ');
+  assert.equal(unspecified.identityPreference,null);
+  assert.equal(assertive.identity,'INTJ-A');
+  assert.equal(turbulent.identity,'INTJ-T');
+  assert.equal(assertive.identityPreference,'A');
+  assert.equal(turbulent.identityPreference,'T');
+  assert.equal(assertive.breakdown.mbti.length,6);
+  assert.notDeepEqual(assertive.breakdown.mbti,unspecified.breakdown.mbti);
+  assert.notDeepEqual(turbulent.breakdown.mbti,assertive.breakdown.mbti);
+  assert.ok(assertive.warnings.some(note=>note.includes('75/25 type-only proxy')));
+  assert.ok(unspecified.warnings.some(note=>note.includes('A/T axis was not provided')));
+  assert.deepEqual(generateBuild({...input,identityPreference:'A'}).baseStats,assertive.baseStats);
+});
+
+test('manual Sakinorva type override changes Nature and interpretation, not raw function affinities',()=>{
+  const inferred=generateBuild(input);
+  const chosen=generateBuild({...input,typeOverride:'ENFP',identityPreference:'A'});
+  assert.equal(chosen.suggestedType,'INTJ');
+  assert.equal(chosen.mbti,'ENFP');
+  assert.equal(chosen.identity,'ENFP-A');
+  assert.equal(chosen.nature,'Naive');
+  assert.deepEqual(chosen.breakdown.mbti,generateBuild({...input,identityPreference:'A'}).breakdown.mbti);
+  assert.deepEqual(chosen.types,inferred.types,'Enneagram typing is unchanged');
+  assert.ok(chosen.warnings.some(note=>note.includes('overrides the function-derived INTJ')));
+  assert.notEqual(chosen.nature,inferred.nature);
+  assert.throws(()=>generateBuild({...input,typeOverride:'FAKE'}),/Invalid MBTI type/);
 });
 
 test('comprehensive recommendations and share-link controls are present',()=>{
@@ -63,7 +98,11 @@ test('comprehensive recommendations and share-link controls are present',()=>{
   assert.match(html,/data-test-mode="advanced"/);
   assert.match(html,/data-mbti-mode="functions"/);
   assert.match(html,/id="function-score-fields"/);
+  assert.match(html,/id="function-identity"/);
+  assert.match(html,/id="mbti-override"/);
   assert.match(app,/input\.functionScores/);
   assert.match(app,/setTestingPath\(payload\.mode\.testing/);
   assert.match(app,/const functionScores=state\.mbtiMode==='functions'/);
+  assert.match(app,/identityPreference=state\.mbtiMode==='functions'/);
+  assert.match(app,/input\.identityPreference/);
 });
