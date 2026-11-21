@@ -163,6 +163,10 @@ GitHub Pages publishes the static site from `main` through GitHub's built-in bra
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
+**Automatic live patch versions (v1.1.x):** Each pull request merged into `main` after the v1.1.0 baseline (#21) receives a deterministic patch number: #22 → v1.1.1, #23 → v1.1.2, and so on, counting first-parent PR merges (including GitHub squash merges), not arbitrary commits. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages and then creates its GitHub Release/tag. Re-run a failed release job if Pages was delayed or failed. Rebase-only merges are not supported by this counter; use merge commits or squash merges.
+
+The small **version marker in the site header** and footer checks the SHA produced by GitHub Pages in `deploy-revision.json` against the tagged releases before displaying a newer version. This prevents a newly merged but still-unpublished commit from appearing live. In local preview or when the GitHub API is unavailable, the page retains its bundled v1.1.0 marker; the release lookup is non-blocking and sends no personality inputs. The `package.json`, static HTML meta, and changelog describe the **v1.1.0 model baseline**, while GitHub Releases and the live marker track subsequent published patch builds. No write-back version commit or second Pages deployment workflow is required.
+
 ## Project structure
 
 ```text
@@ -183,7 +187,7 @@ tests/engine.test.mjs     Full tritype coverage + randomized invariants
 tests/held-items.test.mjs Held-item coverage, diversity, determinism and export
 tests/features.test.mjs  Type matchups and PNG export regression tests
 tests/relatives.test.mjs Real Pokémon index + comparison tests
-.github/workflows/        Static Pages deployment
+.github/workflows/        Test workflow and live-release version tagging
 ```
 
 ## Important caveats
