@@ -12,6 +12,7 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css?v=randomize-1" />
   <script type="module" src="./src/app.mjs?v=role-balance-1"></script>
+  <script type="module" src="./src/release-version.mjs"></script>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -22,7 +23,8 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span>TYPE<span class="brand-accent">/</span>EFFECTIVELY</span>
       </a>
-      <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a>
+      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v1.1.0</span>
+      <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a></div>
     </header>
 
     <section class="hero" aria-labelledby="hero-title">
@@ -187,7 +189,7 @@
       <p class="stat-guide-footnote">These are authored, game-inspired interpretations—not validated measures of resilience, intelligence, character, or mental health.</p>
     </section>
     <footer class="footer">
-      <span>TYPE EFFECTIVELY / V1.1.0</span>
+      <span id="footer-version">TYPE EFFECTIVELY / V1.1.0</span>
       <span>KNOW YOURSELF. KNOW YOUR WEAKNESSES. BLAME TYPE MATCHUPS.</span>
       <a href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">OPEN SOURCE ↗</a>
     </footer>

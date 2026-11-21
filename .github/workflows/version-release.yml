@@ -1,0 +1,92 @@
+name: Version published PR merges
+
+# GitHub Pages still deploys directly from main. This workflow only tags a
+# merge after the built-in Pages publisher succeeds, never pushes a bump
+# commit that would fail to trigger branch-based Pages.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: read
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine patch from all PRs merged into main
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGED_AT: ${{ github.event.pull_request.merged_at }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # PR #21 introduced v1.1.0 on 2026-11-21T01:52:00Z.
+          # Count subsequent merged PRs into main, regardless of merge
+          # commit, squash, or rebase strategy. Ignore ordinary pushes.
+          patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
+            jq -s --arg baseline '2026-11-21T01:52:00Z' \
+              --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+              '[.[][] | select(.merged_at != null and .merged_at > $baseline and
+                (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+          if [ "$patch" -lt 1 ]; then
+            echo "::error::Could not count this merged PR after the v1.1.0 baseline."
+            exit 1
+          fi
+          echo "tag=v1.1.$patch" >> "$GITHUB_OUTPUT"
+          echo "Version for merged PR #$PR_NUMBER: v1.1.$patch"
+
+      - name: Wait for this exact commit to go live on GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$MERGE_SHA&per_page=100"               --jq '[.workflow_runs[] | select(.name == "pages build and deployment")][0].conclusion // ""')
+            if [ "$conclusion" = "success" ]; then
+              echo "GitHub Pages published $MERGE_SHA"
+              exit 0
+            fi
+            if [ "$conclusion" = "failure" ] || [ "$conclusion" = "cancelled" ]; then
+              echo "::error::GitHub Pages did not publish $MERGE_SHA ($conclusion)."
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out checking GitHub Pages deployment for $MERGE_SHA."
+          exit 1
+
+      - name: Tag and publish verified version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            tagged_sha=$(git rev-list -n 1 "$TAG")
+            if [ "$tagged_sha" != "$MERGE_SHA" ]; then
+              echo "::error::$TAG already points to a different commit."
+              exit 1
+            fi
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists for this merge."
+            exit 0
+          fi
+          gh release create "$TAG" --target "$MERGE_SHA" --title "$TAG"             --notes "Live GitHub Pages release from merged PR #$PR_NUMBER (commit \`$MERGE_SHA\`)."
+          echo "Published $TAG for $MERGE_SHA"

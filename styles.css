@@ -27,6 +27,9 @@ a{color:inherit}
 .brand-mark:before{content:'';position:absolute;height:2px;background:var(--accent);left:0;right:0;top:15px}
 .brand-mark span{width:12px;height:12px;border:2px solid var(--accent);background:var(--bg);border-radius:50%;position:relative;z-index:1}
 .header-link{color:var(--muted);font-size:13px;text-decoration:none;transition:color .2s}.header-link:hover{color:var(--accent)}
+.header-actions{display:flex;align-items:center;gap:16px}
+.release-version{border:1px solid #3b4b47;border-radius:5px;padding:5px 7px;color:#bcd3c2;font:10px 'DM Mono',monospace;white-space:nowrap;letter-spacing:.25px}
+@media(max-width:560px){.header-actions .header-link{display:none}}
 .hero{padding:76px 0 64px;border-bottom:1px solid var(--line-soft)}
 .eyebrow,.section-kicker,.step-number,.empty-overline,.empty-detail,.hero-meta,.live-label,.footer,.card-kicker,.mini-label,.result-id,.field>span,.test-line span,.action-aside,.small-link,.mini-note{font-family:'DM Mono',monospace}
 .eyebrow{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:1.25px;color:var(--accent)}

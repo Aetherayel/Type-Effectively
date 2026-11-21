@@ -1,5 +1,7 @@
 # Changelog
 
+**Live patch releases:** From v1.1.1 onward, every merged PR into `main` is tagged as v1.1.x after the exact commit is confirmed deployed on GitHub Pages. The web app displays the matched published version, while v1.1.0 remains the scoring-model baseline. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+
 ## 1.1.0 — Battle role balance
 
 - Recalibrate the six role reference templates 25% toward the 535/6-stat center, preserving their characteristic shapes.
