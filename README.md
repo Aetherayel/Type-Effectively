@@ -196,6 +196,8 @@ The page loads Google Fonts for typography, Pokémon artwork and held-item icons
 
 ## Publishing via GitHub Pages
 
+**Browser module caching:** The release badge is verified independently against the published GitHub Pages commit. A previously cached JavaScript engine can therefore temporarily run older logic while the badge shows a newer release. When a PR changes scoring, update **both** the entry-script query in `index.html` and the scoring-engine import query in `src/app.mjs`; the regression test checks they remain aligned. After deployment, reload in a fresh private window to bypass any older cached module URLs.
+
 GitHub Pages publishes the static site from `main` through GitHub's built-in branch-based publisher. The public app is at [Type Effectively](https://aetherayel.github.io/Type-Effectively/).
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
