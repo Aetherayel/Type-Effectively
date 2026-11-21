@@ -16,6 +16,11 @@
 - Retain all five Type 3/5 growth choices as authored; only reject Baton Pass for builds without a meaningful setup. Snow Bastion uses another corrective growth move.
 - Add direct move-pair tests and seeded end-to-end checks covering the 4,000-build strategy audit, plus active-versus-Hidden Ability semantics.
 
+## Unreleased — Runtime module cache correction
+
+- Refresh the browser's JavaScript module cache keys for the app entry and scoring engine after the v1.2.3 Baton Pass fix. The release badge can update faster than browser-cached module scripts; a v1.2.3 badge alone did not prove that the new engine code was loaded.
+- Add a regression check for consistent entry/engine cache keys and document private-window verification for recent deployments.
+
 ## 1.2.0 — Comprehensive assessment inputs
 
 - Add a **Quick & simple / Comprehensive** testing path with Sakinorva Functions, Sakinorva Rowe Enneagram, and IPIP-NEO-300 links alongside the original short tests.
