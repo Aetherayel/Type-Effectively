@@ -53,7 +53,7 @@ export function isHeldItemCompatible(item,{types,moves,ability=null}){
     'Icy Rock':'Snowscape','Smooth Rock':'Sandstorm'
   };
   if(weather[name])return names.has(weather[name]) ||
-    ({'Icy Rock':'Snow Warning','Heat Rock':'Drought','Damp Rock':'Drizzle'}[name]===abilityName);
+    Boolean(abilityName && {'Icy Rock':'Snow Warning','Heat Rock':'Drought','Damp Rock':'Drizzle'}[name]===abilityName);
   if(name==='Protective Pads')return hasSome(CONTACT_MOVES);
   // No evolutionary stage exists for an original generated personality Pokémon.
   if(name==='Eviolite'||name==='Everstone')return false;
