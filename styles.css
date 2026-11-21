@@ -297,6 +297,11 @@ a{color:inherit}
 .explain p{font-size:11px;color:#a5b8b1;line-height:1.7;margin:11px 0 0}
 .explain ul{color:#a5b8b1;font-size:11px;line-height:1.7;padding-left:18px}
 .warning-note{margin-top:13px;background:#2a2a21;border:1px solid #62583a;border-radius:8px;padding:12px;font-size:11px;line-height:1.65;color:#e8d7ad}
+.signature-strategy{margin-top:12px;padding:14px;border:1px solid color-mix(in srgb,var(--pcolor) 48%,#365149);border-radius:10px;background:color-mix(in srgb,var(--pcolor) 11%,#14272b)}
+.signature-strategy>.mini-label{font-size:9px;letter-spacing:.7px;color:#b5cfc5}
+.signature-strategy>strong{display:block;font:700 16px 'Space Grotesk',sans-serif;color:#edf8f2;margin-top:5px}
+.signature-strategy>p{font-size:11px;line-height:1.6;color:#b9cfc5;margin:7px 0 0}
+.signature-strategy>.signature-mechanism{font-size:10px;color:#90afa2}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:23px}
 .result-actions .primary-export{grid-column:1/-1;background:color-mix(in srgb,var(--pcolor) 15%,#20352e);border-color:color-mix(in srgb,var(--pcolor) 45%,#4e665d)}
 .result-actions button:disabled{opacity:.6;cursor:progress}

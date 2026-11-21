@@ -418,6 +418,11 @@ function renderCard(build) {
         '<p>'+escapeHtml(ROLE_DESCRIPTIONS[build.role.primary.name])+'</p>'+
         '<div class="role-subline">'+escapeHtml(build.role.specialization.toUpperCase())+' SPREAD · '+build.role.primary.score+'% ROLE FIT</div>'+
       '</div>'+
+      (build.signatureStrategy?
+        '<div class="signature-strategy"><span class="mini-label">SIGNATURE STRATEGY · '+build.signatureStrategy.score+' FIT</span>'+
+          '<strong>'+escapeHtml(build.signatureStrategy.name)+'</strong>'+
+          '<p>'+escapeHtml(build.signatureStrategy.insight)+'</p>'+
+          '<p class="signature-mechanism">'+escapeHtml(build.signatureStrategy.mechanism)+'</p></div>':'')+
       '<div class="result-section-title"><h4>Abilities</h4><span>PRIMARY / HIDDEN</span></div>'+
       '<div class="ability-list">'+
         '<div class="ability-box"><span class="mini-label">Standard ability</span><strong>'+escapeHtml(build.ability.name)+'</strong><p>'+escapeHtml(build.ability.desc)+'</p></div>'+
@@ -454,6 +459,7 @@ function renderCard(build) {
         '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% cognitive preference dimensions'+(build.cognitiveSource==='functions'?' derived from eight comparable function totals':' from 16Personalities')+' determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
+        (build.signatureStrategy?'<p><strong>Signature strategy:</strong> '+escapeHtml(build.signatureStrategy.name)+' qualifies through its visible type, battle role, stat gates, motivation patterns, and (when supplied) Big Five profile. Its '+escapeHtml(build.signatureStrategy.ability)+' Ability, '+escapeHtml(build.signatureStrategy.tactic)+' tactic and '+escapeHtml(build.signatureStrategy.item)+' item form one compatible package; the growth-move slot remains independent. Other builds retain the normal selection algorithm.</p>':'')+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. Item candidates are filtered for compatibility with the generated typing and selected moves. They remain thematic and do not modify calculated stats or type matchups.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes Nature and archetype interpretation but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
@@ -492,6 +498,7 @@ function buildSummary(b) {
     'TYPE EFFECTIVELY — '+b.title,
     b.identity+' · '+b.tritype+' · '+b.types.join(' / ')+' · '+b.nature,
     'Role: '+b.role.primary.name+(b.role.secondary?' / '+b.role.secondary.name:''),
+    ...(b.signatureStrategy?['Signature strategy: '+b.signatureStrategy.name+' — '+b.signatureStrategy.mechanism]:[]),
     'BST 535: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
     'Ability: '+b.ability.name+' · Hidden: '+b.hiddenAbility,
     'Held item: '+b.heldItem.name+' — '+b.heldItem.quip,

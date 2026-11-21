@@ -8,6 +8,7 @@ import { chooseHeldItem } from './held-items.mjs';
 import { classifyArchetype } from './archetypes.mjs';
 import { composeFieldReport } from './profile-analysis.mjs';
 import { deriveFunctionPreferences } from './functions.mjs';
+import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -241,7 +242,7 @@ function abilityStatFit(item,stats) {
 
 function chooseAbility(role,types,stats,secondFix) {
   const hints=ABILITY_HINTS[secondFix];
-  const ranked=ABILITIES.map(item=>{
+  const ranked=ABILITIES.filter(item=>!item.strategyOnly).map(item=>{
     let score=(item.roles.includes(role)?60:0)+
       (item.types.includes(types[0])?26:0)+
       (item.types.includes(types[1])?18:0);
@@ -256,7 +257,7 @@ export function chooseHiddenAbility({role,secondaryRole=null,types,stats,second,
   // The visible type constraint is strict: Fire/Fighting cannot receive
   // Sand Force, and Water/Ice cannot receive Solid Rock.
   const viable=ABILITIES.filter(item=>
-    item.name!==standard.name && item.types.some(type=>types.includes(type))
+    !item.strategyOnly && item.name!==standard.name && item.types.some(type=>types.includes(type))
   );
   if(!viable.length)throw new Error('No complementary Hidden Ability for visible typing.');
   return viable.map(item=>{
@@ -287,10 +288,13 @@ const SPECIAL_SETUP=new Set(['Nasty Plot','Quiver Dance','Charge Beam']);
 
 // Hard mechanical requirements precede any psychology-based move weighting.
 // Moves are abstract signature moves, so species learnsets are not assumed.
-export function isMoveEligible(name,{types,stats,role=null}){
+export function isMoveEligible(name,{types,stats,role=null,ability=null}){
   if(name==='Curse' && types.includes('Ghost'))return false;
-  // Aurora Veil needs active snow; this generator has no snow setter.
-  if(name==='Aurora Veil')return false;
+  // Snow must be supplied by the same four-move build, not assumed from teammates.
+  // A signature Snow Warning set satisfies the weather prerequisite.
+  const abilityName=typeof ability==='string'?ability:ability?.name;
+  if(name==='Aurora Veil' &&
+    (abilityName!=='Snow Warning'||!types.includes('Ice')))return false;
   // Trick Room reverses Speed order: do not give it to fast Pokémon.
   if(name==='Trick Room' && stats.spe>85)return false;
   // Shed Tail sacrifices half the user's HP and requires enough staying power.
@@ -344,7 +348,7 @@ function roleTacticScore(name,role,types,stats,second,third) {
   return score;
 }
 
-function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
+function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strategy=null) {
   const physical=stats.atk>=stats.spa;
   const style=physical?'physical':'special';
   const attacks=attackTypes.map(type=>{
@@ -355,8 +359,10 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
   const selected=new Set(attacks.map(m=>m.name));
   const validRole=ROLE_MOVES[role.primary.name].filter(name=>
     !selected.has(name) &&
+    (!strategy||name===strategy.tactic) &&
     MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[role.primary.name]) &&
-    isMoveEligible(name,{types:visibleTypes,stats,role:role.primary.name}));
+    isMoveEligible(name,{types:visibleTypes,stats,role:role.primary.name,
+      ability:strategy?.ability}));
   const growth=GROWTH_MOVES[core];
   const validGrowth=growth.choices.filter(name=>
     !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats}));
@@ -466,21 +472,30 @@ export function generateBuild(input) {
   const {types,hiddenType}=deriveTyping({core,second,third,wing:typingWing});
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
   const role=classifyRole(effectiveStats,toolkitTypes);
-  const ability=chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
+  // A specialization is a joint ability / tactic / item package selected only
+  // after visible typing, effective stats, role, motivations and temperament.
+  // Ordinary generalist selection stays intact when no package earns its place.
+  const signatureStrategy=selectSignatureStrategy({
+    types,role,stats:effectiveStats,core,second,third,
+    bigFive:ocean,hasBigFive:input.bigFive!=null
+  });
+  const ability=signatureStrategy?signatureAbility(signatureStrategy):
+    chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
   const hiddenAbility=chooseHiddenAbility({
     role:role.primary.name,secondaryRole:role.secondary?.name,
     types,stats:effectiveStats,second,third,standard:ability
   });
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
-  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third);
+  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third,signatureStrategy);
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   // Item choice follows move choice: equipment must actually work with its
   // holder and the four signature moves.
-  const heldItem=chooseHeldItem({
-    tritype,core,second,third,wing:selectedWing,
-    enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-    role,types,moves,ability,hasBigFive:input.bigFive!=null
-  });
+  const heldItem=signatureStrategy?signatureHeldItem(signatureStrategy):
+    chooseHeldItem({
+      tritype,core,second,third,wing:selectedWing,
+      enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
+      role,types,moves,ability,hasBigFive:input.bigFive!=null
+    });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
     input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const build={
@@ -493,6 +508,7 @@ export function generateBuild(input) {
     tritype, suggestedTritype, suggestedType, wing:selectedWing, typingWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
+    signatureStrategy,
     baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings

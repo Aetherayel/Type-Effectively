@@ -126,7 +126,10 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
     (build.typingWing!=null?' An evidenced '+build.typingWing+' wing slightly influences its primary typing.':' No unverified wing was assumed for typing.');
   const combat='Deploy this '+types.join(' / ')+' Pokémon as a '+role.primary.name+': it '+ROLE_FLAIR[role.primary.name]+
     '. Its strongest effective stats are '+join(top)+'. '+build.nature+' Nature modifies the base spread after the fixed 535-point budget.'+
-    (role.secondary?' '+role.secondary.name+' is a close alternative style; keep a second plan in the bag.':'');
+    (role.secondary?' '+role.secondary.name+' is a close alternative style; keep a second plan in the bag.':'')+
+    (build.signatureStrategy?' Its '+build.signatureStrategy.name+' specialization uses '+build.signatureStrategy.ability+
+      ', '+build.signatureStrategy.tactic+' and '+build.signatureStrategy.item+
+      ' as one coherent plan. '+build.signatureStrategy.mechanism:'');
   const growth='Teach and reinforce '+build.moves[3].name+', the growth move associated with core '+core+'. '+
     sentence(build.moves[3].why)+' The goal is to expand the Pokémon’s options beyond its favorite trick, not to schedule it a therapy appointment.';
   const titleWhy=a.title+' pairs '+a.modeLabel.toLowerCase()+' with a '+a.role+' battle expression. '+
@@ -145,6 +148,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
   const trainerTips=[
     {label:'HONE ITS EDGE',title:'Train the job it already does well',
       text:'Practice '+roleMove+' in '+role.primary.name+' scenarios. '+ROLE_DRILLS[role.primary.name]+
+        (build.signatureStrategy?' Rehearse the full '+build.signatureStrategy.name+' combination rather than treating its pieces as separate tricks.':'')+
         ' Work with its strongest effective stats: '+join(top)+'.'},
     {label:'PACK COVERAGE',title:'Protect the weak matchups',
       text:matchups+' '+ROLE_PARTNERS[role.primary.name]},
