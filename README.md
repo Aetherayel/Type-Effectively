@@ -16,13 +16,17 @@ No sign-in. No backend. No personality data submitted to a server. Just an unrea
 
 ## Three tests, one build
 
-| Layer | Recommended free assessment | What the app uses |
-| --- | --- | --- |
-| Personality | [16Personalities](https://www.16personalities.com/free-personality-test) | The five bipolar trait percentages; inferred or overridden four-letter type determines Nature |
-| Motivation | [Find My Nine](https://findmynine.com/test) | All nine Enneagram scores; derives the core, wing, and ordered tritype |
-| Temperament | [Ocean Test](https://oceantest.net/test) | Five Big Five scores; the main base-stat influence |
+| Layer | Quick path | Comprehensive path | What enters the model |
+| --- | --- | --- | --- |
+| Cognition | [16Personalities](https://www.16personalities.com/free-personality-test) | [Sakinorva Functions](https://sakinorva.net/test/function_bunya) (256 items) | Five bipolar trait percentages **or** eight comparable function totals (Ne, Ni, Se, Si, Te, Ti, Fe, Fi) |
+| Motivation | [Find My Nine](https://findmynine.com/test) | [Rowe Enneagram](https://sakinorva.net/test/rowe) (306 items) | All nine Enneagram scores; derives the core, wing, and ordered tritype |
+| Temperament | [Ocean Test](https://oceantest.net/test) | [IPIP-NEO-300](https://ipipneo.com/en/ipip-neo-300) (300 items) | Five Big Five domain scores/percentiles; the primary base-stat influence |
 
-These are independent external websites. **No test integration, scraping, affiliation, or automatic import is implied.** Users enter the result numbers manually.
+These are independent external websites. **No test integration, scraping, affiliation, or automatic import is implied.** Users enter the result numbers manually. Comprehensive means a longer, more detailed questionnaire—not a claim of scientifically superior Enneagram or cognitive-function typing.
+
+**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The five existing cognition dimensions become: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, outward perceiving versus outward judging, and a neutral identity axis of 50. This produces a **project-specific** four-letter label for Nature compatibility, not a reproduction of Sakinorva's various type algorithms or a claim of a measured MBTI type. **No A/T label is invented.** Continuous contrasts also feed stats, held items, and whole-build archetype classification, allowing two profiles with the same derived letters to differ.
+
+**Advanced Enneagram / Big Five:** The nine Enneagram input fields remain 0–100; convert other scoring ranges consistently. Use the five IPIP-NEO **domain percentiles** in the app's O/C/E/A/N order (the report's display order may differ), not its 30 individual facets. Both quick and comprehensive test paths use the same 70/20/10 weighting, the same types, and the same fixed 535-point budget.
 
 Don't have the full results? You can select an MBTI-style type, enter an ordered Enneagram ranking, or supply a tritype. The result clearly labels estimated inputs. If Big Five is missing, neutral 50-point placeholders are used and disclosed.
 
@@ -83,7 +87,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 
 1. **Elemental typing:** Score each of the 17 elements against all nine Enneagram motivations using `TYPE_AFFINITY`. **Primary:** core 88% + wing 12% (or core 100% if wing is unknown). **Secondary:** second fix 65% + third fix 30% + core 5%. **Hidden affinity:** third fix 60% + second fix 30% + wing 10% (or 70% third / 30% second if wing is unknown); exclude both visible types. All three selections are deterministic. Monotypes arise only when primary and secondary independently coincide.
 2. **Nature:** Map the four-letter personality type onto one of 16 existing Pokémon Natures.
-3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% 16Personalities dimension percentages**.
+3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% cognition input (16Personalities percentages or function-derived contrasts)**.
 4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.1, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
 6. **Battle role (v1.1):** Match effective stats against six tactical reference profiles compressed **25% toward 535/6 per stat** (see `ROLE_TEMPLATE_SCALE` and `ROLE_CALIBRATED_TEMPLATES` in `src/data.mjs`). This corrects the systematic advantage of the unusually balanced Pivot reference without forcing equal role frequencies. Role suitability remains **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**; the existing five-point hybrid threshold is unchanged. Original reference profiles remain available in `ROLE_TEMPLATES`.
@@ -125,7 +129,7 @@ To update the index, run `npm run refresh:pokedex`, review the generated diff, a
 
 A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertiveness), Defense (discipline), Sp. Atk (creative analysis), Sp. Def (composure/cooperation), and Speed (energy/responsiveness).
 
-The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / 16Personalities** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
+The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / cognition** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
 ## Elemental card artwork: 17 generated identities, 18 supported Pokémon types
 

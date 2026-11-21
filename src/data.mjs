@@ -338,7 +338,10 @@ export const MOVE_SYNERGIES = {
 export const TEST_LINKS = {
   mbti:'https://www.16personalities.com/free-personality-test',
   enneagram:'https://findmynine.com/test',
-  bigfive:'https://oceantest.net/test'
+  bigfive:'https://oceantest.net/test',
+  functions:'https://sakinorva.net/test/function_bunya',
+  rowe:'https://sakinorva.net/test/rowe',
+  ipipneo300:'https://ipipneo.com/en/ipip-neo-300'
 };
 
 export const DEMOS = {

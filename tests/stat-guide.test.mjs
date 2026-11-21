@@ -36,7 +36,7 @@ test('all six Pokémon stats have clear human-facing interpretations',()=>{
   assert.ok(guide.includes('535 base stat points'));
   assert.ok(guide.includes('70% Big Five'));
   assert.ok(guide.includes('20% Enneagram'));
-  assert.ok(guide.includes('10% 16Personalities'));
+  assert.ok(guide.includes('10% cognitive-style'));
   assert.ok(guide.includes('raises one non-HP stat by 10%'));
   assert.ok(guide.includes('Neuroticism'));
   assert.ok(guide.includes('score of 50 or higher'));
