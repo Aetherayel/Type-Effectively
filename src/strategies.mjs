@@ -51,12 +51,12 @@ export const SIGNATURE_STRATEGIES=Object.freeze([
     mechanism:'Iron Defense strengthens physical staying power while Iron Barbs and Rocky Helmet punish contact.'
   },
   {
-    id:'slow-labyrinth',name:'Slow Labyrinth',roles:['Controller'],requiredTypes:['Psychic'],
-    ability:'Magic Bounce',tactic:'Trick Room',item:'Room Service',
-    maximum:{spe:75},targets:{hp:111,def:102,spd:114,spe:42},
-    motivations:[5,6,9],bigFive:[87,72,21,47,53],
-    insight:'Changes the rules of tempo, then uses its apparent slowness as a tactical advantage.',
-    mechanism:'Trick Room reverses ordinary move order; Room Service lowers Speed when it activates. Magic Bounce reflects eligible incoming status moves.'
+    id:'grassy-sanctuary',name:'Grassy Sanctuary',roles:['Support'],requiredTypes:['Grass'],
+    ability:'Grassy Surge',tactic:'Life Dew',item:'Terrain Extender',
+    minimum:{hp:80,spd:84},targets:{hp:112,def:92,spd:119,spe:86},
+    motivations:[2,6,9],bigFive:[64,67,48,82,39],
+    insight:'Changes the surroundings so recovery is normal, then quietly provides even more of it.',
+    mechanism:'Grassy Surge establishes healing terrain, Life Dew actively restores allies, and Terrain Extender prolongs passive healing.'
   }
 ]);
 
