@@ -64,7 +64,7 @@ test('seeded role-balance regression preserves role reachability and complete-bu
     assert.equal(build.archetype.role,build.role.primary.name);
     assert.equal(build.title,build.archetype.title);
     assert.equal(new Set(build.moves.map(move=>move.name)).size,4);
-    assert.ok(build.heldItem.name && build.ability.name && build.hiddenAbility.name);
+    assert.ok(build.heldItem.name && build.ability.name && typeof build.hiddenAbility==='string' && build.hiddenAbility.length>0);
     assert.ok(build.report.combat.includes(build.role.primary.name));
     assert.ok(build.report.trainerTips[0].text.includes(build.moves[2].name));
     assert.ok(build.report.trainerTips[2].text.includes(build.moves[3].name));
