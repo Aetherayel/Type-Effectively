@@ -150,6 +150,11 @@ test('seeded population retains generalists and validates any specialized packag
   const counts={generalist:0};
   for(let i=0;i<4000;i++){
     const b=generateBuild(generateRandomBuildInput(random));
+    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{strategy:b.signatureStrategy}),
+      'redundant or contradictory growth move: '+b.moves[2].name+' / '+b.moves[3].name);
+    if(b.moves[2].name==='Aurora Veil')
+      assert.ok(!['Reflect','Light Screen'].includes(b.moves[3].name),
+        'Aurora Veil must never repeat its protective effect in slot 4');
     const s=b.signatureStrategy;
     if(!s){counts.generalist++;continue;}
     counts[s.id]=(counts[s.id]||0)+1;
@@ -166,5 +171,6 @@ test('seeded population retains generalists and validates any specialized packag
   }
   console.log('Signature strategy audit, 4,000 seeded builds:',JSON.stringify(counts));
   assert.ok(counts.generalist>2000,'specialists should not dominate random builds: '+JSON.stringify(counts));
-  assert.ok(Object.keys(counts).length>=2,'at least one package should occur naturally: '+JSON.stringify(counts));
+  for(const strategy of SIGNATURE_STRATEGIES)
+    assert.ok(counts[strategy.id]>0,'specialty unreachable in a full-engine seeded population: '+strategy.id);
 });
