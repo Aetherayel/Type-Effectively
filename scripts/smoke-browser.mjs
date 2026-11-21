@@ -51,6 +51,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-after-suggestion',document.getElementById('mbti-derived')?.textContent||'');
   document.documentElement.setAttribute('data-after-nature',document.querySelector('.nature-summary')?.textContent||'');
   document.documentElement.setAttribute('data-rowe-negative',document.getElementById('rowe-6')?.value||'');
+  document.documentElement.setAttribute('data-card-version',document.getElementById('build-version-footer')?.textContent||'');
+  document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v1.2.8'}}));
+  document.documentElement.setAttribute('data-verified-version',document.getElementById('build-version-footer')?.textContent||'');
 });
 </script>`;
 const server=createServer((req,res)=>{
@@ -146,6 +149,10 @@ try{
     'Rowe conversion must be disclosed');
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
+  assert.ok(html.includes('data-card-version="CREATED v1.2.0"'),
+    'Card footer must show the bundled version when the build is generated');
+  assert.ok(html.includes('data-verified-version="CREATED v1.2.8"'),
+    'Card footer must update when the published release is verified');
   assert.ok(html.includes('data-ennea-mode="rowe" aria-pressed="true"'),
     'Comprehensive path should activate signed Rowe input');
   assert.ok(html.includes('sakinorva.net/test/function_bunya'),
