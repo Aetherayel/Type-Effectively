@@ -1,6 +1,6 @@
 import { ABILITIES } from './data.mjs';
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
-import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs';
+import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs?v=signature-copy-29';
 
 const clamp=value=>Math.max(0,Math.min(100,value));
 const mean=values=>values.reduce((sum,n)=>sum+n,0)/values.length;
