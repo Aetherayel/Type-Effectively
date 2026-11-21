@@ -7,6 +7,7 @@ import {
 import { chooseHeldItem } from './held-items.mjs';
 import { classifyArchetype } from './archetypes.mjs';
 import { composeFieldReport } from './profile-analysis.mjs';
+import { deriveFunctionPreferences } from './functions.mjs';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -377,7 +378,10 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third) {
 
 export function generateBuild(input) {
   const warnings=[];
-  let mbtiScores=input.mbtiScores;
+  const usingFunctions=input.functionScores!=null;
+  if(usingFunctions && (input.mbtiScores!=null || input.typeOverride))
+    throw new Error('Choose cognitive-function scores or 16Personalities data, not both.');
+  let mbtiScores=usingFunctions ? deriveFunctionPreferences(input.functionScores) : input.mbtiScores;
   const override=String(input.typeOverride||'').trim().toUpperCase().replace(/-[AT]$/,'');
   if (mbtiScores == null && !override) throw new Error('Enter your 16Personalities scores or choose a type.');
   if (mbtiScores == null) {
@@ -388,6 +392,7 @@ export function generateBuild(input) {
   const mbti=override || suggestedType;
   if (!NATURE_BY_MBTI[mbti]) throw new Error('Invalid MBTI type.');
   const nature=NATURE_BY_MBTI[mbti];
+  if(usingFunctions) warnings.push('Eight function totals were translated into four preference contrasts for this game; the A/T axis cannot be inferred. This is not Sakinorva’s typing algorithm.');
 
   let enneaScores=input.enneagramScores;
   if (enneaScores == null && input.enneagramRanking) {
@@ -440,9 +445,9 @@ export function generateBuild(input) {
     enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
     role,types,moves,ability,hasBigFive:input.bigFive!=null
   });
-  const identity=mbti + (input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
+  const identity=mbti + (!usingFunctions && input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const build={
-    mbti, identity, nature,
+    mbti, identity, nature, cognitiveSource:usingFunctions?'functions':'16personalities',
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
     oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
