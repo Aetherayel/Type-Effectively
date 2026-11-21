@@ -133,7 +133,7 @@ test('actual generated builds never equip items that contradict their moves or t
       enneagramScores:Array.from({length:9},()=>Math.floor(rand()*101)),
       bigFive:Array.from({length:5},()=>Math.floor(rand()*101))
     });
-    assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves}),
+    assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}),
       b.tritype+' / '+b.heldItem.name);
     eligible.add(b.heldItem.name);
   }
