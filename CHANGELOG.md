@@ -12,6 +12,7 @@
 - Preserve share links, randomized sample builds, original quick inputs, 17-type typing, six battle roles, 36 archetypes, and the fixed **535 base-stat budget** with the **70/20/10 Big Five / Enneagram / cognition** blend.
 - Keep the two test sources explicitly distinguished; Rowe subtype scores and Big Five facets are not silently introduced as new mechanics.
 - Refresh the bundled version and cache keys, extend regression and browser coverage, and advance future automatic releases to **v1.2.x**.
+- Add the **creation-version footer** to live cards, exported PNGs, and copied summaries. Shared links preserve the originating version; older links recalculated under newer releases show both original and current versions.
 
 ## 1.1.0 — Battle role balance
 
