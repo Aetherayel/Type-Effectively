@@ -150,7 +150,9 @@ test('seeded population retains generalists and validates any specialized packag
   const counts={generalist:0};
   for(let i=0;i<4000;i++){
     const b=generateBuild(generateRandomBuildInput(random));
-    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{strategy:b.signatureStrategy}),
+    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{
+      strategy:b.signatureStrategy,attacks:b.moves.slice(0,2),ability:b.ability
+    }),
       'redundant or contradictory growth move: '+b.moves[2].name+' / '+b.moves[3].name);
     if(b.moves[2].name==='Aurora Veil')
       assert.ok(!['Reflect','Light Screen'].includes(b.moves[3].name),
@@ -161,7 +163,11 @@ test('seeded population retains generalists and validates any specialized packag
     assert.equal(b.ability.name,s.ability);
     assert.equal(b.moves[2].name,s.tactic);
     assert.equal(b.heldItem.name,s.item);
-    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{strategy:s}));
+    assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{
+      strategy:s,attacks:b.moves.slice(0,2),ability:b.ability
+    }));
+    if(s.id==='snow-bastion')assert.notEqual(b.moves[3].name,'Baton Pass',
+      'Aurora Veil and snow defense cannot be passed to a teammate');
     if(s.attackSwap)
       assert.ok(b.moves.slice(0,2).some(m=>m.name===s.attackSwap.move));
     assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}));

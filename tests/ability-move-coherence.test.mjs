@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateBuild, chooseHiddenAbility, isMoveEligible } from '../src/engine.mjs';
+import { generateBuild, chooseHiddenAbility, isMoveEligible, isMovePairCompatible, hasBatonPassSetup } from '../src/engine.mjs';
 import { ABILITIES, GROWTH_MOVES, MOVE_SYNERGIES, ROLE_MOVES, ROLE_PURPOSES, MOVE_PURPOSES } from '../src/data.mjs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
 
@@ -55,6 +55,43 @@ test('Pivot tactics switch our own Pokémon; setup passing and other utility sta
     'keep Baton Pass where its sharing/setup meaning belongs');
   assert.ok(MOVE_SYNERGIES['Shed Tail'],
     'every new self-switch move needs affinity weights');
+});
+
+test('Baton Pass requires something meaningful to transfer',()=>{
+  // Snow Bastion has snow, Ice Defense bonus and Aurora Veil; none is a
+  // transferable stat stage, and its inactive Hidden Ability cannot count.
+  assert.equal(hasBatonPassSetup({
+    moves:['Ice Beam','Flash Cannon','Aurora Veil'],ability:'Snow Warning'
+  }),false);
+  assert.equal(isMovePairCompatible('Aurora Veil','Baton Pass',{
+    attacks:['Ice Beam','Flash Cannon'],ability:'Snow Warning'
+  }),false);
+  assert.equal(isMovePairCompatible('Reflect','Baton Pass',{
+    attacks:['Psychic','Flash Cannon'],ability:'Analytic'
+  }),false);
+  assert.equal(isMovePairCompatible('Tailwind','Baton Pass',{
+    attacks:['Psychic','Air Slash'],ability:'Pressure'
+  }),false);
+
+  // A genuine setup tactic, attack with a self-stat boost, or the *active*
+  // standard Speed Boost Ability gives Baton Pass something to pass.
+  for(const setup of ['Iron Defense','Amnesia','Nasty Plot','Bulk Up','Charge']){
+    assert.equal(isMovePairCompatible(setup,'Baton Pass',{
+      attacks:['Psychic','Flash Cannon'],ability:'Sturdy'
+    }),true,setup);
+  }
+  assert.equal(isMovePairCompatible('Recover','Baton Pass',{
+    attacks:['Flame Charge','Iron Head'],ability:'Sturdy'
+  }),true);
+  assert.equal(isMovePairCompatible('Protect','Baton Pass',{
+    attacks:['Ice Beam','Flash Cannon'],ability:'Speed Boost'
+  }),true);
+  assert.equal(isMovePairCompatible('Protect','Baton Pass',{
+    attacks:['Ice Beam','Flash Cannon'],ability:'Sturdy'
+  }),false);
+  assert.equal(isMovePairCompatible('Protect','Helping Hand',{
+    attacks:['Ice Beam','Flash Cannon'],ability:'Snow Warning'
+  }),true,'unrelated growth options remain available');
 });
 
 test('move prerequisites are checked before type/fix affinity scoring',()=>{
@@ -139,6 +176,10 @@ test('randomized builds vary tactical and growth moves without sacrificing deter
     (coreMoves[build.core]??=new Set()).add(build.moves[3].name);
     hiddenAbilities.add(build.hiddenAbility);
     assert.equal(new Set(build.moves.map(m=>m.name)).size,4);
+    if(build.moves[3].name==='Baton Pass')
+      assert.ok(hasBatonPassSetup({moves:build.moves.slice(0,3),ability:build.ability}),
+        'Baton Pass without setup on '+build.tritype+' '+build.types.join('/')+
+        ': '+build.moves.map(move=>move.name).join(', '));
     assert.equal(build.hiddenAbility,generateBuild(input).hiddenAbility);
     assert.deepEqual(build.moves,generateBuild(input).moves);
   }
