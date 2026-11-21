@@ -1,6 +1,6 @@
 import { ABILITIES } from './data.mjs';
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
-import { isHeldItemCompatible } from './held-items.mjs';
+import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs';
 
 const clamp=value=>Math.max(0,Math.min(100,value));
 const mean=values=>values.reduce((sum,n)=>sum+n,0)/values.length;
@@ -61,7 +61,7 @@ export const SIGNATURE_STRATEGIES=Object.freeze([
   {
     id:'ashen-vanguard',name:'Ashen Vanguard',roles:['Tank'],requiredTypes:['Fighting'],forbiddenTypes:['Fire'],
     ability:'Guts',tactic:'Bulk Up',item:'Flame Orb',offensiveStyle:'physical',
-    attackSwap:{slot:1,move:'Facade',style:'physical',why:'Flame Orb activates Guts and doubles Facade. It gives up a second typed attack for dependable status-fueled offense.'},
+    attackSwap:{slot:1,move:'Facade',style:'physical',why:'Physical coverage that hits harder when affected by a status condition.'},
     minimum:{atk:98,hp:80},targets:{hp:107,atk:122,def:102,spd:92},
     motivations:[3,6,8],bigFive:[55,82,64,39,51],
     insight:'Responds to adversity by improving its stance and hitting harder. This is not permission to create avoidable emergencies.',
@@ -94,7 +94,7 @@ export const SIGNATURE_STRATEGIES=Object.freeze([
   {
     id:'circuit-architect',name:'Circuit Architect',roles:['Sweeper'],requiredTypes:['Electric'],
     ability:'Electric Surge',tactic:'Charge',item:'Terrain Extender',offensiveStyle:'special',
-    attackSwap:{type:'Electric',move:'Rising Voltage',style:'special',why:'Electric Surge supplies terrain. Rising Voltage has extra power against grounded targets while the terrain lasts.'},
+    attackSwap:{type:'Electric',move:'Rising Voltage',style:'special',why:'Its Electric typing is expressed through special offense.'},
     minimum:{spa:100,spe:88},targets:{hp:83,spa:119,spe:123,spd:81},
     motivations:[3,5,7],bigFive:[78,76,79,35,39],
     insight:'Improves the operating environment, charges its system, and then announces that everything is proceeding according to the plan.',
@@ -163,13 +163,13 @@ export function signatureAbility(strategy) {
   return {...ABILITIES.find(entry=>entry.name===strategy.ability)};
 }
 
-export function signatureHeldItem(strategy) {
+export function signatureHeldItem(strategy,{core,role,bigFive,hasBigFive=true}) {
   if(!strategy)return null;
   const item=HELD_ITEMS.find(entry=>entry.name===strategy.item);
   const family=ITEM_FAMILIES[item.family];
   return {
     name:item.name,family:item.family,familyLabel:family.label,
     effect:item.effect,quip:item.quip,
-    why:strategy.name+': '+strategy.mechanism
+    why:heldItemRationale({core,role,bigFive,hasBigFive,family})
   };
 }
