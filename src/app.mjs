@@ -2,12 +2,12 @@ import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=1.2.0';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=baton-pass-27';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=signature-copy-29';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng } from './export-card.mjs?v=role-emblems-1';
+import { downloadCardPng } from './export-card.mjs?v=signature-copy-29';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
