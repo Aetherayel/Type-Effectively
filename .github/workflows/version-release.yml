@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   actions: read
+  pull-requests: read
 
 jobs:
   release:
@@ -20,29 +21,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine the next patch from merged PR history
+      - name: Determine patch from all PRs merged into main
         id: version
         env:
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          GH_TOKEN: ${{ github.token }}
+          MERGED_AT: ${{ github.event.pull_request.merged_at }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         shell: bash
         run: |
           set -euo pipefail
-          # PR #21 introduced v1.1.0. Every later PR merge advances x by one.
-          baseline=2d7feae340f2a0fa3fc2836f077851e1f13bc48a
-          git merge-base --is-ancestor "$baseline" "$MERGE_SHA" || {
-            echo "::error::The v1.1.0 baseline is not an ancestor of this merge."
-            exit 1
-          }
-          # Count first-parent PR merge commits, not arbitrary pushes or PR
-          # branch commits. Supports GitHub's merge-commit and squash styles.
-          patch=$(git log --first-parent --format=%s "$baseline..$MERGE_SHA" |
-            grep -Ec '^(Merge pull request #[0-9]+ from |.+ \(#[0-9]+\)$)' || true)
+          # PR #21 introduced v1.1.0 on 2026-11-21T01:52:00Z.
+          # Count subsequent merged PRs into main, regardless of merge
+          # commit, squash, or rebase strategy. Ignore ordinary pushes.
+          patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
+            jq -s --arg baseline '2026-11-21T01:52:00Z' \
+              --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+              '[.[][] | select(.merged_at != null and .merged_at > $baseline and
+                (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
           if [ "$patch" -lt 1 ]; then
-            echo "::error::Could not identify a merged PR; rebase-only merges are not supported by the release counter."
+            echo "::error::Could not count this merged PR after the v1.1.0 baseline."
             exit 1
           fi
           echo "tag=v1.1.$patch" >> "$GITHUB_OUTPUT"
-          echo "Version for merged commit $MERGE_SHA: v1.1.$patch"
+          echo "Version for merged PR #$PR_NUMBER: v1.1.$patch"
 
       - name: Wait for this exact commit to go live on GitHub Pages
         env:
