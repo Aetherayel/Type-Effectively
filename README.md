@@ -114,7 +114,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 | Regenerative Scout | Pivot / Water | Regenerator | Flip Turn | Heavy-Duty Boots |
 | Toxic Warden | Controller / Poison | Corrosion | Toxic | Black Sludge |
 | Barbed Bulwark | Wall / Steel | Iron Barbs | Iron Defense | Rocky Helmet |
-| Slow Labyrinth | Controller / Psychic | Magic Bounce | Trick Room | Room Service |
+| Grassy Sanctuary | Support / Grass | Grassy Surge | Life Dew | Terrain Extender |
 
 A package must pass **hard role, type, stat, item and move eligibility**. Eligible packages are ranked using the full build's role fit (35%), stat fit (27%), ordered Enneagram motivation (24%), and Big Five fit (14%) when measured. With Big Five missing, the temperament contribution is neutral and qualification is more demanding. The acceptance threshold is an **authored game score**, not a confidence probability or psychological fact. No package is assigned if its actual profile fit is insufficient; ties break deterministically.
 
