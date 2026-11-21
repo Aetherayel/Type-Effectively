@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.0.0 — First complete personality Pokémon generator**
+**Version 1.1.0 — Role-balance recalibration**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -77,7 +77,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning.
 
-## Generation model (v1.0)
+## Generation model (v1.1; v1.0 personality rules retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
@@ -86,7 +86,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% 16Personalities dimension percentages**.
 4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.1, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
-6. **Battle role:** Match the effective stat distribution against six reference profiles. Role suitability is **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**. Near-ties are shown as hybrid roles.
+6. **Battle role (v1.1):** Match effective stats against six tactical reference profiles compressed **25% toward 535/6 per stat** (see `ROLE_TEMPLATE_SCALE` and `ROLE_CALIBRATED_TEMPLATES` in `src/data.mjs`). This corrects the systematic advantage of the unusually balanced Pivot reference without forcing equal role frequencies. Role suitability remains **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**; the existing five-point hybrid threshold is unchanged. Original reference profiles remain available in `ROLE_TEMPLATES`.
 7. **Abilities and moves:** Rank standard Ability candidates by role, visible typing, stat synergy, and second fix. Select a **different Hidden Ability** from the same curated pool, **strictly requiring affinity with at least one visible Pokémon type**, then score it against battle role, stats, second fix, and third fix. The hidden *elemental* affinity remains separate and can provide monotype coverage, but never dictates an off-type Hidden Ability. Four moves comprise primary STAB, secondary STAB/coverage, a **functionally classified role tactic**, and a **corrective growth move**. The third move is chosen by role function first (offense, protection, endurance, positioning, ally support or disruption), then checked against mechanical prerequisites, stats, visible types, supporting fixes and hybrid role. The fourth move must express the Enneagram core's **growth lesson rather than its usual defensive strategy**. The last two moves are **selected as a pair**, preserving four unique moves and avoiding redundant or contradictory setups.
 8. **Held item:** Select moves before ranking **72 real Pokémon held-item candidates** across **nine behavioral families**. Reject items whose defining effect conflicts with the resulting typing and moves: for example Assault Vest on a Status-move build, Black Sludge without Poison typing, Big Root without draining/recovery interaction, Light Clay without screens, and unsupported weather/terrain items. Choice items are excluded from these multi-action four-move builds because their lock conflicts with the app's tactical/growth model. Score compatible choices using the Enneagram, Big Five and role, with a small deterministic tie-breaker. Items remain thematic and **do not modify calculated stats, moves or matchups**.
 
@@ -99,7 +99,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 
 The standard and Hidden Abilities are **alternative strengths**, not concurrently active. A Fire/Fighting build cannot be assigned Sand Force solely because it has a Ground hidden elemental affinity; a Water/Ice build cannot inherit Solid Rock by the same mechanism. This changes mechanical selection without altering the v1.0 seventeen-type typing or 535-BST model.
 
-The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label.
+The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **v1.1 compatibility:** Base stats, elemental typing, Natures, the 36 archetype catalog, and the five-point hybrid threshold are unchanged. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
 
 ### Examples
 

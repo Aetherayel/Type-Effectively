@@ -4,12 +4,13 @@ import { readFileSync } from 'node:fs';
 const load=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const pkg=JSON.parse(load('package.json'));
 
-test('app release markers agree on version 1.0.0',()=>{
-  assert.equal(pkg.version,'1.0.0');
-  assert.match(load('index.html'),/TYPE EFFECTIVELY \/ V1\.0\.0/);
-  assert.match(load('index.html'),/name="application-version" content="1\.0\.0"/);
-  assert.match(load('README.md'),/Generation model \(v1\.0\)/);
-  assert.match(load('CHANGELOG.md'),/## 1\.0\.0/);
+test('app release markers agree on the package version',()=>{
+  const version=pkg.version;
+  const minor=version.split('.').slice(0,2).join('.');
+  assert.ok(load('index.html').includes('TYPE EFFECTIVELY / V'+version));
+  assert.ok(load('index.html').includes('name="application-version" content="'+version+'"'));
+  assert.ok(load('README.md').includes('Generation model (v'+minor));
+  assert.ok(load('CHANGELOG.md').includes('## '+version));
 });
 
 test('v1.0 retains random exploration, six emblems and 17 generated types',()=>{

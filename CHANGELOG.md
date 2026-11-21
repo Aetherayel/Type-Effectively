@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — Battle role balance
+
+- Recalibrate the six role reference templates 25% toward the 535/6-stat center, preserving their characteristic shapes.
+- Reduce unintended Pivot dominance and make Wall and other battle roles more reachable without enforcing equal frequencies.
+- Retain the 80% stat fit / 20% elemental toolkit weights, the five-point hybrid threshold, 535 base-stat budget, typing system, and all 36 archetypes.
+- Allow regenerated roles to inform abilities, moves, items, archetypes, card exports, and Trainer Field Reports consistently.
+- Add seeded role-balance, geometry, and whole-build regression tests; update release metadata and browser cache keys.
+
 ## 1.0.0 — First complete version
 
 The v1.0 baseline for Type Effectively includes:

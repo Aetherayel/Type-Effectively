@@ -2,7 +2,7 @@ import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=typing17-1';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=coherent-moves-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype } from './engine.mjs?v=role-balance-1';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
