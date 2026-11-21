@@ -63,6 +63,20 @@ a{color:inherit}
 .test-line{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid #364848;background:#1a282b;padding:11px 12px;border-radius:9px;margin-bottom:19px}
 .test-line a{color:var(--accent);font-size:12px;text-decoration:none;font-weight:700}.test-line a:hover{text-decoration:underline}
 .test-line span{font-size:10px;color:#8a9f9d}
+/* Recommended tests are a choice of evidence depth, not two scoring systems. */
+.assessment-panel{background:#122125;border:1px solid #364b4c;border-radius:12px;padding:15px 17px;margin:0 0 18px}
+.assessment-heading{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px 12px;align-items:baseline;margin-bottom:12px}
+.assessment-heading strong{font:600 13px 'Space Grotesk',sans-serif;color:#e7eee8}
+.assessment-heading span{font-size:10px;color:#95a9a5}
+.assessment-switch{margin-bottom:8px}
+.assessment-panel .mini-note{margin-top:8px}
+.function-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.function-entry{display:flex;flex-direction:column;gap:7px;padding:10px;background:#101a1e;border:1px solid #35494b;border-radius:9px}
+.function-entry span{font-size:11px;color:#9cb1ab;line-height:1.35}
+.function-entry strong{font:700 13px 'DM Mono',monospace;color:var(--accent)}
+.function-entry input{background:#15252a;border:1px solid #3e5153;border-radius:7px;color:#e7eee8;padding:9px;font:13px 'DM Mono',monospace;width:100%;min-width:0}
+.function-entry input::placeholder{color:#6e8282}
+
 .mode-switch{background:#0e181c;border:1px solid #2a3b3e;border-radius:9px;padding:4px;display:flex;gap:4px;margin-bottom:20px}
 .mode-button{background:transparent;border:0;border-radius:7px;flex:1;color:#829795;font-weight:600;font-size:12px;padding:10px 6px;transition:background .15s,color .15s}
 .mode-button:hover{color:var(--text)}
