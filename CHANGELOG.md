@@ -10,6 +10,12 @@
 - Forbid **Aurora Veil + Reflect/Light Screen** as duplicate defenses, and rule out other identified self-defeating strategy/growth combinations. Reject incompatible weather/terrain orbs and setters.
 - Validate the full 535-BST generation pipeline, exports, textual results, item consistency and strategy distribution.
 
+## Unreleased — Baton Pass prerequisite correction
+
+- Require Baton Pass to have a transferable self-stat boost from another equipped move, or an active standard Speed Boost Ability. Non-transferable weather and screens cannot qualify it.
+- Retain all five Type 3/5 growth choices as authored; only reject Baton Pass for builds without a meaningful setup. Snow Bastion uses another corrective growth move.
+- Add direct move-pair tests and seeded end-to-end checks covering the 4,000-build strategy audit, plus active-versus-Hidden Ability semantics.
+
 ## 1.2.0 — Comprehensive assessment inputs
 
 - Add a **Quick & simple / Comprehensive** testing path with Sakinorva Functions, Sakinorva Rowe Enneagram, and IPIP-NEO-300 links alongside the original short tests.
