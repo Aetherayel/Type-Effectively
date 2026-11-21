@@ -437,8 +437,7 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-      why:strategy?strategy.mechanism:
-        'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
+      why:'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
@@ -536,7 +535,9 @@ export function generateBuild(input) {
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   // Item choice follows move choice: equipment must actually work with its
   // holder and the four signature moves.
-  const heldItem=signatureStrategy?signatureHeldItem(signatureStrategy):
+  const heldItem=signatureStrategy?signatureHeldItem(signatureStrategy,{
+    core,role,bigFive:ocean,hasBigFive:input.bigFive!=null
+  }):
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
