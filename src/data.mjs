@@ -159,6 +159,11 @@ export const ABILITIES = [
   {name:'Levitate',roles:['Pivot','Wall'],types:['Ghost','Psychic','Electric'],desc:'Grants immunity to Ground-type attacks.'},
   {name:'Unaware',roles:['Wall','Support'],types:['Water','Normal','Fairy'],desc:'Ignores opposing stat boosts in damage calculations.'},
   {name:'Ice Scales',roles:['Wall','Tank'],types:['Ice'],desc:'Halves incoming special move damage.'},
+  {name:'Snow Warning',roles:['Wall'],types:['Ice'],desc:'Summons snow on entering battle.',strategyOnly:true},
+  {name:'Drought',roles:['Sweeper'],types:['Fire'],desc:'Summons harsh sunlight on entering battle.',strategyOnly:true},
+  {name:'Corrosion',roles:['Controller'],types:['Poison'],desc:'Allows poisoning of Poison- and Steel-type targets.',strategyOnly:true},
+  {name:'Iron Barbs',roles:['Wall'],types:['Steel'],desc:'Damages opponents that make contact.',strategyOnly:true},
+  {name:'Magic Bounce',roles:['Controller'],types:['Psychic'],desc:'Reflects eligible incoming status moves.',strategyOnly:true},
   {name:'Speed Boost',roles:['Sweeper','Pivot'],types:['Bug','Flying','Electric'],desc:'Raises Speed at the end of each turn.'},
   {name:'Guts',roles:['Tank','Sweeper'],types:['Fighting','Normal'],desc:'Raises Attack while affected by a status condition.'}
 ];
@@ -196,7 +201,7 @@ export const TYPE_ATTACKS = {
 export const ROLE_MOVES = {
   Sweeper:['Swords Dance','Dragon Dance','Flame Charge','Agility','Hone Claws',
     'Nasty Plot','Calm Mind','Quiver Dance','Growth','Charge Beam','Work Up'],
-  Wall:['Iron Defense','Protect','Amnesia','Stockpile','Cotton Guard',
+  Wall:['Iron Defense','Protect','Amnesia','Stockpile','Cotton Guard','Aurora Veil',
     'Light Screen','Reflect','Mist','Recover','Cosmic Power','Acid Armor'],
   Tank:['Bulk Up','Drain Punch','Coil','Curse','Iron Defense','Calm Mind',
     'Cosmic Power','Aqua Ring','Acid Armor','Charge','Amnesia','Recover'],
@@ -226,6 +231,7 @@ export const MOVE_PURPOSES={
   'Protect':['fortification'],'Amnesia':['fortification','endurance'],
   'Stockpile':['fortification'],'Cotton Guard':['fortification'],
   'Light Screen':['fortification','ally'],'Reflect':['fortification','ally'],
+  'Aurora Veil':['fortification','ally'],
   'Mist':['fortification'],'Recover':['fortification','endurance'],
   'Cosmic Power':['fortification','endurance'],
   'Acid Armor':['fortification','endurance'],
