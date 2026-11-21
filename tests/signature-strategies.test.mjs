@@ -68,8 +68,8 @@ test('each other specialization is meaningfully reachable with matching complete
       values:{hp:107,atk:72,def:102,spa:78,spd:115,spe:60},bigFive:[78,63,34,28,54]})},
     {id:'barbed-bulwark',input:ctx({types:['Steel','Ice'],name:'Wall',motives:[1,8,3],
       values:{hp:115,atk:64,def:132,spa:65,spd:92,spe:67},bigFive:[43,86,41,32,48]})},
-    {id:'slow-labyrinth',input:ctx({types:['Psychic','Ghost'],name:'Controller',motives:[5,6,9],
-      values:{hp:111,atk:74,def:102,spa:92,spd:114,spe:42},bigFive:[87,72,21,47,53]})}
+    {id:'grassy-sanctuary',input:ctx({types:['Grass','Fairy'],name:'Support',motives:[9,2,6],
+      values:{hp:112,atk:65,def:92,spa:85,spd:119,spe:86},bigFive:[64,67,48,82,39]})}
   ];
   for(const {id,input} of examples)
     assert.equal(selectSignatureStrategy(input)?.id,id,id+' should be reachable');
