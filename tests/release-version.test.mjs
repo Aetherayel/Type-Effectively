@@ -59,7 +59,8 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(workflow, /types: \[closed\]/);
   assert.match(workflow, /github\.event\.pull_request\.merged == true/);
-  assert.match(workflow, /git log --first-parent/);
+  assert.match(workflow, /pulls\?state=closed&base=main/);
+  assert.match(workflow, /gh api --paginate/);
   assert.match(workflow, /pages build and deployment/);
   assert.match(workflow, /gh release create/);
   assert.ok(template.includes('{{ site.github.build_revision }}'));
