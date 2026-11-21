@@ -36,6 +36,11 @@ export function isHeldItemCompatible(item,{types,moves,ability=null}){
   if(name==='Assault Vest')return false; // Slot 3 and 4 are always status/utility.
   if(['Choice Band','Choice Specs','Choice Scarf'].includes(name))return false;
   if(name==='Black Sludge')return types.includes('Poison');
+  // These orbs are harmful equipment unless the entire package activates their payoff.
+  if(name==='Flame Orb')return abilityName==='Guts' &&
+    !types.includes('Fire') && names.has('Facade');
+  if(name==='Toxic Orb')return abilityName==='Poison Heal' &&
+    !types.some(type=>type==='Poison'||type==='Steel');
   if(name==='Big Root')return hasSome(DRAINING_MOVES);
   if(name==='Light Clay')return hasSome(SCREEN_MOVES);
   if(name==='Grip Claw'||name==='Binding Band')return hasSome(BINDING_MOVES);
@@ -43,17 +48,19 @@ export function isHeldItemCompatible(item,{types,moves,ability=null}){
   if(name==='Loaded Dice')return hasSome(MULTI_HIT_MOVES);
   if(name==='Power Herb')return hasSome(CHARGING_MOVES);
   if(name==='Room Service')return names.has('Trick Room');
-  if(name==='Terrain Extender'||name==='Grassy Seed')
-    return names.has('Grassy Terrain')||abilityName==='Grassy Surge';
-  if(name==='Electric Seed')return names.has('Electric Terrain');
-  if(name==='Misty Seed')return names.has('Misty Terrain');
+  if(name==='Terrain Extender')return ['Grassy Terrain','Electric Terrain','Misty Terrain','Psychic Terrain']
+    .some(move=>names.has(move)) ||
+    ['Grassy Surge','Electric Surge','Misty Surge','Psychic Surge'].includes(abilityName);
+  if(name==='Grassy Seed')return names.has('Grassy Terrain')||abilityName==='Grassy Surge';
+  if(name==='Electric Seed')return names.has('Electric Terrain')||abilityName==='Electric Surge';
+  if(name==='Misty Seed')return names.has('Misty Terrain')||abilityName==='Misty Surge';
   if(name==='Psychic Seed')return names.has('Psychic Terrain');
   const weather={
     'Heat Rock':'Sunny Day','Damp Rock':'Rain Dance',
     'Icy Rock':'Snowscape','Smooth Rock':'Sandstorm'
   };
   if(weather[name])return names.has(weather[name]) ||
-    Boolean(abilityName && {'Icy Rock':'Snow Warning','Heat Rock':'Drought','Damp Rock':'Drizzle'}[name]===abilityName);
+    Boolean(abilityName && {'Icy Rock':'Snow Warning','Heat Rock':'Drought','Damp Rock':'Drizzle','Smooth Rock':'Sand Stream'}[name]===abilityName);
   if(name==='Protective Pads')return hasSome(CONTACT_MOVES);
   // No evolutionary stage exists for an original generated personality Pokémon.
   if(name==='Eviolite'||name==='Everstone')return false;
@@ -80,7 +87,7 @@ export function chooseHeldItem({
     return [key,.68*coreSignal+.32*traits];
   }));
   const seed=[tritype,wing,...mbtiScores,...enneagramScores,...bigFive,role.primary.name].join('|');
-  const sorted=HELD_ITEMS.filter(item=>isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
+  const sorted=HELD_ITEMS.filter(item=>!item.strategyOnly && isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
     const familyScore=familyScores[item.family];
     const traits=traitFit(bigFive,item.targets);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
