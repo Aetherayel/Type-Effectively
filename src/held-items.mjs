@@ -44,7 +44,7 @@ export function isHeldItemCompatible(item,{types,moves,ability=null}){
   if(name==='Power Herb')return hasSome(CHARGING_MOVES);
   if(name==='Room Service')return names.has('Trick Room');
   if(name==='Terrain Extender'||name==='Grassy Seed')
-    return names.has('Grassy Terrain');
+    return names.has('Grassy Terrain')||abilityName==='Grassy Surge';
   if(name==='Electric Seed')return names.has('Electric Terrain');
   if(name==='Misty Seed')return names.has('Misty Terrain');
   if(name==='Psychic Seed')return names.has('Psychic Terrain');
