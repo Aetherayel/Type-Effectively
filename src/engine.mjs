@@ -2,8 +2,8 @@ import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
-  ROLE_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=coherent-moves-1';
+  ROLE_CALIBRATED_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
+} from './data.mjs?v=role-balance-1';
 import { chooseHeldItem } from './held-items.mjs';
 import { classifyArchetype } from './archetypes.mjs';
 import { composeFieldReport } from './profile-analysis.mjs';
@@ -183,7 +183,7 @@ function classifyRole(stats, types) {
   const vals=STAT_KEYS.map(k=>stats[k]);
   const normalized=vals.map(v=>v*535/vals.reduce((a,b)=>a+b,0));
   const scores=ROLE_NAMES.map((role, idx)=>{
-    const target=ROLE_TEMPLATES[role];
+    const target=ROLE_CALIBRATED_TEMPLATES[role];
     const physical=role==='Sweeper'||role==='Tank';
     const options=[target];
     if (physical) options.push([target[0],target[3],target[2],target[1],target[4],target[5]]);
