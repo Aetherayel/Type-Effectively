@@ -84,10 +84,19 @@
             <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. Function scores influence the build continuously; a four-letter label is inferred only to keep existing game mechanics compatible.</p>
             <div class="field-grid" id="mbti-type-fields">
               <label class="field">
-                <span>Type override <span class="muted">(optional with scores)</span></span>
+                <span id="mbti-override-label">Type override <span class="muted">(optional with scores)</span></span>
                 <select id="mbti-override"><option value="">Auto-detect from scores</option></select>
               </label>
+              <label class="field hidden" id="function-identity-fields">
+                <span>A/T identity <span class="muted">(optional; not measured by functions)</span></span>
+                <select id="function-identity">
+                  <option value="">Not provided (no A/T)</option>
+                  <option value="A">Assertive (A)</option>
+                  <option value="T">Turbulent (T)</option>
+                </select>
+              </label>
             </div>
+            <p class="mini-note hidden" id="function-identity-help">Know your Sakinorva four-letter type? Select it above to override the app suggestion. If you know A/T, select it separately. Unknown A/T remains absent; a selected A/T letter uses an estimated 75/25 game-scoring proxy, not a measured percentage.</p>
             <p class="mini-note" id="mbti-derived">An inferred type will appear here as you enter your scores.</p>
           </section>
 
