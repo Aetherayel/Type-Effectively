@@ -331,7 +331,7 @@ function renderFieldReport(build) {
 function renderCard(build) {
   const [first,second]=build.types;
   const pcolor=TYPE_COLORS[first],scolor=TYPE_COLORS[second||first];
-  const warningHtml=build.warnings.length?'<div class="warning-note"><strong>Estimated input:</strong><br />'+build.warnings.map(escapeHtml).join('<br />')+'</div>':'';
+  const warningHtml=build.warnings.length?'<div class="warning-note"><strong>Input notes:</strong><br />'+build.warnings.map(escapeHtml).join('<br />')+'</div>':'';
   const moveHtml=build.moves.map((move,i)=>'<div class="move"><span class="mini-label">'+escapeHtml(move.category)+'</span><strong>'+escapeHtml(move.name)+'</strong><p>'+escapeHtml(move.why)+'</p></div>').join('');
   const roleSecondary=build.role.secondary?' / '+build.role.secondary.name:'';
   const cornerArtwork=renderLiveCornerArtwork(build.types);
@@ -393,11 +393,11 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% five 16Personalities dimensions determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% cognitive preference dimensions'+(build.cognitiveSource==='functions'?' derived from eight comparable function totals':' from 16Personalities')+' determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
         '<p><strong>Held item:</strong> One of 72 real Pokémon held items selected by Enneagram core and fixes, Big Five tendencies, battle role, and deterministic profile matching. Item candidates are filtered for compatibility with the generated typing and selected moves. They remain thematic and do not modify calculated stats or type matchups.</p>'+
-        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. These are interpretations, not clinical findings.</p>'+
+        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. ':'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
       '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
@@ -450,7 +450,7 @@ async function copyText(value,message) {
 }
 function copyShareLink() {
   if(!state.lastInput)return;
-  const payload={version:1,mode:{mbti:state.mbtiMode,ennea:state.enneaMode},input:state.lastInput,sample:state.isSample};
+  const payload={version:1,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample};
   const hash='#build='+encodeURIComponent(JSON.stringify(payload));
   const url=location.origin+location.pathname+location.search+hash;
   copyText(url,'Link copied. Anyone with it can view these personality scores.');
@@ -474,11 +474,12 @@ function runBuild(scroll=true,isSample=false) {
 }
 function clearAll() {
   setScores('mbti',[50,50,50,50,50]);
+  FUNCTION_KEYS.forEach((_,i)=>{$('function-'+i).value='';});
   setScores('ennea',[50,50,50,50,50,50,50,50,50]);
   setScores('bigfive',[50,50,50,50,50]);
-  state.touched={mbti:false,enneagram:false,bigfive:false};
+  state.touched={mbti:false,functions:false,enneagram:false,bigfive:false};
   $('mbti-override').value='';$('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
-  setMode('mbti','scores');setMode('ennea','scores');
+  setTestingPath('quick');setMode('ennea','scores');
   state.lastBuild=null;state.lastInput=null;state.isSample=false;
   $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your personality details to discover the Pokémon they create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
   $('result-status').classList.remove('ready');
@@ -493,12 +494,18 @@ function restoreShared() {
     if(payload.version!==1||!payload.input||!payload.mode) return;
     const input=payload.input;
     if(input.mbtiScores){setScores('mbti',input.mbtiScores);state.touched.mbti=true;}
+    if(input.functionScores){
+      if(!Array.isArray(input.functionScores)||input.functionScores.length!==8) throw new Error('Invalid function scores.');
+      input.functionScores.forEach((value,i)=>{$('function-'+i).value=String(value);});
+      state.touched.functions=true;
+    }
     if(input.enneagramScores){setScores('ennea',input.enneagramScores);state.touched.enneagram=true;}
     if(input.enneagramRanking){$('ennea-ranking').value=input.enneagramRanking.join(' ');state.touched.enneagram=true;}
     if(input.bigFive){setScores('bigfive',input.bigFive);state.touched.bigfive=true;}
     $('mbti-override').value=input.typeOverride||'';
     $('tritype-override').value=input.tritypeOverride||'';
-    setMode('mbti',payload.mode.mbti==='type'?'type':'scores');
+    setTestingPath(payload.mode.testing==='advanced'?'advanced':'quick',false);
+    setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
     setMode('ennea',['scores','ranking','tritype'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
     runBuild(false,payload.sample===true);
@@ -510,12 +517,14 @@ function restoreShared() {
 // sample new combinations without navigating away from the result column.
 function randomizeBuild() {
   const input=generateRandomBuildInput();
+  setTestingPath('quick');
+  FUNCTION_KEYS.forEach((_,i)=>{$('function-'+i).value='';});
   setMode('mbti','scores');
   setMode('ennea','scores');
   setScores('mbti',input.mbtiScores);
   setScores('ennea',input.enneagramScores);
   setScores('bigfive',input.bigFive);
-  state.touched={mbti:true,enneagram:true,bigfive:true};
+  state.touched={mbti:true,functions:false,enneagram:true,bigfive:true};
   $('mbti-override').value='';
   $('tritype-override').value='';
   $('wing-override').value='';
@@ -528,6 +537,8 @@ function randomizeBuild() {
 
 function init() {
   setupFields();
+  document.querySelectorAll('[data-test-mode]').forEach(button=>button.addEventListener('click',()=>setTestingPath(button.dataset.testMode)));
+  setTestingPath('quick',false);
   document.querySelectorAll('[data-mbti-mode]').forEach(button=>button.addEventListener('click',()=>setMode('mbti',button.dataset.mbtiMode)));
   document.querySelectorAll('[data-ennea-mode]').forEach(button=>button.addEventListener('click',()=>setMode('ennea',button.dataset.enneaMode)));
   $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild();});
