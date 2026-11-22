@@ -304,6 +304,8 @@ a{color:inherit}
 .signature-strategy>.signature-mechanism{font-size:10px;color:#90afa2}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:23px}
 .result-actions .primary-export{grid-column:1/-1;background:color-mix(in srgb,var(--pcolor) 15%,#20352e);border-color:color-mix(in srgb,var(--pcolor) 45%,#4e665d)}
+.result-actions .trained-export{grid-column:1/-1;background:#243934;border-color:#6a957a;color:#def5c8}
+.result-actions .trained-export:hover{background:#345047;border-color:#b4db99}
 .result-actions button:disabled{opacity:.6;cursor:progress}
 .outline-button{border:1px solid #4e665d;background:#22332f;color:var(--accent);border-radius:9px;padding:12px 8px;font-weight:700;font-size:12px}
 .outline-button:hover{border-color:var(--accent);background:#2d4536}
