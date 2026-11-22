@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.2.0 — Comprehensive testing and source-aware inputs**
+**Version 1.3.0 — Post-results EV training and two-card exports**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -164,7 +164,7 @@ Once a personality build is generated, a **Train your Pokémon** panel appears *
 - A **Suggested training** button deterministically proposes a 252/252/4 spread from the preexisting role and Nature-adjusted stat shape. Walls, Supports and Controllers emphasize HP and the weaker defense; Sweepers emphasize their better attacking stat and Speed; Tanks emphasize HP/offense; Pivots emphasize Speed/HP. Controllers never receive Speed from the suggestion, preserving potential Trick Room use. A **Reset EVs** button clears the spread.
 - Changes update the six level-100 stat numbers immediately. They never recalculate the 535 BST, Nature, typing, moves, abilities, held item, archetype, or Trainer Guide.
 - **Copy share link** includes the EV spread, so it restores for another viewer; older share links without training data still work and start with suggested training. EV choices remain local unless intentionally shared.
-- The downloadable PNG and **Copy build** text continue to represent the **untrained personality identity**, not player training. No EV or level-100 information is added to the export card pending a separate presentation decision.
+- **Download Personality Card** preserves the original identity card, including its base-stat radar. **Download Trained Build** creates a separate PNG with the current Base / EVs / Level-100 six-stat table (31 IVs), while retaining identity, types, role, abilities, all four moves, item, and version provenance. The trained card is rebuilt from the live EV allocation when clicked, not from the original suggested values. The **Copy build** text remains an identity-only summary.
 
 The feature is playful game training, not a new input to personality interpretation.
 
@@ -190,7 +190,7 @@ Older visual-composition samples from the pair-mapping version: [Ice/Steel Tank]
 
 **Card version provenance:** Every generated result card and its exported PNG prints the release on which that card was created (for example, **CREATED v1.2.0**) in a restrained bottom footer. The **Copy build** summary includes the same label. **Copy share link** records the origin release separately from the URL schema version. If that link is reopened after the site updates, its inputs are **recalculated using the current engine**; the footer then shows both **CREATED v1.2.0 · RECALCULATED v1.2.3**, so a changed outcome is not mistakenly attributed to the old version. Legacy links that predate this field say **CREATED VERSION UNRECORDED**, not a fabricated release. The card footer updates if the verified published patch arrives after an initial build, while previously shared source-version metadata remains immutable.
 
-**Download card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Without entered Big Five results, the card reads **OCEAN · Estimated**. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
+**Download Personality Card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The separate **Download Trained Build** shares the same presentation and item sprite but swaps the radar for six Base / EV / Level-100 stat rows, the Nature modifier, and the current EV budget. Both cards use the same creation/recalculation version footer. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Without entered Big Five results, the card reads **OCEAN · Estimated**. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
 
 ### Held items: a little too much personality
 
@@ -216,9 +216,9 @@ The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `np
 
 **Preview an open PR:** Branches do not automatically receive Pages URLs. For a quick temporary preview of this static app, use [the third-party RawGitHack development viewer for PR #25](https://raw.githack.com/Aetherayel/Type-Effectively/feature/signature-strategies/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
 
-**Automatic live releases (v1.2.x):** The comprehensive-testing follow-up PR **#24** establishes **v1.2.0** when merged and published. Each subsequent merged PR increments the **v1.2.x** patch number (v1.2.1, v1.2.2, etc.) using merged-PR history, not arbitrary pushes or commits. Historical v1.1 tags remain valid: #22 was v1.1.1 and #23 was v1.1.2. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
+**Automatic live releases (v1.3.x):** PR **#30** establishes **v1.3.0** upon merge and successful publication. Each later merged PR increments **v1.3.x** by merged-PR history, not arbitrary pushes or commits. Prior v1.1.x and v1.2.x releases remain valid and verifiable. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x and v1.2.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.2.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.2.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x and v1.3.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.3.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.3.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 
@@ -232,7 +232,9 @@ src/matchups.mjs          Defensive type-chart calculations
 src/held-items-data.mjs   72 curated real items and personality affinity profiles
 src/held-items.mjs        Deterministic item selection and explanations
 src/item-sprites.mjs       Verified held-item sprite URLs and safe export loading
-src/export-card.mjs       Local SVG-to-PNG result card export
+src/export-card.mjs       Personality / trained SVG-to-PNG exports
+src/ev-training.mjs       Pure EV validation, role suggestions and level-100 calculations
+src/training-ui.mjs        Post-results EV sliders and live stat table
 src/relatives.mjs         Pure type, stat, and ability matchers
 src/relatives-ui.mjs      Bonus Pokémon cards and artwork fallbacks
 data/pokedex.json         Static Pokémon and form index (1,351 records)\nscripts/refresh-pokedex.mjs  Rebuild the index from public PokéAPI CSVs
