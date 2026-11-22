@@ -87,7 +87,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning. **Baton Pass** is eligible only when another equipped move establishes transferable self-stat boosts, or the active standard Ability is **Speed Boost**. A Hidden Ability is an alternative, not active alongside the standard one. Snow, Aurora Veil, Reflect, Light Screen and Tailwind do not supply transferable stat stages. Builds without valid Baton Pass setup keep the other core-specific growth choices.
 
-## Generation model (v1.2; v1.0 personality rules retained)
+## Generation model (v1.3; v1.0 personality rules retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
