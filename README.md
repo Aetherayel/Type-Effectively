@@ -156,6 +156,18 @@ Once your build is generated, a bonus section loads the versioned [local Pokéde
 
 To update the index, run `npm run refresh:pokedex`, review the generated diff, and commit it. The refresh script fetches source CSVs only during manual regeneration; the website never calls PokéAPI for its comparisons.\n\nResults diversify by species rather than repeating multiple forms of the same Pokémon. The display uses remote [PokéAPI official-artwork images](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/official-artwork) with sprite fallbacks; it does not copy Pokémon art into this repository. Imagery and names remain the intellectual property of their respective rights holders. Failed Pokémon data/art requests must never stop the primary personality result from working.
 
+## Train your Pokémon (after results)
+
+Once a personality build is generated, a **Train your Pokémon** panel appears **beneath**, not inside, its personality card. It uses the original 535-point `baseStats` with fixed 31 IVs, level 100, a user-adjustable EV allocation, and the actual Pokémon stat formulas. Nature applies once **after** IV/EV calculation; `effectiveStats` (which already contains Nature adjustments for classification) is deliberately **not** used as the formula's input.
+
+- The sliders accept 0–252 EVs per stat in useful four-point increments, up to **508 useful EVs**. Pokémon formally allow 510 EVs, but the remaining two cannot affect level-100 stats.
+- A **Suggested training** button deterministically proposes a 252/252/4 spread from the preexisting role and Nature-adjusted stat shape. Walls, Supports and Controllers emphasize HP and the weaker defense; Sweepers emphasize their better attacking stat and Speed; Tanks emphasize HP/offense; Pivots emphasize Speed/HP. Controllers never receive Speed from the suggestion, preserving potential Trick Room use. A **Reset EVs** button clears the spread.
+- Changes update the six level-100 stat numbers immediately. They never recalculate the 535 BST, Nature, typing, moves, abilities, held item, archetype, or Trainer Guide.
+- **Copy share link** includes the EV spread, so it restores for another viewer; older share links without training data still work and start with suggested training. EV choices remain local unless intentionally shared.
+- The downloadable PNG and **Copy build** text continue to represent the **untrained personality identity**, not player training. No EV or level-100 information is added to the export card pending a separate presentation decision.
+
+The feature is playful game training, not a new input to personality interpretation.
+
 ## Understanding the stats (on-site guide)
 
 A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertiveness), Defense (discipline), Sp. Atk (creative analysis), Sp. Def (composure/cooperation), and Speed (energy/responsiveness).
