@@ -7,7 +7,7 @@ import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng } from './export-card.mjs?v=signature-copy-29';
+import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=1.3.0';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
@@ -464,7 +464,8 @@ function renderCard(build) {
         '<p><strong>Held item:</strong> Equipment is matched to the generated Pokémon’s personality, role, typing, moves and Ability. It does not change the calculated 535 base stats.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes Nature and archetype interpretation but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
-      '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download card ↓</button>'+
+      '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download Personality Card ↓</button>'+ 
+      '<button type="button" id="download-trained-card" class="outline-button trained-export">Download Trained Build ↓</button>'+
       '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
       '<button type="button" id="share-build" class="outline-button">Copy share link ↗</button></div>'+
     '</div>'+
@@ -484,13 +485,29 @@ function renderCard(build) {
       showToast(error.message||'Could not download the card.');
     } finally {
       button.disabled=false;
-      button.textContent='Download card ↓';
+      button.textContent='Download Personality Card ↓';
+    }
+  });
+  $('download-trained-card').addEventListener('click',async()=>{
+    const button=$('download-trained-card');
+    if(button.disabled)return;
+    button.disabled=true;
+    button.textContent='Preparing trained PNG…';
+    try {
+      // Snapshot the current allocation at click time; the export never derives it from base stats.
+      await downloadTrainedCardPng(build, state.lastTrainingEvs);
+      showToast('Trained build PNG ready to save or share.');
+    } catch(error) {
+      showToast(error.message||'Could not download the trained card.');
+    } finally {
+      button.disabled=false;
+      button.textContent='Download Trained Build ↓';
     }
   });
   $('held-item-sprite')?.addEventListener('error',event=>event.currentTarget.remove());
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
-  // Training is deliberately outside the personality card, leaving PNG export unchanged.
+  // Training remains separate from identity; users may export either card.
   renderTrainingPanel(build,$('result-container'),{
     initialEvs:state.lastTrainingEvs,
     onChange:evs=>{state.lastTrainingEvs=evs;}
