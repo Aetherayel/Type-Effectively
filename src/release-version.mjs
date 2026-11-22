@@ -3,12 +3,12 @@
 // slow browser caches cannot make the visible version jump forward.
 const RELEASES_URL = 'https://api.github.com/repos/Aetherayel/Type-Effectively/releases?per_page=100';
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
-const PATCH_TAG_PATTERN = /^v1\.(1|2)\.(0|[1-9][0-9]*)$/;
+const PATCH_TAG_PATTERN = /^v1\.(1|2|3)\.(0|[1-9][0-9]*)$/;
 
 export function versionForRevision(revision, releases) {
   if (!SHA_PATTERN.test(revision) || !Array.isArray(releases)) return null;
-  // Keep historical v1.1 releases visible, but prefer v1.2 when multiple
-  // valid release tags happen to point at the same published revision.
+  // Keep historical minor releases visible, preferring the newest valid
+  // v1.3+ tag when multiple releases point at one published revision.
   const matches = releases.filter(release =>
     release?.draft === false &&
     PATCH_TAG_PATTERN.test(release.tag_name) &&
