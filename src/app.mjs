@@ -12,6 +12,7 @@ import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 import { cardVersionFooter, normalizeBuildVersion } from './build-version.mjs';
+import { renderTrainingPanel } from './training-ui.mjs?v=ev-training-1';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -26,7 +27,7 @@ const oceanDetails=[
   'Cooperation & empathy','Sensitivity to stress'
 ];
 const FUNCTION_LABELS=['Extraverted intuition','Introverted intuition','Extraverted sensing','Introverted sensing','Extraverted thinking','Introverted thinking','Extraverted feeling','Introverted feeling'];
-const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,isSample:false};
+const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,lastTrainingEvs:null,isSample:false};
 let toastTimeout;
 
 function activeBuildVersion() {
@@ -489,6 +490,11 @@ function renderCard(build) {
   $('held-item-sprite')?.addEventListener('error',event=>event.currentTarget.remove());
   $('copy-build').addEventListener('click',()=>copyText(buildSummary(build),'Build copied.'));
   $('share-build').addEventListener('click',()=>copyShareLink());
+  // Training is deliberately outside the personality card, leaving PNG export unchanged.
+  renderTrainingPanel(build,$('result-container'),{
+    initialEvs:state.lastTrainingEvs,
+    onChange:evs=>{state.lastTrainingEvs=evs;}
+  });
   // Optional real-Pokémon comparisons load only after the base build is complete.
   void renderRelatives(build,$('result-container'));
 }
@@ -517,7 +523,7 @@ async function copyText(value,message) {
 }
 function copyShareLink() {
   if(!state.lastInput)return;
-  const payload={version:1,buildVersion:state.lastBuild?.createdVersion||null,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample};
+  const payload={version:1,buildVersion:state.lastBuild?.createdVersion||null,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample,trainingEvs:state.lastTrainingEvs};
   const hash='#build='+encodeURIComponent(JSON.stringify(payload));
   const url=location.origin+location.pathname+location.search+hash;
   copyText(url,'Link copied. Anyone with it can view these personality scores.');
@@ -530,14 +536,14 @@ function setError(message) {
   $('form-error').textContent=message;
   $('form-error').classList.toggle('hidden',!message);
 }
-function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
+function runBuild(scroll=true,isSample=false,sharedVersion=undefined,trainingEvs=undefined) {
   try {
     const input=collectInput();
     const build=generateBuild(input);
     build.renderVersion=activeBuildVersion();
     build.restoredFromShare=sharedVersion!==undefined;
     build.createdVersion=build.restoredFromShare?normalizeBuildVersion(sharedVersion):build.renderVersion;
-    state.isSample=isSample;
+    state.isSample=isSample;state.lastTrainingEvs=trainingEvs;
     state.lastBuild=build;state.lastInput=input;setError('');renderCard(build);
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(error){setError(error.message||'Unable to generate this build.');}
@@ -552,7 +558,7 @@ function clearAll() {
   $('mbti-override').value='';$('function-identity').value='';
   $('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
   setTestingPath('quick');setMode('ennea','scores');
-  state.lastBuild=null;state.lastInput=null;state.isSample=false;
+  state.lastBuild=null;state.lastInput=null;state.lastTrainingEvs=null;state.isSample=false;
   $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your personality details to discover the Pokémon they create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
   $('result-status').classList.remove('ready');
   $('result-status').innerHTML='<span></span> WAITING';
@@ -587,7 +593,7 @@ function restoreShared() {
     setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
     setMode('ennea',input.roweScores?'rowe':['scores','ranking','tritype','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
-    runBuild(false,payload.sample===true,payload.buildVersion??null);
+    runBuild(false,payload.sample===true,payload.buildVersion??null,payload.trainingEvs);
     showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
   }catch {showToast('That shared build link could not be read.');}
 }
