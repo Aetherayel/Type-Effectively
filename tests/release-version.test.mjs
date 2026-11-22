@@ -10,12 +10,14 @@ const sample = [
   { tag_name: 'v1.1.2', target_commitish: previous, draft: false },
   { tag_name: 'v1.1.1', target_commitish: published, draft: false },
   { tag_name: 'v1.2.0', target_commitish: published, draft: false },
+  { tag_name: 'v1.3.0', target_commitish: published, draft: false },
   { tag_name: 'v1.1.3', target_commitish: published, draft: true }
 ];
 
-test('published revisions choose the newest supported v1.1 or v1.2 release', () => {
-  assert.equal(versionForRevision(published, sample), '1.2.0');
-  assert.equal(versionForRevision(published, sample.filter(x=>x.tag_name!=='v1.2.0')), '1.1.1');
+test('published revisions choose the newest supported minor release through v1.3', () => {
+  assert.equal(versionForRevision(published, sample), '1.3.0');
+  assert.equal(versionForRevision(published, sample.filter(x=>x.tag_name!=='v1.3.0')), '1.2.0');
+  assert.equal(versionForRevision(published, sample.filter(x=>!['v1.3.0','v1.2.0'].includes(x.tag_name))), '1.1.1');
   assert.equal(versionForRevision(previous, sample), '1.1.2');
   assert.equal(versionForRevision('b'.repeat(40), sample), null);
   assert.equal(versionForRevision('{{ site.github.build_revision }}', sample), null);
@@ -39,7 +41,7 @@ test('version lookup never uses the latest release from another commit', async (
         ? { revision: published } : sample
     };
   });
-  assert.equal(version, '1.2.0');
+  assert.equal(version, '1.3.0');
   assert.equal(requests.length, 2);
   assert.match(requests[1], /github\.com\/repos\/Aetherayel\/Type-Effectively\/releases/);
 });
@@ -66,11 +68,15 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.match(workflow, /gh release create/);
   assert.ok(workflow.includes('if [ "$PR_NUMBER" = "24" ]; then'));
   assert.ok(workflow.includes('tag=v1.2.0'));
+  assert.ok(workflow.includes('if [ "$PR_NUMBER" = "30" ]; then'));
+  assert.ok(workflow.includes('tag=v1.3.0'));
+  assert.ok(workflow.includes('tag="v1.3.$patch"'));
+  assert.match(workflow,/merged PRs since the v1\.3\.0 baseline/);
   assert.ok(workflow.includes('tag="v1.2.$patch"'));
   assert.ok(workflow.includes('tag="v1.1.$patch"'));
   assert.match(workflow, /merged PRs since the v1\.2\.0 baseline/);
   assert.ok(template.includes('{{ site.github.build_revision }}'));
   assert.match(html, /id="release-version"/);
   assert.match(html, /id="footer-version"/);
-  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=1\.2\.0"/);
+  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=1\.3\.0"/);
 });

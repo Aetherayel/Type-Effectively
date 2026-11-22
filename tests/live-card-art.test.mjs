@@ -90,5 +90,5 @@ test('live and PNG exporters consume the same role artwork with no new external 
   assert.ok(!png.includes('renderLiveTankWatermark'));
   const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(index, /src\/app\.mjs\?v=[\w.-]+/,'entry module must retain a cache key');
-  assert.match(index, /styles\.css\?v=1\.2\.0/,'stylesheet cache key must update');
+  assert.match(index, /styles\.css\?v=1\.3\.0/,'stylesheet cache key must include updated training styles');
 });

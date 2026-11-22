@@ -304,6 +304,8 @@ a{color:inherit}
 .signature-strategy>.signature-mechanism{font-size:10px;color:#90afa2}
 .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:23px}
 .result-actions .primary-export{grid-column:1/-1;background:color-mix(in srgb,var(--pcolor) 15%,#20352e);border-color:color-mix(in srgb,var(--pcolor) 45%,#4e665d)}
+.result-actions .trained-export{grid-column:1/-1;background:#243934;border-color:#6a957a;color:#def5c8}
+.result-actions .trained-export:hover{background:#345047;border-color:#b4db99}
 .result-actions button:disabled{opacity:.6;cursor:progress}
 .outline-button{border:1px solid #4e665d;background:#22332f;color:var(--accent);border-radius:9px;padding:12px 8px;font-weight:700;font-size:12px}
 .outline-button:hover{border-color:var(--accent);background:#2d4536}
@@ -465,4 +467,37 @@ a{color:inherit}
   .report-grid{grid-template-columns:1fr}
   .report-tile{padding:13px}
   .report-intro{padding:15px}
+}
+
+
+/* Optional post-results EV training, intentionally outside the shareable personality card. */
+.ev-trainer{margin-top:15px;padding:23px 20px 20px;border:1px solid #425c54;border-radius:14px;background:linear-gradient(145deg,#1c302e,#142429 90%)}
+.ev-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ev-head .mini-label{font-size:9px;color:#c0dcaf;letter-spacing:1px}
+.ev-head h4{margin:6px 0 0;font:700 23px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.65px}
+.ev-level{flex-shrink:0;border:1px solid #627858;border-radius:7px;padding:7px 9px;font:700 11px 'DM Mono',monospace;color:#daefbc}
+.ev-intro{margin:13px 0 19px;color:#b7c9c0;font-size:11px;line-height:1.75}
+.ev-budget{display:flex;justify-content:space-between;gap:10px;align-items:center;font:10px 'DM Mono',monospace;color:#a3b9ae}
+.ev-budget strong{font-size:12px;color:#e4f4c4;font-variant-numeric:tabular-nums}
+.ev-budget-track{margin:8px 0 20px;height:7px;border-radius:99px;background:#2c4241;overflow:hidden}
+.ev-budget-track>span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#70a3a2,#d9f375);transition:width .12s}
+.ev-table-head,.ev-row{display:grid;grid-template-columns:70px minmax(0,1fr) 42px 58px;gap:8px;align-items:center}
+.ev-table-head{font:9px 'DM Mono',monospace;letter-spacing:.25px;color:#8ca7a0;padding-bottom:8px;border-bottom:1px solid #3c5550}
+.ev-table-head span:nth-child(3),.ev-table-head span:nth-child(4){text-align:right}
+.ev-row{min-height:44px;border-bottom:1px solid #293f3e}
+.ev-row label{font:600 11px 'Space Grotesk',sans-serif;color:#dcebe0}
+.ev-row input[type=range]{width:100%;min-width:0;accent-color:#c8ec8b;cursor:pointer}
+.ev-row output{font:10px 'DM Mono',monospace;color:#a9c8b4;text-align:right;font-variant-numeric:tabular-nums}
+.ev-row>strong{font:700 15px 'Space Grotesk',sans-serif;color:#f0f8dc;text-align:right;font-variant-numeric:tabular-nums}
+.ev-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:17px}
+.ev-actions button{padding:11px 7px;font-size:11px}
+.ev-caption{font:10px/1.65 'DM Mono',monospace;color:#bfd6ae;margin:12px 0 0}
+.ev-caveat{margin:13px 0 0;padding-top:12px;border-top:1px solid #38504a;color:#89a69c;font-size:10px;line-height:1.75}
+@media(max-width:450px){
+  .ev-trainer{padding:18px 12px}
+  .ev-head h4{font-size:20px}
+  .ev-table-head,.ev-row{grid-template-columns:56px minmax(0,1fr) 35px 49px;gap:5px}
+  .ev-row label{font-size:10px}
+  .ev-row>strong{font-size:14px}
+  .ev-table-head{font-size:8px}
 }

@@ -1,6 +1,14 @@
 # Changelog
 
-**Live release numbering:** The v1.1.x patch series covers releases through merged PR #23. PR #24 introduces the **v1.2.0** minor release; later merged PRs increment v1.2.x. Release tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+**Live release numbering:** PR #30 establishes **v1.3.0**, with later merged PRs incrementing v1.3.x. Earlier v1.1.x and v1.2.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+
+## 1.3.0 — Train your Pokémon / two-card exports
+
+- Add an optional **post-results EV trainer** with editable allocations, fixed 31 IVs, level-100 stat calculations, a role-informed suggested spread and reset.
+- Keep 535 BST, Nature, typing, moves, items and archetypes determined exclusively by personality inputs; EV training is an independent layer.
+- Preserve EVs in share links and restore them from shared builds, including compatibility with legacy links.
+- Export **two different PNG cards**: the original base-stat personality identity card, and a companion trained card showing base stats, allocated EVs and level-100 final stats. Both retain typings, abilities, moves, item, artwork and release provenance.
+- Introduce a v1.3 release series; preserve historical version identification and add export/formula/regression tests.
 
 ## Unreleased — Signature strategy expansion and move coherence
 

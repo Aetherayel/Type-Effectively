@@ -1,4 +1,5 @@
-import { TYPE_COLORS } from './data.mjs';
+import { STAT_KEYS, STAT_NAMES, TYPE_COLORS } from './data.mjs';
+import { level100Stats, TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs } from './ev-training.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { loadItemSprite } from './item-sprites.mjs';
 import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs?v=role-emblems-1';
@@ -71,7 +72,41 @@ function moveTiles(moves) {
   }).join('');
 }
 
-export function buildCardSvg(build) {
+
+function trainedStatsPanel(build, evs) {
+  // Use original base stats: effectiveStats already include Nature for personality roles.
+  const trained=level100Stats(build.baseStats, build.natureBoost, build.natureDrop, evs);
+  const spent=evs.reduce((total,value)=>total+value,0);
+  const rows=STAT_KEYS.map((key,index)=>{
+    const y=501+index*72;
+    const base=build.baseStats[key];
+    const ev=evs[index];
+    const final=trained[key];
+    const natureColor=key===build.natureBoost?'#cff39a':key===build.natureDrop?'#ffc5ad':'#f0f9f0';
+    return '<rect x="76" y="'+y+'" width="808" height="62" rx="10" fill="#1b3034" stroke="#395653"/>'+
+      '<text x="97" y="'+(y+38)+'" font-size="21" font-weight="700" fill="#e9f7f2">'+esc(STAT_NAMES[index])+'</text>'+
+      '<rect x="285" y="'+(y+42)+'" width="123" height="6" rx="3" fill="#355055"/>'+
+      '<rect x="285" y="'+(y+42)+'" width="'+(123*Math.min(150,base)/150).toFixed(1)+'" height="6" rx="3" fill="#8bc9c4"/>'+
+      '<text x="477" y="'+(y+39)+'" text-anchor="end" font-size="27" font-weight="700" fill="#bde2d9">'+base+'</text>'+
+      '<text x="646" y="'+(y+39)+'" text-anchor="end" font-size="23" font-weight="700" fill="#cbe8b3">'+ev+'</text>'+
+      '<text x="860" y="'+(y+40)+'" text-anchor="end" font-size="32" font-weight="800" fill="'+natureColor+'">'+final+'</text>';
+  }).join('');
+  return '<text x="76" y="399" class="overline">TRAINED STATS</text>'+
+    '<text x="882" y="399" text-anchor="end" class="overline">LEVEL 100 · 31 IVs</text>'+
+    '<text x="76" y="440" font-size="19" fill="#bdd4ca">PERSONALITY SETS THE BASE. TRAINING SHAPES THE RESULT.</text>'+
+    '<text x="97" y="486" font-size="15" font-weight="700" fill="#a4bbb1">STAT</text>'+
+    '<text x="477" y="486" text-anchor="end" font-size="15" font-weight="700" fill="#a4bbb1">BASE</text>'+
+    '<text x="646" y="486" text-anchor="end" font-size="15" font-weight="700" fill="#a4bbb1">EVs</text>'+
+    '<text x="860" y="486" text-anchor="end" font-size="15" font-weight="700" fill="#a4bbb1">LV. 100</text>'+
+    rows+
+    '<rect x="76" y="955" width="808" height="93" rx="12" fill="#183330" stroke="#537968"/>'+
+    '<text x="100" y="986" font-size="17" font-weight="700" fill="#c6e2bc">'+
+      esc(build.nature)+' NATURE · +10% '+esc(build.natureBoost.toUpperCase())+
+      ' / −10% '+esc(build.natureDrop.toUpperCase())+'</text>'+
+    '<text x="100" y="1020" font-size="17" fill="#a2c1b3">IVs: '+TRAINING_IV+' EACH · EVs: '+spent+' / '+USABLE_EV_BUDGET+' USEFUL</text>';
+}
+
+export function buildCardSvg(build, trainingEvs = null) {
   if (!build || !Array.isArray(build.types) || !build.types.length ||
       build.types.length>2 || build.types.some(type=>!TYPE_COLORS[type])) {
     throw new Error('Cannot export a build without valid Pokémon typing.');
@@ -80,9 +115,19 @@ export function buildCardSvg(build) {
       !build.ability?.name || !build.hiddenAbility) {
     throw new Error('Cannot export a build without its abilities and held item.');
   }
-  // Preserve the exact six-axis chart and Nature numbers from the result card.
-  const radar=renderStatRadar(build.baseStats,build.effectiveStats)
-    .replace('<svg class="stat-radar"','<svg x="145" y="386" width="670" height="627" class="stat-radar"');
+  if(trainingEvs!==null && !validTrainingEvs(trainingEvs))
+    throw new Error('Cannot export an invalid trained EV spread.');
+  // Personality cards retain their exact radar layout; trained cards replace it with a readable table.
+  const radar=trainingEvs===null?renderStatRadar(build.baseStats,build.effectiveStats)
+    .replace('<svg class="stat-radar"','<svg x="145" y="386" width="670" height="627" class="stat-radar"'):null;
+  const statsPanel=trainingEvs===null?
+    '<text x="76" y="399" class="overline">BASE STATS</text>'+
+    '<text x="882" y="399" text-anchor="end" class="overline">535 BST</text>'+
+    radar+
+    '<text x="480" y="1052" text-anchor="middle" font-size="18" fill="#a9c2ba">'+
+      esc(build.nature)+' Nature · +10% '+esc(build.natureBoost.toUpperCase())+
+      ' / −10% '+esc(build.natureDrop.toUpperCase())+'</text>':
+    trainedStatsPanel(build,trainingEvs);
 
   const p=TYPE_COLORS[build.types[0]],s=TYPE_COLORS[build.types[1]||build.types[0]];
   const role=build.role.primary.name+(build.role.secondary?' / '+build.role.secondary.name:'');
@@ -135,10 +180,7 @@ export function buildCardSvg(build) {
   <text x="611" y="261" font-size="11" font-weight="700" letter-spacing="1" fill="#9eb9b0">BATTLE ROLE</text>
   <text x="611" y="283" font-size="19" font-weight="700" fill="#edf9f2">${esc(role)}</text>
   <line x1="76" x2="884" y1="364" y2="364" stroke="#4b6964"/>
-  <text x="76" y="399" class="overline">BASE STATS</text>
-  <text x="882" y="399" text-anchor="end" class="overline">535 BST</text>
-  ${radar}
-  <text x="480" y="1052" text-anchor="middle" font-size="18" fill="#a9c2ba">${esc(build.nature)} Nature · +10% ${esc(build.natureBoost.toUpperCase())} / −10% ${esc(build.natureDrop.toUpperCase())}</text>
+  ${statsPanel}
   <line x1="76" x2="884" y1="1073" y2="1073" stroke="#4b6964"/>
   <text x="76" y="1106" class="overline">ABILITIES</text>
   <rect x="76" y="1122" width="395" height="81" rx="11" fill="#1b3034" stroke="#3b5854"/>
@@ -163,12 +205,19 @@ export function buildCardSvg(build) {
 </svg>`;
 }
 
+// A trained card intentionally shares the exact same identity, artwork, abilities,
+// moves, item and provenance as the personality card. Only its stats panel differs.
+export function buildTrainedCardSvg(build, evs) {
+  if(!validTrainingEvs(evs))throw new Error('Choose a valid EV spread before exporting.');
+  return buildCardSvg(build, evs);
+}
+
 // Canvas export avoids screenshot libraries. Only the optional item icon is
 // retrieved from the verified PokéAPI sprite library (no user scores sent).
 // Returns only after a real PNG blob was produced; callers report failures.
-export async function downloadCardPng(build) {
+export async function downloadCardPng(build, trainingEvs = null) {
   const spritePromise=loadItemSprite(build.heldItem.name);
-  const svg=buildCardSvg(build);
+  const svg=buildCardSvg(build,trainingEvs);
   const svgUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   const image=new Image();
   try {
@@ -198,7 +247,7 @@ export async function downloadCardPng(build) {
     try {
       const anchor=document.createElement('a');
       anchor.href=pngUrl;
-      anchor.download='type-effectively-'+build.types.join('-').toLowerCase()+'-'+build.tritype+'.png';
+      anchor.download='type-effectively-'+(trainingEvs===null?'':'trained-')+build.types.join('-').toLowerCase()+'-'+build.tritype+(trainingEvs===null?'':'-lv100')+'.png';
       document.body.append(anchor);
       anchor.click();
       anchor.remove();
@@ -209,4 +258,9 @@ export async function downloadCardPng(build) {
   } finally {
     URL.revokeObjectURL(svgUrl);
   }
+}
+
+export async function downloadTrainedCardPng(build, evs) {
+  if(!validTrainingEvs(evs))throw new Error('Choose a valid EV spread before exporting.');
+  return downloadCardPng(build, evs);
 }
