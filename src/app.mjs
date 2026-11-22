@@ -2,7 +2,7 @@ import {
   ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=1.2.0';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=signature-copy-29';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=ev-training-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
@@ -536,14 +536,15 @@ function setError(message) {
   $('form-error').textContent=message;
   $('form-error').classList.toggle('hidden',!message);
 }
-function runBuild(scroll=true,isSample=false,sharedVersion=undefined,trainingEvs=undefined) {
+function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
   try {
     const input=collectInput();
     const build=generateBuild(input);
     build.renderVersion=activeBuildVersion();
     build.restoredFromShare=sharedVersion!==undefined;
     build.createdVersion=build.restoredFromShare?normalizeBuildVersion(sharedVersion):build.renderVersion;
-    state.isSample=isSample;state.lastTrainingEvs=trainingEvs;
+    state.isSample=isSample;
+    if(sharedVersion===undefined)state.lastTrainingEvs=null;
     state.lastBuild=build;state.lastInput=input;setError('');renderCard(build);
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(error){setError(error.message||'Unable to generate this build.');}
@@ -558,7 +559,7 @@ function clearAll() {
   $('mbti-override').value='';$('function-identity').value='';
   $('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
   setTestingPath('quick');setMode('ennea','scores');
-  state.lastBuild=null;state.lastInput=null;state.lastTrainingEvs=null;state.isSample=false;
+  state.lastBuild=null;state.lastInput=null;state.isSample=false;state.lastTrainingEvs=null;
   $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">NO DATA, NO DRAMA</div><h3>Something\'s evolving.</h3><p>Enter your personality details to discover the Pokémon they create.</p><div class="empty-detail">AWAITING TRAINER DATA <span class="blink-cursor">_</span></div></div>';
   $('result-status').classList.remove('ready');
   $('result-status').innerHTML='<span></span> WAITING';
@@ -593,7 +594,8 @@ function restoreShared() {
     setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
     setMode('ennea',input.roweScores?'rowe':['scores','ranking','tritype','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
-    runBuild(false,payload.sample===true,payload.buildVersion??null,payload.trainingEvs);
+    state.lastTrainingEvs=payload.trainingEvs;
+    runBuild(false,payload.sample===true,payload.buildVersion??null);
     showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
   }catch {showToast('That shared build link could not be read.');}
 }
