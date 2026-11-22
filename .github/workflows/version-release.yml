@@ -30,8 +30,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # PR #24 introduces v1.2.0, and subsequent merged PRs get v1.2.x.
-          # PRs merged earlier retain their existing v1.1.x release sequence.
+          # PR #30 introduces v1.3.0. PRs merged after #30 get v1.3.x;
+          # historical releases retain their existing v1.2.x or v1.1.x tags.
           v12_at=$(gh api "repos/$GITHUB_REPOSITORY/pulls/24" --jq '.merged_at // empty')
           v12_after=false
           if [ -n "$v12_at" ]; then
@@ -41,7 +41,30 @@ jobs:
             fi
           fi
 
-          if [ "$PR_NUMBER" = "24" ]; then
+          v13_at=$(gh api "repos/$GITHUB_REPOSITORY/pulls/30" --jq '.merged_at // empty')
+          v13_after=false
+          if [ -n "$v13_at" ]; then
+            if [[ "$MERGED_AT" > "$v13_at" ]] || \
+              { [[ "$MERGED_AT" == "$v13_at" ]] && [ "$PR_NUMBER" -gt 30 ]; }; then
+              v13_after=true
+            fi
+          fi
+
+          if [ "$PR_NUMBER" = "30" ]; then
+            tag=v1.3.0
+          elif [ "$v13_after" = true ]; then
+            patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
+              jq -s --arg baseline "$v13_at" \
+                --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+                '[.[][] | select(.merged_at != null and
+                  (.merged_at > $baseline or (.merged_at == $baseline and .number > 30)) and
+                  (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+            if [ "$patch" -lt 1 ]; then
+              echo "::error::Could not count merged PRs since the v1.3.0 baseline."
+              exit 1
+            fi
+            tag="v1.3.$patch"
+          elif [ "$PR_NUMBER" = "24" ]; then
             tag=v1.2.0
           elif [ "$v12_after" = true ]; then
             patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |
