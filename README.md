@@ -24,9 +24,9 @@ No sign-in. No backend. No personality data submitted to a server. Just an unrea
 
 These are independent external websites. **No test integration, scraping, affiliation, or automatic import is implied.** Users enter the result numbers manually. Comprehensive means a longer, more detailed questionnaire—not a claim of scientifically superior Enneagram or cognitive-function typing.
 
-**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The cognition dimensions are: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, and outward perceiving versus outward judging. This produces a **project-specific suggestion** for Nature compatibility, not a reproduction of Sakinorva's various type algorithms or a measured MBTI result. Continuous contrasts also feed stats, held items, and whole-build archetype classification.
+**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The cognition dimensions are: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, and outward perceiving versus outward judging. This produces a **project-specific cognitive preference** for the whole-profile Nature scoring and stats, not a reproduction of Sakinorva's typing algorithms or a measured MBTI result. Continuous contrasts also feed stats, held items, and whole-build archetype classification.
 
-**Optional Sakinorva type override:** Use the existing four-letter type dropdown while entering eight functions. The app still records and scores the **same eight function totals**, but the chosen type controls the displayed identity and Nature, and informs the whole-build archetype interpretation. The function-derived suggestion remains visible for comparison. The Enneagram-derived elemental typing is unaffected by an MBTI override.
+**Optional Sakinorva type override:** Use the existing four-letter type dropdown while entering eight functions. The app still records and scores the **same eight function totals**, but the chosen type controls the displayed identity and the cognitive polarity used in Nature scoring, and informs whole-build archetype interpretation. The function-derived suggestion remains visible for comparison. The Enneagram-derived elemental typing is unaffected by an MBTI override.
 
 **Optional A/T identity:** Functions do not measure the Assertive/Turbulent axis. Leave A/T as **Not provided** to omit the suffix and retain an internal neutral 50 placeholder for compatibility; no measured A/T is claimed. If you know your A or T designation, select it independently. With no measured percentage, the engine uses its existing **type-only 75/25 proxy** (A → 25 and T → 75 on the Turbulent axis), explicitly flagged as an estimate. Input choices are preserved in shared links and reflected on result cards, without exposing raw function scores in PNG exports.
 
@@ -92,7 +92,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
 1. **Elemental typing:** Score each of the 17 elements against all nine Enneagram motivations using `TYPE_AFFINITY`. **Primary:** core 88% + wing 12% (or core 100% if wing is unknown). **Secondary:** second fix 65% + third fix 30% + core 5%. **Hidden affinity:** third fix 60% + second fix 30% + wing 10% (or 70% third / 30% second if wing is unknown); exclude both visible types. All three selections are deterministic. Monotypes arise only when primary and secondary independently coincide.
-2. **Nature:** Map the four-letter personality type onto one of 16 existing Pokémon Natures.
+2. **Nature:** Score all **20 distinct non-neutral Pokémon Natures** as a motivation/cognition/temperament **priority tradeoff**, before applying Nature to stats. See the scoring specification below; MBTI letters alone no longer determine Nature.
 3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% cognition input (16Personalities percentages or function-derived contrasts)**.
 4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.1, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
@@ -102,6 +102,50 @@ Deterministic. The same inputs always produce the same result. The output is exp
 
 9. **Whole-build archetype (post-generation):** After typing, Nature, 535-point stats, role, Abilities, moves and item are finalized, classify the result against **36 curated archetypes**: six motivational/cognitive/temperamental operating styles × six battle expressions. The game-affinity score combines **25% Enneagram motivation** (all nine scores plus ordered tritype), **20% 16Personalities cognitive preference** (five percentages, respecting overridden letters), **25% Big Five temperament**, and **30% battle-role compatibility**. Battle compatibility already reflects stats and visible typing, so neither is independently counted again. The best-ranked candidate wins; close competitors and four scoring components are shown for transparency. Nothing in archetype selection feeds backward into the Pokémon build.
 10. **Trainer Field Report:** A fictional, dynamically generated **Pokédex field entry** introduces the creature, followed by a **three-order Trainer Playbook**: practice the actual role-tactic move using the strongest stats, bring coverage for the actual type-chart weaknesses, and train the actual corrective growth move. Eight further field notes address instincts, MBTI-style habits, OCEAN temperament, deployment, vulnerabilities, contradictions, party synergy, and growth—**as advice to a Pokémon trainer**, not a clinical assessment of the player. The narrative references the complete generated build, including Nature and the 535 BST budget. Missing Big Five inputs are explicitly described as estimates, not observations. The report displays qualitative observations, not raw personal assessment scores; downloaded card behavior is unchanged.
+
+### How Nature is scored (v1.3.x)
+
+Nature answers **which behavior is prioritized, and which competing response is sacrificed?** It does **not** rank aptitude, so it never reads base stats, battle role, typing, abilities, or archetype. Five non-HP meanings are deliberately distinct from the base-stat aptitude mappings:
+
+| Nature preference axis | Interpretation |
+| --- | --- |
+| Attack | Decisive assertion (choosing to confront/act) |
+| Defense | Protective structure (choosing boundaries/order) |
+| Sp. Atk | Reflective exploration (choosing inquiry/possibilities) |
+| Sp. Def | Patient cooperation (choosing composure/harmony) |
+| Speed | Responsive flexibility (choosing immediate adaptation) |
+
+**Enneagram component:** Nine authored motivational prototypes, ordered Attack / Defense / Sp. Atk / Sp. Def / Speed. These are **preference scores**, not the `ENNEAGRAM_AFFINITIES` aptitude matrix used for base stats.
+
+| Type | Atk | Def | SpA | SpD | Spe |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 46 | 94 | 75 | 83 | 27 |
+| 2 | 38 | 53 | 48 | 96 | 64 |
+| 3 | 94 | 68 | 54 | 41 | 88 |
+| 4 | 41 | 32 | 91 | 63 | 64 |
+| 5 | 22 | 77 | 99 | 74 | 21 |
+| 6 | 40 | 89 | 76 | 94 | 32 |
+| 7 | 79 | 22 | 70 | 28 | 99 |
+| 8 | 99 | 72 | 38 | 34 | 77 |
+| 9 | 22 | 64 | 45 | 96 | 36 |
+
+For each preference axis: `Motivation = 50 + (0.55 × core prototype + 0.25 × second fix + 0.10 × third fix + 0.10 × all-nine weighted prototype) − nine-type prototype mean for that axis`. All-nine weights are `max(0, score − 20)^2 + 16` and are normalized to sum to 1, preserving the supplied score distribution. Mean-centering prevents authored category offsets from making one stat the default winner.
+
+**Cognitive component:** Let `I,N,F,P` be four 0–100 preference percentages; `E=100−I`, `S=100−N`, `T=100−F`, `J=100−P`. For an intentional type override, keep the reported distance from 50 but point it toward the overridden letter. The four preference axes (not A/T) determine:
+
+- Atk = `0.30E + 0.55T + 0.15J`; Def = `0.20I + 0.15S + 0.15T + 0.50J`
+- SpA = `0.20I + 0.55N + 0.25T`; SpD = `0.15I + 0.50F + 0.20J + 0.15S`
+- Spe = `0.30E + 0.25S + 0.45P`
+
+**Big Five component, only when measured:** `O,C,E,A,N` are the entered 0–100 domains and `Stability = 100−N`.
+
+- Atk = `0.30E + 0.40(100−A) + 0.30C`; Def = `0.55C + 0.25 Stability + 0.20(100−E)`
+- SpA = `0.50O + 0.25(100−E) + 0.25C`; SpD = `0.45A + 0.40 Stability + 0.15C`
+- Spe = `0.40E + 0.35(100−C) + 0.25O`
+
+For each candidate Nature's boost stat `b` and reduced stat `d`, calculate a source's **pair fit** as `50 + (sourcePriority[b] − sourcePriority[d])/2`. Score the candidate as **45% Enneagram + 30% cognition + 25% Big Five**. A four-letter-only proxy reduces cognitive weight to 15 before re-normalizing. Missing Big Five is **excluded and weights re-normalized** (60%/40% with measured cognition; 75%/25% with type-only estimates). Highest score wins; exact ties are alphabetically deterministic. No arbitrary variation or equalization quota is applied.
+
+The results screen's **Why this Nature?** disclosure shows the selected contrast, weighted component fits, and close alternative. All five neutral Natures are intentionally excluded from the 20 distinct mechanical tradeoffs; the selected Nature preserves the existing ±10% non-HP modifiers and original 535 BST. Nature-adjusted stats continue to feed roles, specialists, moves, and EV suggestions, so changing Nature can legitimately alter the downstream build. This is a fictional game model, not validated psychological scoring.
 
 ### Signature Strategies
 
