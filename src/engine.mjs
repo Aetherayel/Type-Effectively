@@ -1,11 +1,12 @@
 import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
-  MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, NATURE_BY_MBTI, NATURE_EFFECTS, OCEAN_KEYS,
+  MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_CALIBRATED_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs?v=role-balance-1';
 import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
+import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences } from './functions.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
@@ -109,7 +110,7 @@ export function inferredEnneagramScores(tritype) {
 }
 
 export function inferredMbtiScores(mbti) {
-  if (!NATURE_BY_MBTI[mbti]) throw new Error('Choose a valid four-letter personality type.');
+  if (!MBTI_TYPES.includes(mbti)) throw new Error('Choose a valid four-letter personality type.');
   return [
     mbti[0] === 'I' ? 75:25, mbti[1] === 'N'?75:25,
     mbti[2] === 'F'?75:25, mbti[3] === 'P'?75:25, 50
@@ -468,8 +469,7 @@ export function generateBuild(input) {
   }
   const suggestedType=deriveMbti(mbtiScores);
   const mbti=override || suggestedType;
-  if (!NATURE_BY_MBTI[mbti]) throw new Error('Invalid MBTI type.');
-  const nature=NATURE_BY_MBTI[mbti];
+  if (!MBTI_TYPES.includes(mbti)) throw new Error('Invalid MBTI type.');
   if(usingFunctions) {
     warnings.push('Eight function totals were translated into four preference contrasts for this game. This is not Sakinorva’s typing algorithm.');
     if(identityPreference)
@@ -477,7 +477,7 @@ export function generateBuild(input) {
     else
       warnings.push('The A/T axis was not provided; its contribution is neutral and no A/T label was inferred.');
     if(override && override!==suggestedType)
-      warnings.push('Your selected '+override+' type overrides the function-derived '+suggestedType+' label for Nature and archetype interpretation; function contrasts still drive the underlying stat affinities.');
+      warnings.push('Your selected '+override+' type is used for Nature preference polarity and archetype interpretation; the function-derived '+suggestedType+' suggestion and raw stat affinities remain unchanged.');
   }
 
   const usingRowe=input.roweScores!=null;
@@ -507,7 +507,15 @@ export function generateBuild(input) {
   if (!Array.isArray(ocean) || ocean.length!==5 || ocean.some(n=>!Number.isFinite(n)||n<0||n>100)) {
     throw new Error('Big Five scores must contain five numbers from 0–100.');
   }
-  if (!input.bigFive) warnings.push('Big Five scores were set to neutral 50-point placeholders.');
+  if (!input.bigFive) warnings.push('Big Five scores were set to neutral 50-point placeholders for base stats; Nature scoring excludes unmeasured Big Five.');
+  // Nature scores a motivational/cognitive/temperamental *preference contrast*,
+  // not raw stats or an already selected battle role. Run before role selection.
+  const natureScoring=classifyNature({
+    enneagramScores:enneaScores,core,second,third,mbtiScores,mbti,
+    bigFive:input.bigFive??null,
+    hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
+  });
+  const nature=natureScoring.name;
   const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores), ma=mbtiAffinity(mbtiScores);
   const blend=STAT_KEYS.map((_,i)=>.7*oa[i]+.2*ea[i]+.1*ma[i]);
   const baseStats=normalizeStats(blend);
@@ -549,7 +557,7 @@ export function generateBuild(input) {
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
     input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
   const build={
-    mbti, identity, nature, identityPreference:usingFunctions?(identityPreference||null):null,
+    mbti, identity, nature, natureScoring, identityPreference:usingFunctions?(identityPreference||null):null,
     cognitiveSource:usingFunctions?'functions':'16personalities', enneagramSource:usingRowe?'rowe':'standard',
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
