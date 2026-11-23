@@ -145,6 +145,8 @@ For each preference axis: `Motivation = 50 + (0.55 × core prototype + 0.25 × s
 
 For each candidate Nature's boost stat `b` and reduced stat `d`, calculate a source's **pair fit** as `50 + (sourcePriority[b] − sourcePriority[d])/2`. Score the candidate as **45% Enneagram + 30% cognition + 25% Big Five**. A four-letter-only proxy reduces cognitive weight to 15 before re-normalizing. Missing Big Five is **excluded and weights re-normalized** (60%/40% with measured cognition; 75%/25% with type-only estimates). Highest score wins; exact ties are alphabetically deterministic. No arbitrary variation or equalization quota is applied.
 
+**Worked example (bundled INTJ-A / 593 sample):** Quiet (+Sp. Atk, −Speed) receives Enneagram pair fit **67.7**, cognitive pair fit **83.8**, and Big Five pair fit **75.5**. The resulting score is **74.5** after weighting (45/30/25). This is the bundled demo profile, not a fixed result for all INTJs or all 593s. Numbers are rounded for display; candidate ranking uses full precision.
+
 The results screen's **Why this Nature?** disclosure shows the selected contrast, weighted component fits, and close alternative. All five neutral Natures are intentionally excluded from the 20 distinct mechanical tradeoffs; the selected Nature preserves the existing ±10% non-HP modifiers and original 535 BST. Nature-adjusted stats continue to feed roles, specialists, moves, and EV suggestions, so changing Nature can legitimately alter the downstream build. This is a fictional game model, not validated psychological scoring.
 
 ### Signature Strategies
