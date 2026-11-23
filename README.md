@@ -184,11 +184,11 @@ The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Con
 
 | Profile | Typing | Nature | Hidden affinity |
 | --- | --- | --- | --- |
-| INTJ-A · 593 (5w6) | Ice / Water | Quiet | Fighting |
-| ESFP · 714 (7w8) | Electric / Steel | Jolly | Psychic |
-| INTJ · 514 (5w4) | Psychic / Steel | Quiet | Ghost |
+| INTJ-A · 593 (5w6) | Ice / Water | Quiet (sample complete profile) | Fighting |
+| ESFP · 714 (7w8) | Electric / Steel | Hasty (sample complete profile) | Psychic |
+| INTJ · 514 (5w4) | Psychic / Steel | Varies with full profile | Ghost |
 
-These are examples of actual supported profiles. If the visitor supplies only a tritype with no wing or measured Enneagram scores, typing uses the core alone rather than inferring a wing from proxy data.
+Typing examples remain deterministic for the stated core/wing/fixes. **Nature now depends on motivation, cognition and measured temperament**, so it cannot be inferred from MBTI/tritype labels alone. If the visitor supplies only a tritype with no wing or measured Enneagram scores, typing uses the core alone rather than inferring a wing from proxy data.
 
 ## Pokémon Relatives: real Pokémon comparisons
 
