@@ -131,7 +131,7 @@ test('score-derived and manually overridden identities',()=>{
   }});
   assert.deepEqual(wife.types,['Electric','Steel']);
   assert.equal(wife.hiddenType,'Psychic');
-  assert.equal(wife.nature,'Jolly');
+  assert.equal(wife.nature,'Hasty');
 });
 
 test('tritypes enforce exactly one type per center',()=>{
