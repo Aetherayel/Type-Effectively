@@ -75,7 +75,7 @@ test('optional A/T uses a disclosed type-only proxy, never a fabricated measurem
   assert.deepEqual(generateBuild({...input,identityPreference:'A'}).baseStats,assertive.baseStats);
 });
 
-test('manual Sakinorva type override changes Nature and interpretation, not raw function affinities',()=>{
+test('manual Sakinorva type override changes Nature scoring inputs, not raw function affinities',()=>{
   const inferred=generateBuild(input);
   const chosen=generateBuild({...input,typeOverride:'ENFP',identityPreference:'A'});
   assert.equal(chosen.suggestedType,'INTJ');
