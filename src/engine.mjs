@@ -404,11 +404,14 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   }
   const selected=new Set(attacks.map(m=>m.name));
   if(selected.size!==2)throw new Error('Signature attack substitution duplicated an attack.');
-  const validRole=ROLE_MOVES[role.primary.name].filter(name=>
+  // A signature tactic belongs to the role that earned the package, even
+  // when that is the close secondary role; the displayed primary is unchanged.
+  const tacticRole=strategy?.matchedRole||role.primary.name;
+  const validRole=ROLE_MOVES[tacticRole].filter(name=>
     !selected.has(name) &&
     (!strategy||name===strategy.tactic) &&
-    MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[role.primary.name]) &&
-    isMoveEligible(name,{types:visibleTypes,stats,role:role.primary.name,
+    MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[tacticRole]) &&
+    isMoveEligible(name,{types:visibleTypes,stats,role:tacticRole,
       ability:strategy?.ability}));
   const growth=GROWTH_MOVES[core];
   const validGrowth=growth.choices.filter(name=>
@@ -437,7 +440,7 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-      why:'This '+role.primary.name.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
+      why:'This '+tacticRole.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
