@@ -20,7 +20,7 @@ test('published revisions choose the newest supported minor and patch through v1
   assert.equal(versionForRevision(published, sample), '1.4.2');
   assert.equal(versionForRevision(published, sample.filter(x=>!x.tag_name.startsWith('v1.4.'))), '1.3.0');
   assert.equal(versionForRevision(published, sample.filter(x=>!x.tag_name.startsWith('v1.4.')&&x.tag_name!=='v1.3.0')), '1.2.0');
-  assert.equal(versionForRevision(published, sample.filter(x=>!['v1.3.0','v1.2.0'].includes(x.tag_name))), '1.1.1');
+  assert.equal(versionForRevision(published, sample.filter(x=>!x.tag_name.startsWith('v1.4.') && !['v1.3.0','v1.2.0'].includes(x.tag_name))), '1.1.1');
   assert.equal(versionForRevision(previous, sample), '1.1.2');
   assert.equal(versionForRevision('b'.repeat(40), sample), null);
   assert.equal(versionForRevision('{{ site.github.build_revision }}', sample), null);
