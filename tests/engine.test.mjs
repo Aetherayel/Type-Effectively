@@ -152,10 +152,11 @@ test('ranking converts into well-ordered, distinctive proxy scores',()=>{
 
 test('nature changes two non-HP stats and leaves base stats unchanged',()=>{
   const b=generateBuild(baseInput);
-  const effective=applyNature(b.baseStats,'Quiet');
+  const effective=applyNature(b.baseStats,b.nature);
+  assert.deepEqual(b.effectiveStats,effective);
   assert.equal(effective.hp,b.baseStats.hp);
-  assert.equal(effective.spa,Math.floor(b.baseStats.spa*1.1));
-  assert.equal(effective.spe,Math.floor(b.baseStats.spe*.9));
+  assert.equal(effective[b.natureBoost],Math.floor(b.baseStats[b.natureBoost]*1.1));
+  assert.equal(effective[b.natureDrop],Math.floor(b.baseStats[b.natureDrop]*.9));
   assert.equal(sum(b.baseStats),535);
 });
 
