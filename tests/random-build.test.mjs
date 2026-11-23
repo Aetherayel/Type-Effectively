@@ -50,7 +50,7 @@ test('random samples explore all MBTI types, ordered tritypes and six role emble
     mbti.add(b.mbti);tritypes.add(b.tritype);roles.add(b.role.primary.name);
     typings.add(b.types.join('/'));items.add(b.heldItem.name);
   }
-  assert.deepEqual(mbti,new Set(Object.keys(NATURE_BY_MBTI)));
+  assert.deepEqual(mbti,new Set(MBTI_TYPES));
   assert.equal(tritypes.size,162,'3 center choices × 3 × 3 × six orders');
   assert.deepEqual(roles,new Set(BATTLE_ROLE_NAMES));
   assert.ok(typings.size>=90,'should visit many type-art pairings');
