@@ -107,11 +107,14 @@ export function classifyNature({
     const boostIndex=NATURE_STATS.indexOf(boost),dropIndex=NATURE_STATS.indexOf(drop);
     if(boostIndex<0||dropIndex<0||boostIndex===dropIndex)
       throw new Error('Nature must boost and reduce distinct non-HP stats: '+name);
-    const components=Object.fromEntries(Object.entries(bySource).filter(([,values])=>values)
-      .map(([source,values])=>[source,round1(
-        50+(values[boostIndex]-values[dropIndex])/2)]));
-    const raw=Object.entries(components).reduce((sum,[source,score])=>
+    const componentRaw=Object.fromEntries(Object.entries(bySource).filter(([,values])=>values)
+      .map(([source,values])=>[source,
+        50+(values[boostIndex]-values[dropIndex])/2]));
+    // Rank on unrounded evidence; round only for human-readable reporting.
+    const raw=Object.entries(componentRaw).reduce((sum,[source,score])=>
       sum+weights[source]*score,0);
+    const components=Object.fromEntries(Object.entries(componentRaw)
+      .map(([source,score])=>[source,round1(score)]));
     return {name,boost,drop,raw,score:round1(raw),components};
   }).sort((a,b)=>b.raw-a.raw || a.name.localeCompare(b.name));
   const winner=candidates[0];
