@@ -1,8 +1,8 @@
 # Changelog
 
-**Live release numbering:** PR #30 establishes **v1.3.0**, with later merged PRs incrementing v1.3.x. Earlier v1.1.x and v1.2.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+**Live release numbering:** PR #32 establishes **v1.4.0**, with subsequent merged PRs incrementing v1.4.x. Historical v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
-## Unreleased — Whole-profile Nature classification
+## 1.4.0 — Whole-profile Nature classification
 
 - Replace 16 hard-coded MBTI → Nature mappings with independent scoring across all 20 non-neutral Pokémon stat tradeoffs.
 - Interpret Nature as a preferred behavioral priority versus a competing sacrifice, using motivation (45%), cognition (30%), and measured Big Five temperament (25%) with centered nine-type prototypes and transparent pair scoring.
