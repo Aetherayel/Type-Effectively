@@ -81,7 +81,9 @@ test('manual Sakinorva type override changes Nature and interpretation, not raw 
   assert.equal(chosen.suggestedType,'INTJ');
   assert.equal(chosen.mbti,'ENFP');
   assert.equal(chosen.identity,'ENFP-A');
-  assert.equal(chosen.nature,'Naive');
+  assert.equal(chosen.natureScoring.cognitionEstimated,false);
+  assert.notDeepEqual(chosen.natureScoring.priorities,inferred.natureScoring.priorities,
+    'overridden preference poles must affect the Nature candidates');
   assert.deepEqual(chosen.breakdown.mbti,generateBuild({...input,identityPreference:'A'}).breakdown.mbti);
   assert.deepEqual(chosen.types,inferred.types,'Enneagram typing is unchanged');
   assert.ok(chosen.warnings.some(note=>note.includes('overrides the function-derived INTJ')));
