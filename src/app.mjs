@@ -1,8 +1,8 @@
 import {
   ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs?v=1.3.0';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=1.3.0';
+} from './data.mjs?v=nature-scoring-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=nature-scoring-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
 import { renderStatRadar } from './radar.mjs';
