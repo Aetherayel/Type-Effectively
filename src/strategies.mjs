@@ -135,7 +135,11 @@ export function selectSignatureStrategy({
   if(!Array.isArray(types)||!role?.primary?.name||!stats||
       !Array.isArray(bigFive)||bigFive.length!==5)return null;
   const eligible=SIGNATURE_STRATEGIES.flatMap(strategy=>{
-    if(!strategy.roles.includes(role.primary.name) ||
+    // A classified secondary role is a close hybrid (within five role points).
+    // Prefer the primary role if both match a package's eligible roles.
+    const matchedRole=[role.primary,role.secondary].find(candidate=>
+      candidate && strategy.roles.includes(candidate.name));
+    if(!matchedRole ||
        !strategy.requiredTypes.every(type=>types.includes(type)) ||
        strategy.forbiddenTypes?.some(type=>types.includes(type)) ||
        (strategy.offensiveStyle==='physical' && stats.atk<stats.spa) ||
@@ -143,7 +147,7 @@ export function selectSignatureStrategy({
        !satisfiesGates(strategy,stats))return [];
     const motive=motivationFit(strategy,{core,second,third});
     if(motive<55)return []; // A thematic match alone cannot force a specialist.
-    const score=.35*role.primary.score+.27*statFit(strategy,stats)+
+    const score=.35*matchedRole.score+.27*statFit(strategy,stats)+
       .24*motive+.14*(hasBigFive?traitFit(strategy,bigFive):55);
     const threshold=hasBigFive?77:82; // Missing traits are not invented evidence.
     if(score<threshold)return [];
@@ -153,7 +157,7 @@ export function selectSignatureStrategy({
        !ability.types.some(type=>types.includes(type))||
        !isHeldItemCompatible(item,{types,moves:[strategy.tactic,strategy.attackSwap?.move].filter(Boolean),ability}))
       throw new Error('Invalid signature strategy configuration: '+strategy.id);
-    return [{...strategy,score:Math.round(score*10)/10}];
+    return [{...strategy,matchedRole:matchedRole.name,score:Math.round(score*10)/10}];
   }).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
   return eligible[0]||null;
 }
