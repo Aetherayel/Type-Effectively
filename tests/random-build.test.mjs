@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
 import { generateBuild, deriveMbti, deriveTritype, isValidTritype } from '../src/engine.mjs';
-import { NATURE_BY_MBTI } from '../src/data.mjs';
+import { MBTI_TYPES } from '../src/data.mjs';
 import { BATTLE_ROLE_NAMES } from '../src/card-art.mjs';
 
 const page=readFileSync(new URL('../index.html',import.meta.url),'utf8');
