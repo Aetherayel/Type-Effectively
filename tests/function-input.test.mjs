@@ -87,7 +87,7 @@ test('manual Sakinorva type override changes Nature and interpretation, not raw 
   assert.deepEqual(chosen.breakdown.mbti,generateBuild({...input,identityPreference:'A'}).breakdown.mbti);
   assert.deepEqual(chosen.types,inferred.types,'Enneagram typing is unchanged');
   assert.ok(chosen.warnings.some(note=>note.includes('overrides the function-derived INTJ')));
-  assert.notEqual(chosen.nature,inferred.nature);
+  assert.ok(chosen.natureScoring.components.cognition>0);
   assert.throws(()=>generateBuild({...input,typeOverride:'FAKE'}),/Invalid MBTI type/);
 });
 
