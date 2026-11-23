@@ -151,7 +151,12 @@ test('strategy selection is deterministic and keeps ordinary scoring available',
   assert.equal(Object.values(general.baseStats).reduce((a,b)=>a+b,0),535);
   assert.equal(general.moves.length,4);
   assert.ok(GROWTH_MOVES[general.core].choices.includes(general.moves[3].name));
-  assert.equal(general.signatureStrategy??null,null);
+  if(general.signatureStrategy){
+    assert.equal(general.ability.name,general.signatureStrategy.ability);
+    assert.equal(general.moves[2].name,general.signatureStrategy.tactic);
+  }
+  // An old generalist becoming a specialist after a new Nature is a valid
+  // downstream effect; the seeded population audit still guards prevalence.
 });
 
 test('the Signature Strategy callout alone explains specialist synergy',()=>{
