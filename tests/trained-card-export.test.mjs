@@ -73,7 +73,7 @@ test('results offer distinct personality and trained downloads while shares pres
   assert.ok(app.includes('downloadTrainedCardPng(build, state.lastTrainingEvs)'));
   assert.ok(app.includes('trainingEvs:state.lastTrainingEvs'));
   assert.ok(app.includes('state.lastTrainingEvs=payload.trainingEvs'));
-  assert.equal(packageJson.version,'1.3.0');
-  assert.match(html,/application-version" content="1\.3\.0"/);
-  assert.match(html,/src\/app\.mjs\?v=1\.3\.0/);
+  assert.equal(packageJson.version,'1.4.0');
+  assert.match(html,/application-version" content="1\.4\.0"/);
+  assert.match(html,/src\/app\.mjs\?v=[\w.-]+/,'entry cache key is distinct from release version');
 });

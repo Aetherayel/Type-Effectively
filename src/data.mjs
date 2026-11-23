@@ -81,19 +81,20 @@ export const ENNEAGRAM_AFFINITIES = {
   9:[100,43,96,65,98,35]
 };
 
-export const NATURE_BY_MBTI = {
-  INTJ:'Quiet', INTP:'Modest', ENTJ:'Adamant', ENTP:'Rash',
-  INFJ:'Calm', INFP:'Gentle', ENFJ:'Bold', ENFP:'Naive',
-  ISTJ:'Careful', ISFJ:'Relaxed', ESTJ:'Brave', ESFJ:'Impish',
-  ISTP:'Lonely', ISFP:'Mild', ESTP:'Hasty', ESFP:'Jolly'
-};
-export const NATURE_EFFECTS = {
-  Quiet:['spa','spe'], Modest:['spa','atk'], Adamant:['atk','spa'],
-  Rash:['spa','spd'], Calm:['spd','atk'], Gentle:['spd','def'],
-  Bold:['def','atk'], Naive:['spe','spd'], Careful:['spd','spa'],
-  Relaxed:['def','spe'], Brave:['atk','spe'], Impish:['def','spa'],
-  Lonely:['atk','def'], Mild:['spa','def'], Hasty:['spe','def'], Jolly:['spe','spa']
-};
+// Valid MBTI labels are retained as identities, not Nature assignments.
+export const MBTI_TYPES = Object.freeze([
+  'INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP',
+  'ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'
+]);
+// All 20 non-neutral official Nature stat tradeoffs (5 choices × 4 costs).
+// The five neutral Natures intentionally remain outside preference selection.
+export const NATURE_EFFECTS = Object.freeze({
+  Adamant:['atk','spa'], Brave:['atk','spe'], Lonely:['atk','def'], Naughty:['atk','spd'],
+  Bold:['def','atk'], Impish:['def','spa'], Lax:['def','spd'], Relaxed:['def','spe'],
+  Modest:['spa','atk'], Mild:['spa','def'], Rash:['spa','spd'], Quiet:['spa','spe'],
+  Calm:['spd','atk'], Careful:['spd','spa'], Gentle:['spd','def'], Sassy:['spd','spe'],
+  Timid:['spe','atk'], Hasty:['spe','def'], Jolly:['spe','spa'], Naive:['spe','spd']
+});
 
 export const STAT_KEYS = ['hp','atk','def','spa','spd','spe'];
 export const STAT_NAMES = ['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed'];

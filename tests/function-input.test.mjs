@@ -75,17 +75,19 @@ test('optional A/T uses a disclosed type-only proxy, never a fabricated measurem
   assert.deepEqual(generateBuild({...input,identityPreference:'A'}).baseStats,assertive.baseStats);
 });
 
-test('manual Sakinorva type override changes Nature and interpretation, not raw function affinities',()=>{
+test('manual Sakinorva type override changes Nature scoring inputs, not raw function affinities',()=>{
   const inferred=generateBuild(input);
   const chosen=generateBuild({...input,typeOverride:'ENFP',identityPreference:'A'});
   assert.equal(chosen.suggestedType,'INTJ');
   assert.equal(chosen.mbti,'ENFP');
   assert.equal(chosen.identity,'ENFP-A');
-  assert.equal(chosen.nature,'Naive');
+  assert.equal(chosen.natureScoring.cognitionEstimated,false);
+  assert.notDeepEqual(chosen.natureScoring.priorities,inferred.natureScoring.priorities,
+    'overridden preference poles must affect the Nature candidates');
   assert.deepEqual(chosen.breakdown.mbti,generateBuild({...input,identityPreference:'A'}).breakdown.mbti);
   assert.deepEqual(chosen.types,inferred.types,'Enneagram typing is unchanged');
-  assert.ok(chosen.warnings.some(note=>note.includes('overrides the function-derived INTJ')));
-  assert.notEqual(chosen.nature,inferred.nature);
+  assert.ok(chosen.warnings.some(note=>note.includes('function-derived INTJ suggestion')));
+  assert.ok(chosen.natureScoring.components.cognition>0);
   assert.throws(()=>generateBuild({...input,typeOverride:'FAKE'}),/Invalid MBTI type/);
 });
 

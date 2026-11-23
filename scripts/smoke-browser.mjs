@@ -60,7 +60,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-trained-hp',document.querySelector('[data-trained-stat="hp"]')?.textContent||'');
   document.documentElement.setAttribute('data-personality-export',Boolean(document.getElementById('download-card')));
   document.documentElement.setAttribute('data-trained-export',Boolean(document.getElementById('download-trained-card')));
-  document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v1.3.8'}}));
+  document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v1.4.8'}}));
   document.documentElement.setAttribute('data-verified-version',document.getElementById('build-version-footer')?.textContent||'');
 });
 </script>`;
@@ -147,8 +147,10 @@ try{
     'Sakinorva four-letter override and optional A\/T should be reflected in results');
   assert.match(html,/data-after-suggestion="[^"]*function-derived suggestion: INTJ/,
     'Original function-derived suggestion should remain visible beside the manual type');
-  assert.match(html,/data-after-nature="[^"]*Naive Nature/,
-    'Override should control Nature while keeping raw function totals');
+  assert.match(html,/data-after-nature="[^"]*[A-Za-z]+ Nature/,
+    'Whole-profile Nature should be shown after the overridden build is generated');
+  assert.ok(html.includes('class="nature-detail"')&&html.includes('tradeoff fit'),
+    'Nature score and factors should appear in the results');
   assert.ok(html.includes('data-test-mode="advanced" aria-pressed="true"'),
     'Comprehensive path should activate');
   assert.ok(html.includes('Input notes:'),
@@ -157,9 +159,9 @@ try{
     'Rowe conversion must be disclosed');
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
-  assert.ok(html.includes('data-card-version="CREATED v1.3.0"'),
+  assert.ok(html.includes('data-card-version="CREATED v1.4.0"'),
     'Card footer must show the bundled version when the build is generated');
-  assert.ok(html.includes('data-verified-version="CREATED v1.3.8"'),
+  assert.ok(html.includes('data-verified-version="CREATED v1.4.8"'),
     'Card footer must update when the published release is verified');
   assert.ok(html.includes('data-ev-after-reset="0 / 508"'),
     'EV trainer should reset to a truly untrained spread');

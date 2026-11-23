@@ -24,3 +24,16 @@ test('release badge and actual engine can have independent cache states',()=>{
   assert.match(release,/type-effectively:release-version/);
   assert.match(html,/app\.mjs\?v=/);
 });
+
+test('Nature engine, source data and new explanation styling cannot reuse old browser caches',()=>{
+  const nature=readFileSync(new URL('../src/nature.mjs',import.meta.url),'utf8');
+  const entry=html.match(/app\.mjs\?v=([^"]+)/)?.[1];
+  const style=html.match(/styles\.css\?v=([^"]+)/)?.[1];
+  const dataKey=source=>source.match(/from '\.\/data\.mjs\?v=([^']+)'/)?.[1];
+  assert.ok(entry&&style&&dataKey(app)&&dataKey(engine)&&dataKey(nature));
+  assert.notEqual(entry,'1.3.0');
+  assert.equal(entry,style);
+  assert.equal(dataKey(app),dataKey(engine));
+  assert.equal(dataKey(app),dataKey(nature));
+  assert.equal(entry,dataKey(engine));
+});

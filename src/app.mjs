@@ -1,9 +1,10 @@
 import {
-  ENNEAGRAM_NAMES, NATURE_BY_MBTI, OCEAN_LABELS,
+  ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs?v=1.3.0';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=1.3.0';
+} from './data.mjs?v=nature-scoring-1';
+import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=nature-scoring-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
+import { NATURE_DIMENSIONS } from './nature.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
@@ -125,7 +126,7 @@ function setupFields() {
   $('rowe-score-fields').innerHTML=Array.from({length:9},(_,i)=>roweMarkup(i+1)).join('');
   $('bigfive-fields').innerHTML=OCEAN_LABELS.map((label,i)=>sliderMarkup('bigfive',i,label,oceanDetails[i],'High '+label)).join('');
   const typeSelect=$('mbti-override');
-  Object.keys(NATURE_BY_MBTI).sort().forEach(type=>{
+  [...MBTI_TYPES].sort().forEach(type=>{
     const el=document.createElement('option');el.value=type;el.textContent=type;typeSelect.append(el);
   });
   document.querySelectorAll('[data-score]').forEach(el=>el.addEventListener('input',()=>{
@@ -254,12 +255,12 @@ function updateDerived() {
     (suggested
       ? (override?'Selected type: '+override+' · function-derived suggestion: '+suggested:
         'Game-derived preference: '+suggested)+
-        ' · Nature: '+NATURE_BY_MBTI[override||suggested]+
+        ' · Nature follows the complete profile'+
         ' · '+(selectedAT?'Identity: '+selectedAT+' (estimated strength)':'A/T not provided')
       : (override?'Selected type: '+override+' · ':'')+
         'Enter all eight overall function totals to infer a game-compatible preference.'):
     override?'Selected: '+override+(suggested && suggested!==override?' · test-derived suggestion: '+suggested:''):
-    suggested?'Suggested type: '+suggested+' · Nature: '+NATURE_BY_MBTI[suggested]:
+    suggested?'Suggested type: '+suggested+' · Nature follows the complete profile':
     state.mbtiMode==='type'?'Choose your four-letter type above to continue.':'Enter your percentages to infer your type, or choose an override.';
 
   const tritypeOverride=$('tritype-override').value.trim();
@@ -415,6 +416,15 @@ function renderCard(build) {
       '<div class="stat-visual">'+roleWatermark+renderStatRadar(build.baseStats,build.effectiveStats)+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
+       '<details class="nature-detail"><summary>Why '+escapeHtml(build.nature)+'? · '+build.natureScoring.score+' tradeoff fit</summary>'+
+         '<p>Prefers '+escapeHtml(NATURE_DIMENSIONS[build.natureBoost])+' over '+escapeHtml(NATURE_DIMENSIONS[build.natureDrop])+'. This describes a priority tradeoff, not which stat you are best at.</p>'+
+         '<p><strong>Score:</strong> 50 + (boost priority − sacrificed priority) / 2. Each input source gets its own score before weighting:</p>'+
+         '<div class="nature-factors">'+Object.entries(build.natureScoring.components).map(([source,value])=>
+           '<span>'+escapeHtml(source==='motivation'?'Enneagram':source==='cognition'?'Cognition':'Big Five')+' · '+build.natureScoring.weights[source]+'% × '+value+'</span>').join('')+'</div>'+
+         '<p>'+ (build.natureScoring.temperamentMeasured?'':'Big Five was not supplied, so it was excluded rather than treated as measured 50. ')+
+           (build.natureScoring.cognitionEstimated?'Four-letter type provided a reduced-weight cognitive estimate. ':'')+
+           'Top alternative: '+escapeHtml(build.natureScoring.alternatives[0].name)+' ('+build.natureScoring.alternatives[0].score+'). Authored game affinities, not psychological probabilities.</p>'+
+       '</details>'+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
         '<p>'+escapeHtml(ROLE_DESCRIPTIONS[build.role.primary.name])+'</p>'+
         '<div class="role-subline">'+escapeHtml(build.role.specialization.toUpperCase())+' SPREAD · '+build.role.primary.score+'% ROLE FIT</div>'+
@@ -457,12 +467,12 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% cognitive preference dimensions'+(build.cognitiveSource==='functions'?' derived from eight comparable function totals':' from 16Personalities')+' determine stat affinities. The six stats are bounded and normalized to exactly 535. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>535 base points:</strong> 70% Big Five, 20% nine Enneagram scores, and 10% cognitive preference dimensions'+(build.cognitiveSource==='functions'?' derived from eight comparable function totals':' from 16Personalities')+' determine stat affinities. The six stats are bounded and normalized to exactly 535. Nature is scored separately from Enneagram motivation, cognitive preference and measured Big Five temperament; the highest 20-Nature boost/sacrifice contrast wins before battle-role selection. '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
         '<p><strong>Held item:</strong> Equipment is matched to the generated Pokémon’s personality, role, typing, moves and Ability. It does not change the calculated 535 base stats.</p>'+
-        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes Nature and archetype interpretation but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
+        '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes the cognitive polarity used for Nature scoring and archetype interpretation, but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download Personality Card ↓</button>'+ 
       '<button type="button" id="download-trained-card" class="outline-button trained-export">Download Trained Build ↓</button>'+
