@@ -14,6 +14,7 @@ const build=()=>generateBuild({
 
 test('card provenance identifies creation and current recalculation separately',()=>{
   assert.equal(normalizeBuildVersion('v1.2.0'),'v1.2.0');
+  assert.equal(normalizeBuildVersion('v1.4.0'),'v1.4.0');
   assert.equal(normalizeBuildVersion('v1.2.17'),'v1.2.17');
   assert.equal(normalizeBuildVersion('1.2.0'),null);
   assert.equal(normalizeBuildVersion('v1.2.0<img>'),null);
@@ -22,6 +23,8 @@ test('card provenance identifies creation and current recalculation separately',
   assert.deepEqual(cardVersionLabels({createdVersion:'v1.1.2',renderVersion:'v1.2.4'}),{
     created:'CREATED v1.1.2',recalculated:'RECALCULATED v1.2.4'
   });
+  assert.equal(cardVersionFooter({createdVersion:'v1.3.8',renderVersion:'v1.4.0'}),
+    'CREATED v1.3.8 · RECALCULATED v1.4.0');
   assert.equal(cardVersionFooter({createdVersion:null,renderVersion:'v1.2.4'}),
     'CREATED VERSION UNRECORDED · RECALCULATED v1.2.4');
 });
