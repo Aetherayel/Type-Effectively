@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.3.0 — Post-results EV training and two-card exports**
+**Version 1.4.0 — Whole-profile Nature scoring**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -87,7 +87,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning. **Baton Pass** is eligible only when another equipped move establishes transferable self-stat boosts, or the active standard Ability is **Speed Boost**. A Hidden Ability is an alternative, not active alongside the standard one. Snow, Aurora Veil, Reflect, Light Screen and Tailwind do not supply transferable stat stages. Builds without valid Baton Pass setup keep the other core-specific growth choices.
 
-## Generation model (v1.3; v1.0 personality rules retained)
+## Generation model (v1.4; core Pokémon typing and 535 BST retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
@@ -103,7 +103,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 9. **Whole-build archetype (post-generation):** After typing, Nature, 535-point stats, role, Abilities, moves and item are finalized, classify the result against **36 curated archetypes**: six motivational/cognitive/temperamental operating styles × six battle expressions. The game-affinity score combines **25% Enneagram motivation** (all nine scores plus ordered tritype), **20% 16Personalities cognitive preference** (five percentages, respecting overridden letters), **25% Big Five temperament**, and **30% battle-role compatibility**. Battle compatibility already reflects stats and visible typing, so neither is independently counted again. The best-ranked candidate wins; close competitors and four scoring components are shown for transparency. Nothing in archetype selection feeds backward into the Pokémon build.
 10. **Trainer Field Report:** A fictional, dynamically generated **Pokédex field entry** introduces the creature, followed by a **three-order Trainer Playbook**: practice the actual role-tactic move using the strongest stats, bring coverage for the actual type-chart weaknesses, and train the actual corrective growth move. Eight further field notes address instincts, MBTI-style habits, OCEAN temperament, deployment, vulnerabilities, contradictions, party synergy, and growth—**as advice to a Pokémon trainer**, not a clinical assessment of the player. The narrative references the complete generated build, including Nature and the 535 BST budget. Missing Big Five inputs are explicitly described as estimates, not observations. The report displays qualitative observations, not raw personal assessment scores; downloaded card behavior is unchanged.
 
-### How Nature is scored (v1.3.x)
+### How Nature is scored (v1.4.x)
 
 Nature answers **which behavior is prioritized, and which competing response is sacrificed?** It does **not** rank aptitude, so it never reads base stats, battle role, typing, abilities, or archetype. Five non-HP meanings are deliberately distinct from the base-stat aptitude mappings:
 
@@ -262,9 +262,9 @@ The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `np
 
 **Preview an open PR:** Branches do not automatically receive Pages URLs. For a quick temporary preview of this static app, use [the third-party RawGitHack development viewer for PR #25](https://raw.githack.com/Aetherayel/Type-Effectively/feature/signature-strategies/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
 
-**Automatic live releases (v1.3.x):** PR **#30** establishes **v1.3.0** upon merge and successful publication. Each later merged PR increments **v1.3.x** by merged-PR history, not arbitrary pushes or commits. Prior v1.1.x and v1.2.x releases remain valid and verifiable. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
+**Automatic live releases (v1.4.x):** PR **#32** establishes **v1.4.0** upon merge and successful publication. Each later merged PR increments **v1.4.x** by merged-PR history, not arbitrary pushes or commits. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x and v1.3.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.3.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.3.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x and v1.4.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.4.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.4.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 
