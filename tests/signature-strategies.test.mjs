@@ -9,8 +9,8 @@ import { buildCardSvg } from '../src/export-card.mjs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
 
 const stats={hp:112,atk:68,def:119,spa:70,spd:111,spe:55};
-const ctx=({types=['Ice','Steel'],name='Wall',motives=[5,1,3],bigFive=[62,83,28,55,43],values=stats,hasBigFive=true}={})=>({
-  types,role:{primary:{name,score:94}},stats:values,
+const ctx=({types=['Ice','Steel'],name='Wall',secondary=null,motives=[5,1,3],bigFive=[62,83,28,55,43],values=stats,hasBigFive=true}={})=>({
+  types,role:{primary:{name,score:94},secondary:secondary?{name:secondary,score:92}:null},stats:values,
   core:motives[0],second:motives[1],third:motives[2],
   bigFive,hasBigFive
 });
@@ -47,6 +47,14 @@ test('Snow Bastion works as a complete Ice/Steel wall package and cannot fake sn
   assert.equal(s.ability,'Snow Warning');
   assert.equal(s.tactic,'Aurora Veil');
   assert.equal(s.item,'Icy Rock');
+  assert.equal(s.matchedRole,'Wall');
+  const hybrid=selectSignatureStrategy(ctx({name:'Tank',secondary:'Wall'}));
+  assert.equal(hybrid?.id,'snow-bastion','Tank / Wall should use its Wall specialization');
+  assert.equal(hybrid?.matchedRole,'Wall');
+  assert.equal(selectSignatureStrategy(ctx({name:'Tank'})),null,
+    'an Ice Tank without a Wall role does not earn Snow Bastion');
+  assert.equal(selectSignatureStrategy(ctx({name:'Wall',secondary:'Tank'}))?.matchedRole,'Wall',
+    'primary role takes precedence when it qualifies');
   assert.equal(isMoveEligible('Aurora Veil',{
     types:['Ice','Steel'],stats,role:'Wall'
   }),false);
@@ -89,8 +97,18 @@ test('each other specialization is meaningfully reachable with matching complete
     {id:'misty-custodian',input:ctx({types:['Fairy','Psychic'],name:'Support',motives:[2,1,6],
       values:{hp:108,atk:70,def:93,spa:76,spd:121,spe:83},bigFive:[67,73,47,88,47]})}
   ];
-  for(const {id,input} of examples)
+  for(const {id,input} of examples){
     assert.equal(selectSignatureStrategy(input)?.id,id,id+' should be reachable');
+    // Every existing strategy can use its intended tactic through a close
+    // secondary role without pretending the Pokémon has changed primary role.
+    const otherRole=input.role.primary.name==='Wall'?'Tank':'Wall';
+    const hybrid={...input,role:{primary:{name:otherRole,score:94},
+      secondary:{name:input.role.primary.name,score:92}}};
+    const selected=selectSignatureStrategy(hybrid);
+    assert.equal(selected?.id,id,id+' should be reachable through secondary role');
+    assert.equal(selected?.matchedRole,input.role.primary.name,
+      id+' must preserve the qualifying role');
+  }
 });
 
 test('move-pair compatibility rejects redundant screens and self-sabotaging growth',()=>{
@@ -179,6 +197,12 @@ test('seeded population retains generalists and validates any specialized packag
     counts[s.id]=(counts[s.id]||0)+1;
     assert.equal(b.ability.name,s.ability);
     assert.equal(b.moves[2].name,s.tactic);
+    assert.ok([b.role.primary.name,b.role.secondary?.name].includes(s.matchedRole),
+      'specialization must match an actually classified role: '+s.id);
+    assert.ok(ROLE_MOVES[s.matchedRole].includes(s.tactic),
+      'specialization tactic must belong to the matched role: '+s.id);
+    assert.ok(MOVE_PURPOSES[s.tactic]?.includes(ROLE_PURPOSES[s.matchedRole]),
+      'specialization tactic must serve its matched role: '+s.id);
     assert.equal(b.heldItem.name,s.item);
     assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{
       strategy:s,attacks:b.moves.slice(0,2),ability:b.ability
