@@ -102,7 +102,7 @@ The baseline before these changes is preserved in `docs/v2-audit-baseline.md`. R
 
 **Also included in V2:** IPIP-NEO **facet-first** scoring. Complete facet groups replace broad-domain inputs within the relevant scoring pathways; a full 30-facet report can satisfy Big Five without additional domain scores. Old five-domain inputs and links remain valid.
 
-## Generation model (v2; core Pokémon typing retained; 600 BST)
+## Generation model (v2.0; core Pokémon typing retained; 600 BST)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
