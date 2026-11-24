@@ -200,7 +200,7 @@ This retains the distinctions that the four-letter reduction loses, without inte
 
 HP and SpD cognitive affinities deliberately shrink toward neutral 50 because the four cognitive axes are weak evidence for resilience and emotional regulation. The 16Personalities A/T dimension is excluded to avoid double-counting emotional sensitivity. Authored nine-type Enneagram base affinities live in `ENNEAGRAM_AFFINITIES`, distinct from Nature's motivational preferences. Lower Agreeableness is only a minority contributor to Attack; Neuroticism no longer raises Speed. HP, Defense and Sp. Def can correlate, but now have different principal signals.
 
-**Limits:** This is a deterministic game calibration, not a validated personality assessment. The weights and prototypes are design judgments. They intentionally change downstream battle roles, abilities and moves when the recalibrated stat spread warrants it; typing, Nature mechanics, and the 600-point budget remain unchanged.
+**Limits:** This is a deterministic game calibration, not a validated personality assessment. The weights and prototypes are design judgments. They intentionally change downstream battle roles, abilities and moves when the recalibrated stat spread warrants it; typing, Nature mechanics, and the then-535-point budget remained unchanged.
 
 ### How Nature is scored (v1.4 onward; retained in V2)
 
@@ -277,9 +277,9 @@ Specialization jointly selects standard Ability, role tactic and held item. A cl
 
 **Pivot role convention:** Tactics must reposition the user's Pokémon (for example, U-turn, Volt Switch, Parting Shot or Shed Tail). Baton Pass remains available as a **growth/setup-transfer move**, not a Pivot role tactic. Dragon Tail (forces an opponent switch), Rapid Spin (removes hazards) and Tailwind (speed support) are likewise excluded from Pivot tactics.
 
-The standard and Hidden Abilities are **alternative strengths**, not concurrently active. A Fire/Fighting build cannot be assigned Sand Force solely because it has a Ground hidden elemental affinity; a Water/Ice build cannot inherit Solid Rock by the same mechanism. This changes mechanical selection without altering the v1.0 seventeen-type typing or 600-BST model.
+The standard and Hidden Abilities are **alternative strengths**, not concurrently active. A Fire/Fighting build cannot be assigned Sand Force solely because it has a Ground hidden elemental affinity; a Water/Ice build cannot inherit Solid Rock by the same mechanism. This changes mechanical selection without altering the v1.0 seventeen-type typing or the then-535-BST model.
 
-The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 changed Nature selection; v2.0 recalibrates the base-stat model**, so derived roles and specialist outcomes can change; the then-535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remain intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
+The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 changed Nature selection; v2.0 recalibrates the base-stat model**, so derived roles and specialist outcomes can change; the then-535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remained intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
 
 ### Examples
 
