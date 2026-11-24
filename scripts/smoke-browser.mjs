@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     return Number(label?.querySelector('.stat-radar-label-base,.stat-radar-label-single')?.textContent);
   };
   const baseline=baseSpA();
-  const facetValues=[90,80,25,25,99,25];
+  const facetValues=[90,80,85,25,99,25];
   const firstFacet=document.getElementById('facet-0');
   firstFacet.value=String(facetValues[0]);
   firstFacet.dispatchEvent(new Event('input',{bubbles:true}));
@@ -80,6 +80,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-facet-spa-delta',String(baseSpA()-baseline));
   document.documentElement.setAttribute('data-facet-result',
     document.querySelector('.explain')?.textContent?.includes('IPIP-NEO facet refinement')?'true':'false');
+  document.documentElement.setAttribute('data-facet-other-outcomes',
+    document.querySelector('.explain')?.textContent?.includes('Facet influence on other outcomes')?'true':'false');
+  document.documentElement.setAttribute('data-facet-story-note',
+    document.querySelector('.field-report')?.textContent?.includes('detailed IPIP-NEO report suggests')?'true':'false');
   document.documentElement.setAttribute('data-facet-status',
     document.getElementById('facet-entry-status')?.textContent||'');
   // Exercise the post-result EV trainer and both export affordances.
@@ -195,6 +199,10 @@ try{
   assert.ok(Number(html.match(/data-facet-spa-delta="([^"]+)"/)?.[1])>0,
     'high Intellect/Imagination at low overall Openness must raise Sp. Atk');
   assert.ok(html.includes('data-facet-result="true"'),'facet scoring must appear in result explanations');
+  assert.ok(html.includes('data-facet-other-outcomes="true"'),
+    'facet impacts on archetype and equipment should be disclosed');
+  assert.ok(html.includes('data-facet-story-note="true"'),
+    'substantial differences in a narrative facet should appear in the Trainer Guide');
   assert.ok(html.includes('data-facet-status="1 of five domain(s) refined'),
     'facet entry status must show fallback for remaining domains');
   assert.ok(html.includes('data-card-version="CREATED v2.0.0"'),
