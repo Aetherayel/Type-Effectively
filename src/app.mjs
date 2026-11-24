@@ -7,6 +7,7 @@ import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
 import { renderStatRadar } from './radar.mjs';
+import { renderAffinityComparison } from './stat-affinity-ui.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=1.3.0';
@@ -457,6 +458,11 @@ function renderCard(build) {
     '</div>'+
     '<div class="result-body">'+
       '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
+      '<div class="stat-view-switch" role="group" aria-label="Stat score view">'+
+        '<button type="button" id="stat-view-bst" class="stat-view-button active" aria-pressed="true">Pokémon stats</button>'+
+        '<button type="button" id="stat-view-affinity" class="stat-view-button" aria-pressed="false">Before normalization</button>'+
+      '</div>'+
+      '<div id="stat-view-bst-panel">'+
       '<div class="stat-visual">'+roleWatermark+renderStatRadar(build.baseStats,build.effectiveStats)+
       '</div>'+
       '<p class="nature-summary"><strong>'+escapeHtml(build.nature)+' Nature</strong> · +10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureBoost)])+' · −10% '+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(build.natureDrop)])+'</p>'+
@@ -469,6 +475,7 @@ function renderCard(build) {
            (build.natureScoring.cognitionEstimated?'Four-letter type provided a reduced-weight cognitive estimate. ':'')+
            'Top alternative: '+escapeHtml(build.natureScoring.alternatives[0].name)+' ('+build.natureScoring.alternatives[0].score+'). Authored game affinities, not psychological probabilities.</p>'+
        '</details>'+
+      '</div>'+renderAffinityComparison(build)+
       '<div class="role-panel"><span class="mini-label">BATTLE CLASSIFICATION</span><strong>'+escapeHtml(build.role.primary.name+roleSecondary)+'</strong>'+
         '<p>'+escapeHtml(ROLE_DESCRIPTIONS[build.role.primary.name])+'</p>'+
         '<div class="role-subline">'+escapeHtml(build.role.specialization.toUpperCase())+' SPREAD · '+build.role.primary.score+'% ROLE FIT</div>'+
@@ -511,7 +518,7 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>535 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. The six stats are bounded and normalized to exactly 535. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>535 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 535 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. The six stats are bounded and normalized to exactly 535. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<div class="nature-factors">'+STAT_KEYS.map(key=>{
           const w=build.statWeights[key];
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
@@ -546,6 +553,17 @@ function renderCard(build) {
     '</article>';
   $('result-status').classList.add('ready');
   $('result-status').innerHTML='<span></span> '+(state.isSample?'RANDOM SAMPLE':'BUILD COMPLETE');
+  const setStatView=mode=>{
+    const showAffinity=mode==='affinity';
+    $('stat-view-bst-panel').hidden=showAffinity;
+    $('stat-view-affinity-panel').hidden=!showAffinity;
+    $('stat-view-bst').classList.toggle('active',!showAffinity);
+    $('stat-view-affinity').classList.toggle('active',showAffinity);
+    $('stat-view-bst').setAttribute('aria-pressed',String(!showAffinity));
+    $('stat-view-affinity').setAttribute('aria-pressed',String(showAffinity));
+  };
+  $('stat-view-bst').addEventListener('click',()=>setStatView('bst'));
+  $('stat-view-affinity').addEventListener('click',()=>setStatView('affinity'));
   $('download-card').addEventListener('click',async()=>{
     const button=$('download-card');
     if(button.disabled)return;
