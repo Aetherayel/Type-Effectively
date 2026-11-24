@@ -538,9 +538,12 @@ export function generateBuild(input) {
   // Facet-first calculation: each available full facet group REPLACES the
   // corresponding broad-domain term in the Big Five stat formula.
   const facetScoring=refineBigFiveAffinities(
-    reportedOcean??ocean,oceanAffinity(reportedOcean??ocean),input.bigFiveFacets
+    reportedOcean??(input.bigFiveFacets?null:ocean),
+    oceanAffinity(reportedOcean??ocean),input.bigFiveFacets
   );
-  const facetContrasts=facetContrastMap(reportedOcean??ocean,input.bigFiveFacets);
+  const facetContrasts=facetContrastMap(
+    reportedOcean??(input.bigFiveFacets?null:ocean),input.bigFiveFacets
+  );
   const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
