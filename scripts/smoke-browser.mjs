@@ -60,7 +60,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-trained-hp',document.querySelector('[data-trained-stat="hp"]')?.textContent||'');
   document.documentElement.setAttribute('data-personality-export',Boolean(document.getElementById('download-card')));
   document.documentElement.setAttribute('data-trained-export',Boolean(document.getElementById('download-trained-card')));
-  document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v1.4.8'}}));
+  document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v2.0.8'}}));
   document.documentElement.setAttribute('data-verified-version',document.getElementById('build-version-footer')?.textContent||'');
 });
 </script>`;
@@ -159,9 +159,9 @@ try{
     'Rowe conversion must be disclosed');
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
-  assert.ok(html.includes('data-card-version="CREATED v1.4.0"'),
+  assert.ok(html.includes('data-card-version="CREATED v2.0.0"'),
     'Card footer must show the bundled version when the build is generated');
-  assert.ok(html.includes('data-verified-version="CREATED v1.4.8"'),
+  assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),
     'Card footer must update when the published release is verified');
   assert.ok(html.includes('data-ev-after-reset="0 / 508"'),
     'EV trainer should reset to a truly untrained spread');
