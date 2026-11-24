@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { SIGNATURE_STRATEGIES, selectSignatureStrategy, signatureHeldItem } from '../src/strategies.mjs';
+import {
+  SIGNATURE_STRATEGIES, selectSignatureStrategy, signatureHeldItem, protectivePlanningFit
+} from '../src/strategies.mjs';
 import { ABILITIES, GROWTH_MOVES, MOVE_PURPOSES, ROLE_MOVES, ROLE_PURPOSES } from '../src/data.mjs';
 import { isMoveEligible, isMovePairCompatible, generateBuild } from '../src/engine.mjs';
 import { isHeldItemCompatible } from '../src/held-items.mjs';
@@ -9,10 +11,10 @@ import { buildCardSvg } from '../src/export-card.mjs';
 import { generateRandomBuildInput } from '../src/random-build.mjs';
 
 const stats={hp:112,atk:68,def:119,spa:70,spd:111,spe:55};
-const ctx=({types=['Ice','Steel'],name='Wall',secondary=null,motives=[5,1,3],bigFive=[62,83,28,55,43],values=stats,hasBigFive=true}={})=>({
+const ctx=({types=['Ice','Steel'],name='Wall',secondary=null,motives=[5,1,3],bigFive=[62,83,28,55,43],values=stats,hasBigFive=true,mbtiScores=[82,88,25,18,50],bigFiveFacets=null}={})=>({
   types,role:{primary:{name,score:94},secondary:secondary?{name:secondary,score:92}:null},stats:values,
   core:motives[0],second:motives[1],third:motives[2],
-  bigFive,hasBigFive
+  bigFive,hasBigFive,mbtiScores,bigFiveFacets
 });
 
 test('twelve packages have distinct coherent mechanics and real item/ability references',()=>{
@@ -24,8 +26,13 @@ test('twelve packages have distinct coherent mechanics and real item/ability ref
     const ability=ABILITIES.find(x=>x.name===s.ability);
     assert.ok(ability,'missing ability '+s.ability);
     assert.ok(s.requiredTypes.some(type=>ability.types.includes(type)));
-    assert.ok(ROLE_MOVES[s.roles[0]].includes(s.tactic),'tactic is not in role move pool');
-    assert.ok(MOVE_PURPOSES[s.tactic]?.includes(ROLE_PURPOSES[s.roles[0]]));
+    for(const classifiedRole of s.roles){
+      const tacticRole=s.tacticRoles?.[classifiedRole]||classifiedRole;
+      assert.ok(ROLE_MOVES[tacticRole]?.includes(s.tactic),
+        'tactic missing its allowed purpose pool: '+s.id+'/'+classifiedRole);
+      assert.ok(MOVE_PURPOSES[s.tactic]?.includes(ROLE_PURPOSES[tacticRole]),
+        'tactic has inconsistent purpose: '+s.id+'/'+classifiedRole);
+    }
     const item=signatureHeldItem(s,{
       core:s.motivations[0],
       role:{primary:{name:s.roles[0]}},
@@ -41,20 +48,29 @@ test('twelve packages have distinct coherent mechanics and real item/ability ref
   }
 });
 
-test('Snow Bastion works as a complete Ice/Steel wall package and cannot fake snow',()=>{
+test('Snow Bastion expresses an Ice defensive/protective strategy across four roles',()=>{
   const s=selectSignatureStrategy(ctx());
   assert.equal(s?.id,'snow-bastion');
   assert.equal(s.ability,'Snow Warning');
   assert.equal(s.tactic,'Aurora Veil');
   assert.equal(s.item,'Icy Rock');
   assert.equal(s.matchedRole,'Wall');
+  assert.equal(s.tacticRole,'Wall');
+  for(const [name,tacticRole] of [
+    ['Wall','Wall'],['Tank','Wall'],['Support','Support'],['Controller','Support']
+  ]){
+    const result=selectSignatureStrategy(ctx({name}));
+    assert.equal(result?.id,'snow-bastion',name+' can earn an Ice protection setup');
+    assert.equal(result?.matchedRole,name,'the actual role must be retained');
+    assert.equal(result?.tacticRole,tacticRole,'the tactic must have a coherent purpose');
+  }
+  for(const name of ['Sweeper','Pivot'])
+    assert.equal(selectSignatureStrategy(ctx({name})),null,
+      name+' does not qualify without a protected or defending role');
   const hybrid=selectSignatureStrategy(ctx({name:'Tank',secondary:'Wall'}));
-  assert.equal(hybrid?.id,'snow-bastion','Tank / Wall should use its Wall specialization');
-  assert.equal(hybrid?.matchedRole,'Wall');
-  assert.equal(selectSignatureStrategy(ctx({name:'Tank'})),null,
-    'an Ice Tank without a Wall role does not earn Snow Bastion');
-  assert.equal(selectSignatureStrategy(ctx({name:'Wall',secondary:'Tank'}))?.matchedRole,'Wall',
-    'primary role takes precedence when it qualifies');
+  assert.equal(hybrid?.matchedRole,'Tank','primary role has precedence when eligible');
+  assert.equal(hybrid?.tacticRole,'Wall','Aurora Veil remains protective');
+  assert.equal(selectSignatureStrategy(ctx({name:'Wall',secondary:'Tank'}))?.matchedRole,'Wall');
   assert.equal(isMoveEligible('Aurora Veil',{
     types:['Ice','Steel'],stats,role:'Wall'
   }),false);
@@ -204,10 +220,10 @@ test('seeded population retains generalists and validates any specialized packag
     assert.equal(b.moves[2].name,s.tactic);
     assert.ok([b.role.primary.name,b.role.secondary?.name].includes(s.matchedRole),
       'specialization must match an actually classified role: '+s.id);
-    assert.ok(ROLE_MOVES[s.matchedRole].includes(s.tactic),
-      'specialization tactic must belong to the matched role: '+s.id);
-    assert.ok(MOVE_PURPOSES[s.tactic]?.includes(ROLE_PURPOSES[s.matchedRole]),
-      'specialization tactic must serve its matched role: '+s.id);
+    assert.ok(ROLE_MOVES[s.tacticRole].includes(s.tactic),
+      'specialization tactic must belong to its functional pool: '+s.id);
+    assert.ok(MOVE_PURPOSES[s.tactic]?.includes(ROLE_PURPOSES[s.tacticRole]),
+      'specialization tactic must have an aligned tactical purpose: '+s.id);
     assert.equal(b.heldItem.name,s.item);
     assert.ok(isMovePairCompatible(b.moves[2].name,b.moves[3].name,{
       strategy:s,attacks:b.moves.slice(0,2),ability:b.ability
