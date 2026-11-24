@@ -144,6 +144,8 @@ export function refineBigFiveAffinities(domains,baseAffinities,facets) {
   if(!Array.isArray(baseAffinities)||baseAffinities.length!==6||
      baseAffinities.some(n=>!Number.isFinite(n)))
     throw new Error('Six reference Big Five affinities are required.');
+  if(!evidence.facets)
+    return {affinities:[...baseAffinities],activeDomains:[],corrections:[0,0,0,0,0,0]};
   const keys=['hp','atk','def','spa','spd','spe'];
   const affinities=keys.map(key=>clamp(FACET_STAT_COMPONENTS[key].reduce((sum,part)=>{
     let value=evidence.forDomain(part.domain,part.focus);
