@@ -1,6 +1,15 @@
 # Changelog
 
-**Live release numbering:** PR #32 establishes **v1.4.0**, with subsequent merged PRs incrementing v1.4.x. Historical v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+**Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+
+## 2.0.0 — Stat-specific personality recalibration
+
+- Establish a single six-stat semantic contract: HP resilience, Attack assertion, Defense fortitude, Special Attack ingenuity, Special Defense composure, Speed responsiveness.
+- Recalibrate the Big Five equations and nine Enneagram six-stat prototypes to reduce overlapping defensive proxies and overly broad novelty/assertion associations.
+- Replace a universal framework blend with **per-stat weights** for Big Five, Enneagram, and cognition. When users supply all eight cognitive functions, they contribute directly and receive greater relative emphasis for conceptual ingenuity and responsiveness. Entered 16Personalities percentages and four-letter MBTI-only inputs use progressively more conservative cognitive weight profiles.
+- Preserve the 535-point base-stat total, 45–140 stat bounds, deterministic behavior, distinct Nature priority scoring, and existing battle mechanics. Expect generated role, ability, moves, and exported cards to change when the base stat shape warrants it.
+- Disclose each stat's source weights in the result explanations, refresh browser module caches, and extend distribution, source-sensitivity, Nature, and end-to-end validation.
+- **Facet scores are not yet implemented**: IPIP-NEO's 30 Big Five facets are under design consideration and will need a separately validated score-mapping and fallback strategy.
 
 ## 1.4.0 — Whole-profile Nature classification
 
