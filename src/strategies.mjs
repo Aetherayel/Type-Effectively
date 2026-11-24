@@ -1,17 +1,26 @@
-import { ABILITIES } from './data.mjs';
+import { ABILITIES, ROLE_MOVES, ROLE_PURPOSES, MOVE_PURPOSES } from './data.mjs';
+import { resolveBigFiveEvidence } from './bigfive-facets.mjs';
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
 import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs?v=signature-copy-29';
 
 const clamp=value=>Math.max(0,Math.min(100,value));
 const mean=values=>values.reduce((sum,n)=>sum+n,0)/values.length;
 
-// Each package commits ability + role tactic + equipment to one actual battle
-// mechanism. Required types, roles and stat gates are hard eligibility rules;
-// whole-profile fit decides whether a valid package should supersede a generalist.
+// Each package commits ability + a coherent tactic + equipment to one battle
+// mechanism. Tactical roles express battlefield behavior, not operating style.
+// Where a signature setup serves more than one role, its explicitly declared
+// tacticRole identifies which functional move pool supplies that tactic.
+// Typing, effective-stat viability, motivations and whole-profile fit remain
+// independent gates. No archetype label is read or required.
 // This is an authored game classification, not a psychological measurement.
 export const SIGNATURE_STRATEGIES=Object.freeze([
   {
-    id:'snow-bastion',name:'Snow Bastion',roles:['Wall'],requiredTypes:['Ice'],
+    id:'snow-bastion',name:'Snow Bastion',
+    roles:['Wall','Tank','Support','Controller'],requiredTypes:['Ice'],
+    // Aurora Veil is a fortification or ally-protection tactic. It need not
+    // pretend an Ice Tank/Controller has become a Wall/Support archetype.
+    tacticRoles:{Wall:'Wall',Tank:'Wall',Support:'Support',Controller:'Support'},
+    planningStyle:'prepared-protection',
     ability:'Snow Warning',tactic:'Aurora Veil',item:'Icy Rock',
     minimum:{def:83,spd:82},targets:{hp:113,def:119,spd:112},
     motivations:[1,5,6,9],bigFive:[62,83,28,55,43],
@@ -129,8 +138,29 @@ function satisfiesGates(strategy,stats) {
     Object.entries(strategy.maximum||{}).every(([key,max])=>stats[key]<=max);
 }
 
+// This is a *pre-archetype* personality signal, not a hard Architect check.
+// 16P dimensions or their existing cognitive-function-derived equivalents
+// distinguish conceptual preference (N), preparation (J), and analysis (T).
+// Facets refine preparedness and intellectual orientation when available.
+// No extra stats, psychological diagnosis, or fourth framework are introduced.
+export function protectivePlanningFit({mbtiScores=null,bigFive,bigFiveFacets=null}) {
+  const evidence=resolveBigFiveEvidence(bigFive,bigFiveFacets);
+  const dimensions=Array.isArray(mbtiScores)&&mbtiScores.length===5&&
+    mbtiScores.slice(0,4).every(n=>Number.isFinite(n)&&n>=0&&n<=100)
+    ? mbtiScores : [50,50,50,50,50]; // legacy direct calls only
+  const conceptual=dimensions[1];
+  const deliberate=100-dimensions[3];
+  const analytical=100-dimensions[2];
+  const cognition=.50*conceptual+.35*deliberate+.15*analytical;
+  const preparation=evidence.forDomain('C',{C2:.5,C6:.5});
+  const intellectual=evidence.forDomain('O',{O5:1});
+  return clamp(.45*cognition+.35*preparation+.20*intellectual);
+}
+
+
 export function selectSignatureStrategy({
-  types,role,stats,core,second,third,bigFive,hasBigFive=true
+  types,role,stats,core,second,third,bigFive,hasBigFive=true,
+  mbtiScores=null,bigFiveFacets=null
 }) {
   if(!Array.isArray(types)||!role?.primary?.name||!stats||
       !Array.isArray(bigFive)||bigFive.length!==5)return null;
@@ -145,10 +175,24 @@ export function selectSignatureStrategy({
        (strategy.offensiveStyle==='physical' && stats.atk<stats.spa) ||
        (strategy.offensiveStyle==='special' && stats.spa<=stats.atk) ||
        !satisfiesGates(strategy,stats))return [];
+    const tacticRole=strategy.tacticRoles?.[matchedRole.name]||matchedRole.name;
+    if(!ROLE_MOVES[tacticRole]?.includes(strategy.tactic) ||
+       !MOVE_PURPOSES[strategy.tactic]?.includes(ROLE_PURPOSES[tacticRole]))
+      throw new Error('Signature strategy has an invalid tactic/role mapping: '+strategy.id);
     const motive=motivationFit(strategy,{core,second,third});
     if(motive<55)return []; // A thematic match alone cannot force a specialist.
-    const score=.35*matchedRole.score+.27*statFit(strategy,stats)+
-      .24*motive+.14*(hasBigFive?traitFit(strategy,bigFive):55);
+    const tacticalFit=statFit(strategy,stats);
+    const temperament=hasBigFive?traitFit(strategy,bigFive):55;
+    const planningFit=strategy.planningStyle==='prepared-protection'
+      ? protectivePlanningFit({mbtiScores,bigFive,bigFiveFacets})
+      : null;
+    // A protective setup favors advance preparation without requiring any
+    // particular archetype. Its 15% planning share reduces the role/template
+    // contribution, instead of adding a separate arbitrary bonus.
+    const score=planningFit==null
+      ? .35*matchedRole.score+.27*tacticalFit+.24*motive+.14*temperament
+      : .25*matchedRole.score+.27*tacticalFit+.24*motive+
+        .09*temperament+.15*planningFit;
     const threshold=hasBigFive?77:82; // Missing traits are not invented evidence.
     if(score<threshold)return [];
     const ability=ABILITIES.find(entry=>entry.name===strategy.ability);
@@ -157,7 +201,11 @@ export function selectSignatureStrategy({
        !ability.types.some(type=>types.includes(type))||
        !isHeldItemCompatible(item,{types,moves:[strategy.tactic,strategy.attackSwap?.move].filter(Boolean),ability}))
       throw new Error('Invalid signature strategy configuration: '+strategy.id);
-    return [{...strategy,matchedRole:matchedRole.name,score:Math.round(score*10)/10}];
+    return [{
+      ...strategy,matchedRole:matchedRole.name,tacticRole,
+      planningFit:planningFit==null?null:Math.round(planningFit*10)/10,
+      score:Math.round(score*10)/10
+    }];
   }).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
   return eligible[0]||null;
 }
