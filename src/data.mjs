@@ -265,7 +265,7 @@ export const ROLE_MOVES = {
   Pivot:['U-turn','Flip Turn','Volt Switch','Parting Shot',
     'Chilly Reception','Teleport','Shed Tail'],
   Support:['Helping Hand','Reflect','Wish','Aromatherapy','Safeguard',
-    'Light Screen','Life Dew','Tailwind','Grassy Terrain','Heal Bell'],
+    'Light Screen','Life Dew','Tailwind','Grassy Terrain','Heal Bell','Aurora Veil'],
   Controller:['Taunt','Thunder Wave','Toxic','Spikes','Will-O-Wisp',
     'Encore','Haze','Trick Room','Spore']
 };
