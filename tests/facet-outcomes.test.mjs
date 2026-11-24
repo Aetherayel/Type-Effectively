@@ -70,7 +70,8 @@ test('facet detail adjusts only the existing archetype temperament-fit component
   const proto=ARCHETYPE_PROTOTYPES.find(x=>x.id==='steward');
   const [core,second,third]=deriveTritype(proto.ennea).split('').map(Number);
   const args={
-    enneagramScores:proto.ennea,mbtiScores:proto.mbti,bigFive:proto.ocean,
+    enneagramScores:proto.ennea,mbtiScores:proto.mbti,
+    bigFive:proto.ocean.map(x=>x>50?x-10:x+10),
     mbti:deriveMbti(proto.mbti),core,second,third,role:role('Support')
   };
   const base=classifyArchetype(args);
