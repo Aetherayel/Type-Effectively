@@ -1,5 +1,6 @@
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
-import { itemFacetAdjustment } from './facet-outcomes.mjs';
+import { ITEM_FACET_FOCI } from './facet-outcomes.mjs';
+import { facetProfileFit } from './bigfive-facets.mjs';
 
 const TRAIT_LABELS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Emotional sensitivity'];
 const average = values => values.reduce((sum,value)=>sum+value,0)/values.length;
@@ -78,7 +79,7 @@ export function heldItemRationale({core,role,bigFive,hasBigFive=true,family}) {
 
 export function chooseHeldItem({
   tritype,core,second,third,wing,enneagramScores,bigFive,mbtiScores,
-  role,types,moves,ability,hasBigFive=true,facetContrasts=null
+  role,types,moves,ability,hasBigFive=true,facetContrasts=null,facetScores=null
 }) {
   if(!Array.isArray(enneagramScores)||enneagramScores.length!==9 ||
       !Array.isArray(bigFive)||bigFive.length!==5 ||
@@ -92,17 +93,17 @@ export function chooseHeldItem({
     const weighted=enneagramScores.reduce((sum,value,i)=>sum+value*ennea[i],0) /
       Math.max(1,enneagramScores.reduce((sum,value)=>sum+value,0));
     const coreSignal=.54*ennea[core-1]+.23*ennea[second-1]+.13*ennea[third-1]+.10*weighted;
-    const traits=traitFit(bigFive,family.target);
-    // Facets are a modest nudge to equipment *theme*, never eligibility or
-    // battle functionality; source weights and family templates stay intact.
-    return [key,.68*coreSignal+.32*traits+itemFacetAdjustment(key,facetContrasts)];
+    // Each completed facet group substitutes for its parent within the
+    // established temperament share; no extra facet-fit bonus is added.
+    const traits=facetProfileFit(bigFive,facetScores,family.target,ITEM_FACET_FOCI[key]);
+    return [key,.68*coreSignal+.32*traits];
   }));
   // Rank by actual thematic and tactical fit only. Never hash raw survey
   // values into a pseudo-random bonus: one-point input changes must not
   // reshuffle otherwise identical equipment choices.
   const sorted=HELD_ITEMS.filter(item=>!item.strategyOnly && isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
     const familyScore=familyScores[item.family];
-    const traits=traitFit(bigFive,item.targets);
+    const traits=facetProfileFit(bigFive,facetScores,item.targets,ITEM_FACET_FOCI[item.family]);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
       role.secondary && item.roles.includes(role.secondary.name) ? 75 : 35;
     return {item,score:.47*familyScore+.38*traits+.15*roleScore};
@@ -116,7 +117,10 @@ export function chooseHeldItem({
     name:selected.name,
     family:selected.family,
     familyLabel:family.label,
-    facetAdjustment:Math.round(itemFacetAdjustment(selected.family,facetContrasts)*10)/10,
+    // Explained as difference from the coarse theme fit, not an added bonus.
+    facetAdjustment:Math.round(10*(facetProfileFit(bigFive,facetScores,family.target,
+      ITEM_FACET_FOCI[selected.family])-
+      traitFit(bigFive,family.target)))/10,
     effect:selected.effect,
     quip:selected.quip,
     why:explanation
