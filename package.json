@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node scripts/check-syntax.mjs && node --test tests/*.test.mjs",
     "dev": "python3 -m http.server 4173",
-    "refresh:pokedex": "node scripts/refresh-pokedex.mjs"
+    "refresh:pokedex": "node scripts/refresh-pokedex.mjs",
+    "audit:v2": "node scripts/audit-v2.mjs"
   }
 }
