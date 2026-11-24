@@ -2,16 +2,12 @@
 // This independent, deterministic classifier runs before Nature-adjusted stats,
 // role classification, and specialty selection. All numbers are authored game
 // affinities, not psychological probabilities or validated personality measures.
-import { NATURE_EFFECTS } from './data.mjs?v=nature-scoring-1';
+import { NATURE_EFFECTS, STAT_MEANINGS } from './data.mjs?v=nature-scoring-1';
 
 export const NATURE_STATS=Object.freeze(['atk','def','spa','spd','spe']);
-export const NATURE_DIMENSIONS=Object.freeze({
-  atk:'decisive assertion',
-  def:'protective structure',
-  spa:'reflective exploration',
-  spd:'patient cooperation',
-  spe:'responsive flexibility'
-});
+export const NATURE_DIMENSIONS=Object.freeze(Object.fromEntries(
+  NATURE_STATS.map(key=>[key,STAT_MEANINGS[key].priority])
+));
 
 // Enneagram motivational priorities in NATURE_STATS order, not base-stat
 // aptitudes. Each row has a distinct preferred emphasis and corresponding cost.
@@ -44,7 +40,7 @@ function cognitivePriorities(mbtiScores,mbti) {
     .30*e+.55*t+.15*j,                      // decisive assertion
     .20*i+.15*s+.15*t+.50*j,                // protective structure
     .20*i+.55*n+.25*t,                      // reflective exploration
-    .15*i+.50*f+.20*j+.15*s,                // patient cooperation
+    .35*i+.30*j+.35*50,                  // considered response (weak proxy)
     .30*e+.25*s+.45*p                       // responsive flexibility
   ];
 }
@@ -54,11 +50,11 @@ function cognitivePriorities(mbtiScores,mbti) {
 function temperamentPriorities([o,c,e,a,n]) {
   const stability=100-n;
   return [
-    .30*e+.40*(100-a)+.30*c,               // assertive follow-through
-    .55*c+.25*stability+.20*(100-e),       // structure / restraint
-    .50*o+.25*(100-e)+.25*c,               // curiosity / reflection
-    .45*a+.40*stability+.15*c,             // cooperation / composure
-    .40*e+.35*(100-c)+.25*o                // responsiveness / looseness
+    .30*e+.30*(100-a)+.40*c,               // assertion / follow-through
+    .55*c+.25*stability+.20*(100-e),       // protective fortitude
+    .55*o+.25*(100-e)+.20*c,               // inventive exploration
+    .65*stability+.15*a+.20*c,             // steady composure
+    .40*e+.25*(100-c)+.35*o                // responsive adaptation
   ];
 }
 
