@@ -80,6 +80,21 @@ export function validateFacetScores(values) {
   return values;
 }
 
+// Within-report deviations of individual facet percentiles from their parent
+// reported domain. Absent groups produce no values; no data is inferred.
+export function facetContrastMap(domainScores,facets) {
+  const values=validateFacetScores(facets);
+  if(!values)return Object.freeze({});
+  if(!Array.isArray(domainScores)||domainScores.length!==5||
+     domainScores.some(x=>!Number.isFinite(x)||x<0||x>100))
+    throw new Error('Five valid Big Five domains are required for facet contrasts.');
+  return Object.freeze(Object.fromEntries(FACET_KEYS.flatMap((key,i)=>{
+    if(values[i]===null)return [];
+    const parent=domainScores[DOMAIN[key[0]]];
+    return [[key,clamp(values[i]-parent,-FACET_CONTRAST_CAP,FACET_CONTRAST_CAP)]];
+  })));
+}
+
 export function refineBigFiveAffinities(domainScores,baseAffinities,facets) {
   const values=validateFacetScores(facets);
   if(!values)return {affinities:[...baseAffinities],activeDomains:[],corrections:[0,0,0,0,0,0]};
