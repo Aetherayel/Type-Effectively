@@ -132,7 +132,13 @@ test('a held item is selected from the complete build and can be independently c
     mbtiScores:architectInput.mbtiScores,
     role:b.role,types:b.types,moves:b.moves,ability:b.ability
   });
-  assert.deepEqual(candidate,b.heldItem);
+  if(b.signatureStrategy){
+    assert.equal(b.heldItem.name,b.signatureStrategy.item,
+      'signature equipment must be the mechanically required item');
+    assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}));
+  }else{
+    assert.deepEqual(candidate,b.heldItem);
+  }
   assert.throws(()=>chooseHeldItem({}),/complete personality build/);
 });
 
