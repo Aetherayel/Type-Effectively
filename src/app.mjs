@@ -2,7 +2,7 @@ import {
   ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
 } from './data.mjs?v=v2-facet-outcomes-2';
-import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-facet-outcomes-2';
+import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-facet-outcomes-2';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
@@ -226,6 +226,9 @@ function readScores(prefix,length) {
 }
 function setScores(prefix,vals) {vals.forEach((v,i)=>syncSlider(prefix+'-'+i,v));}
 function setMode(group,mode) {
+  // Labels alone are overrides, never standalone tests.
+  if(group==='mbti' && !['scores','functions'].includes(mode))mode='scores';
+  if(group==='ennea' && !['scores','ranking','rowe'].includes(mode))mode='scores';
   state[group+'Mode']=mode;
   document.querySelectorAll('[data-'+group+'-mode]').forEach(button=>{
     const active=button.dataset[group+'Mode']===mode;
@@ -246,16 +249,15 @@ function setMode(group,mode) {
     $('mbti-subtitle').textContent=mode==='functions'?
       'Eight cognitive functions, entered directly. All eight inform base stats; their preference contrasts inform Nature and other classifications.':
       'Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.';
-    $('mbti-derived').textContent=mode==='type'?'Select the four-letter type you identify with. We will use estimated percentage scores where needed.':'Your percentages determine the suggested type. You can override it below.';
-    $('mbti-override').options[0].textContent=mode==='type'?'Choose a type…':
-      mode==='functions'?'Use function-derived suggestion':'Auto-detect from scores';
+    $('mbti-derived').textContent='Your test results determine the suggested type. You may override the label without replacing your scores.';
+    $('mbti-override').options[0].textContent=mode==='functions'?'Use function-derived suggestion':'Auto-detect from scores';
   } else {
     $('ennea-score-fields').classList.toggle('hidden',mode!=='scores');
     $('ennea-ranking-fields').classList.toggle('hidden',mode!=='ranking');
     $('ennea-score-help').classList.toggle('hidden',mode!=='scores');
     $('rowe-score-fields').classList.toggle('hidden',mode!=='rowe');
     $('rowe-score-help').classList.toggle('hidden',mode!=='rowe');
-    $('tritype-override').placeholder=mode==='tritype'?'Required, e.g. 593':'e.g. 593';
+    $('tritype-override').placeholder='e.g. 593';
   }
   updateDerived();
 }
@@ -267,7 +269,7 @@ function parseRanking() {
   return parts.map(Number);
 }
 function inferredTritype() {
-  if(state.enneaMode==='tritype'||(state.enneaMode==='rowe'?!state.touched.rowe:!state.touched.enneagram)) return '';
+  if(state.enneaMode==='rowe'?!state.touched.rowe:!state.touched.enneagram) return '';
   try {
     if(state.enneaMode==='scores') return deriveTritype(readScores('ennea',9));
     if(state.enneaMode==='rowe') return deriveTritype(normalizeRoweScores(readRoweScores()));
@@ -300,7 +302,7 @@ function updateDerived() {
         'Enter all eight overall function totals to infer a game-compatible preference.'):
     override?'Selected: '+override+(suggested && suggested!==override?' · test-derived suggestion: '+suggested:''):
     suggested?'Suggested type: '+suggested+' · Nature follows the complete profile':
-    state.mbtiMode==='type'?'Choose your four-letter type above to continue.':'Enter your percentages to infer your type, or choose an override.';
+    'Enter your five 16Personalities percentages to infer a type. A four-letter label alone cannot generate a build.';
 
   const tritypeOverride=$('tritype-override').value.trim();
   const derived=inferredTritype();
@@ -309,7 +311,7 @@ function updateDerived() {
     : derived?'Suggested tritype: '+derived
     : state.enneaMode==='ranking'?'Enter a complete ranking of all nine types.':
     state.enneaMode==='rowe'?'Enter the nine signed raw totals from your Rowe report.':
-    state.enneaMode==='tritype'?'Enter your three-number tritype above.':'Add your nine scores or an override to determine your tritype.';
+    'Add your nine test scores to determine a tritype; overrides cannot substitute for test results.';
 
   const coreString=isValidTritype(tritypeOverride)?tritypeOverride:derived;
   const core=coreString?Number(coreString[0]):null;
@@ -333,7 +335,7 @@ function collectInput() {
   const tritypeOverride=$('tritype-override').value.trim();
   if(tritypeOverride&&!isValidTritype(tritypeOverride)) throw new Error('Tritype needs exactly one gut (8/9/1), heart (2/3/4), and head (5/6/7) type.');
   const mbtiScores=state.mbtiMode==='scores' && state.touched.mbti ? readScores('mbti',5):null;
-  if(!mbtiScores&&!typeOverride&&!functionScores) throw new Error('Please enter your 16Personalities scores, a four-letter type, or eight function scores.');
+  if(!mbtiScores&&!functionScores) throw new Error('Cognitive style test results are required: enter 16Personalities percentages or eight functions. A type override alone is insufficient.');
   let enneagramScores=null,enneagramRanking=null,roweScores=null;
   if(state.enneaMode==='scores'&&state.touched.enneagram) enneagramScores=readScores('ennea',9);
   if(state.enneaMode==='rowe') roweScores=readRoweScores();
@@ -341,11 +343,13 @@ function collectInput() {
     enneagramRanking=parseRanking();
     if(!enneagramRanking) throw new Error('Your ranking must contain each digit 1–9 exactly once.');
   }
-  if(!enneagramScores&&!enneagramRanking&&!roweScores&&!tritypeOverride) throw new Error('Enter Enneagram scores, Rowe raw totals, a complete ranking, or a valid tritype.');
+  if(!enneagramScores&&!enneagramRanking&&!roweScores) throw new Error('Enneagram test results are required: enter nine scores, Rowe totals, or a full nine-type ranking. A tritype override alone is insufficient.');
+  if(!state.touched.bigfive)
+    throw new Error('Big Five test results are required: enter all five OCEAN domain scores before generating.');
   return {
     mbtiScores,typeOverride,functionScores,identityPreference,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
-    bigFive:state.touched.bigfive?readScores('bigfive',5):null,
+    bigFive:readScores('bigfive',5),
     bigFiveFacets:readFacetScores()
   };
 }
@@ -622,10 +626,16 @@ function setError(message) {
   $('form-error').textContent=message;
   $('form-error').classList.toggle('hidden',!message);
 }
+function clearIncompleteResult() {
+  state.lastBuild=null;state.lastInput=null;state.lastTrainingEvs=null;state.isSample=false;
+  $('result-container').innerHTML='<div class="empty-state"><div class="empty-orb"><span class="empty-core">?</span></div><div class="empty-overline">THREE TESTS REQUIRED</div><h3>Build incomplete.</h3><p>Enter cognitive style, Enneagram, and Big Five results to generate your Pokémon.</p><div class="empty-detail">AWAITING ALL THREE REPORTS <span class="blink-cursor">_</span></div></div>';
+  $('result-status').classList.remove('ready');
+  $('result-status').innerHTML='<span></span> INCOMPLETE';
+}
 function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
   try {
     const input=collectInput();
-    const build=generateBuild(input);
+    const build=generateCompleteBuild(input);
     build.renderVersion=activeBuildVersion();
     build.restoredFromShare=sharedVersion!==undefined;
     build.createdVersion=build.restoredFromShare?normalizeBuildVersion(sharedVersion):build.renderVersion;
@@ -633,7 +643,12 @@ function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
     if(sharedVersion===undefined)state.lastTrainingEvs=null;
     state.lastBuild=build;state.lastInput=input;setError('');renderCard(build);
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(error){setError(error.message||'Unable to generate this build.');}
+    return true;
+  }catch(error){
+    clearIncompleteResult();
+    setError(error.message||'Unable to generate this build.');
+    return false;
+  }
 }
 function clearAll() {
   setScores('mbti',[50,50,50,50,50]);
@@ -685,12 +700,13 @@ function restoreShared() {
       input.identityPreference:'';
     $('tritype-override').value=input.tritypeOverride||'';
     setTestingPath(payload.mode.testing==='advanced'?'advanced':'quick',false);
-    setMode('mbti',input.functionScores?'functions':payload.mode.mbti==='type'?'type':'scores');
-    setMode('ennea',input.roweScores?'rowe':['scores','ranking','tritype','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
+    setMode('mbti',input.functionScores?'functions':'scores');
+    setMode('ennea',input.roweScores?'rowe':['scores','ranking','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
     state.lastTrainingEvs=payload.trainingEvs;
-    runBuild(false,payload.sample===true,payload.buildVersion??null);
-    showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
+    if(runBuild(false,payload.sample===true,payload.buildVersion??null))
+      showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
+    else showToast('This shared build is missing required test results; enter all three sections.');
   }catch {showToast('That shared build link could not be read.');}
 }
 // Generate synthetic scores, show them in the editable form, and immediately
