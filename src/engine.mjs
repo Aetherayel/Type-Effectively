@@ -399,9 +399,10 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   }
   const selected=new Set(attacks.map(m=>m.name));
   if(selected.size!==2)throw new Error('Signature attack substitution duplicated an attack.');
-  // A signature tactic belongs to the role that earned the package, even
-  // when that is the close secondary role; the displayed primary is unchanged.
-  const tacticRole=strategy?.matchedRole||role.primary.name;
+  // A specialist may express a protective or ally tactic without changing
+  // its classified primary/secondary battle role. Tactic purpose is explicitly
+  // mapped by the selected package and verified against the chosen move pool.
+  const tacticRole=strategy?.tacticRole||strategy?.matchedRole||role.primary.name;
   const validRole=ROLE_MOVES[tacticRole].filter(name=>
     !selected.has(name) &&
     (!strategy||name===strategy.tactic) &&
@@ -435,7 +436,9 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   return [
     ...attacks,
     {name:tactic,category:'Role tactic',
-      why:'This '+tacticRole.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
+      why:strategy?.tactic==='Aurora Veil'
+        ? 'This protective move reflects its visible typing, preparation, and staying power.'
+        : 'This '+tacticRole.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
 }
@@ -576,7 +579,7 @@ export function generateBuild(input) {
   // Ordinary generalist selection stays intact when no package earns its place.
   const signatureStrategy=selectSignatureStrategy({
     types,role,stats:effectiveStats,core,second,third,
-    bigFive:ocean,hasBigFive
+    bigFive:ocean,hasBigFive,mbtiScores,bigFiveFacets:input.bigFiveFacets??null
   });
   const ability=signatureStrategy?signatureAbility(signatureStrategy):
     chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
