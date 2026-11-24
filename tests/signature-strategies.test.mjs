@@ -88,6 +88,38 @@ test('Snow Bastion expresses an Ice defensive/protective strategy across four ro
   }),true);
 });
 
+test('planning and facet evidence affect Snow Bastion preference, not hard eligibility',()=>{
+  const prepared=ctx({
+    name:'Tank',mbtiScores:[85,95,12,9,50],bigFive:[62,83,28,55,43]
+  });
+  const improvising=ctx({
+    name:'Tank',mbtiScores:[30,10,94,95,50],bigFive:[62,83,28,55,43]
+  });
+  const strategic=selectSignatureStrategy(prepared);
+  const spontaneous=selectSignatureStrategy(improvising);
+  assert.equal(strategic?.id,'snow-bastion');
+  assert.equal(spontaneous?.id,'snow-bastion',
+    'Architect-style planning is an advantage, not an eligibility requirement');
+  assert.ok(strategic.planningFit>spontaneous.planningFit+30);
+  assert.ok(strategic.score>spontaneous.score+4);
+  assert.equal(strategic.matchedRole,'Tank');
+  const facets=Array(30).fill(50);
+  const high=[...facets],low=[...facets];
+  for(const i of [4,7,11]){high[i]=95;low[i]=5;} // O5 Intellect, C2 Order, C6 Caution
+  const detailHigh=protectivePlanningFit({...prepared,bigFiveFacets:high});
+  const detailLow=protectivePlanningFit({...prepared,bigFiveFacets:low});
+  assert.ok(detailHigh>detailLow+30,'direct facets must matter beyond broad domain');
+  assert.ok(selectSignatureStrategy({...prepared,bigFiveFacets:high}).score>
+    selectSignatureStrategy({...prepared,bigFiveFacets:low}).score);
+  assert.equal(selectSignatureStrategy({...prepared,types:['Steel','Water']}),null,
+    'no psychological fit can bypass the Ice-type requirement');
+  assert.equal(selectSignatureStrategy({...prepared,values:{...stats,spd:81}}),null,
+    'no planning score can bypass special-defensive viability');
+  const source=readFileSync(new URL('../src/strategies.mjs',import.meta.url),'utf8');
+  assert.doesNotMatch(source,/classifyArchetype|archetype\.title|archetype\.mode/,
+    'signatures must use original evidence, never final archetype titles');
+});
+
 test('each other specialization is meaningfully reachable with matching complete inputs',()=>{
   const examples=[
     {id:'solar-engine',input:ctx({types:['Fire','Grass'],name:'Sweeper',motives:[7,3,8],
