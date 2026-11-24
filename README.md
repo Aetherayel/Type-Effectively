@@ -122,11 +122,22 @@ Deterministic. The same inputs always produce the same result. The output is exp
 - Def = `0.45C + 0.30(100−E) + 0.25 Stability`; SpA = `0.60O + 0.20C + 0.20(100−E)`
 - SpD = `0.65 Stability + 0.20A + 0.15C`; Spe = `0.45E + 0.35O + 0.20(100−C)`
 
-**Cognitive base affinities** (I/N/F/P as reported; E=100−I, S=100−N, T=100−F, J=100−P):
+**16Personalities cognitive base affinities** (used only without eight-function results; I/N/F/P as reported, E=100−I, S=100−N, T=100−F, J=100−P):
 
 - HP = `0.35J + 0.20I + 0.45×50`; Atk = `0.45E + 0.35T + 0.20J`
 - Def = `0.45J + 0.30I + 0.25T`; SpA = `0.60N + 0.25T + 0.15I`
 - SpD = `0.35I + 0.30J + 0.35×50`; Spe = `0.45E + 0.35P + 0.20S`
+
+**Direct eight-function base affinities** (used only when comparable Ne/Ni/Se/Si/Te/Ti/Fe/Fi totals are entered): subtract the within-profile eight-function mean from each score, producing deviations `ne,ni,se,si,te,ti,fe,fi`. Bound each resulting stat affinity to 0–100.
+
+- HP = `50 + 0.50×(0.35si + 0.30ni + 0.20te + 0.15fi)`
+- Atk = `50 + 0.50te + 0.30se + 0.20fi`
+- Def = `50 + 0.35si + 0.35fi + 0.20ni + 0.10ti`
+- SpA = `50 + 0.42ni + 0.32ne + 0.26ti`
+- SpD = `50 + 0.45×(0.40ti + 0.35fi + 0.25si)`
+- Spe = `50 + 0.45se + 0.35ne + 0.20te`
+
+This retains the distinctions that the four-letter reduction loses, without interpreting raw Sakinorva totals as 0–100 percentiles. Uniformly shifting every input function score has no effect. HP and SpD are attenuated, since functional preferences are weak evidence for resilience or emotional regulation. Only the 20% cognitive *branch* changes input representation; no additional scoring source is added. The four derived preference contrasts still inform Nature and legacy interpretation, keeping base-stat style and Nature priorities conceptually separate.
 
 HP and SpD cognitive affinities deliberately shrink toward neutral 50 because the four cognitive axes are weak evidence for resilience and emotional regulation. The 16Personalities A/T dimension is excluded to avoid double-counting emotional sensitivity. Authored nine-type Enneagram base affinities live in `ENNEAGRAM_AFFINITIES`, distinct from Nature's motivational preferences. Lower Agreeableness is only a minority contributor to Attack; Neuroticism no longer raises Speed. HP, Defense and Sp. Def can correlate, but now have different principal signals.
 
