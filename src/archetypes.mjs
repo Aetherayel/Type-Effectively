@@ -3,7 +3,8 @@
 // Every candidate is scored on Enneagram (25%), MBTI-style dimensions (20%),
 // Big Five (25%), and the already computed battle profile (30%).
 // Battle scores already incorporate typing and stats: do not score them again.
-import { archetypeFacetAdjustment } from './facet-outcomes.mjs';
+import { ARCHETYPE_FACET_FOCI } from './facet-outcomes.mjs';
+import { facetProfileFit } from './bigfive-facets.mjs';
 
 const clamp = x => Math.max(0,Math.min(100,x));
 const fit = (values,ideal) => clamp(100-Math.sqrt(
@@ -123,7 +124,7 @@ export const ARCHETYPE_CATALOG = Object.freeze(modes.flatMap(mode=>
   }))
 ));
 
-export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,second,third,role,facetContrasts=null}) {
+export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,second,third,role,facetContrasts=null,facetScores=null}) {
   if(enneagramScores?.length!==9 || mbtiScores?.length!==5 || bigFive?.length!==5 ||
     !role?.all?.length) throw new Error('Archetype classification requires a complete build.');
   // Manual type overrides change the preferred pole but preserve the reported intensity.
@@ -137,10 +138,12 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
     const motivation=clamp(.69*rawMotivation+
       .18*mode.ennea[core-1]+.09*mode.ennea[second-1]+.04*mode.ennea[third-1]);
     const cognition=fit(cognitive,mode.mbti);
-    // Facet detail shapes the existing 25% temperament component only;
-    // motivation, cognitive style, role identity and 36 titles remain intact.
-    const facetAdjustment=archetypeFacetAdjustment(candidate.mode,facetContrasts);
-    const temperament=clamp(fit(bigFive,mode.ocean)+facetAdjustment);
+    // When a complete facet group exists, its relevant facets REPLACE the
+    // broad score in this temperament fit. Undetailed groups still use their
+    // actual domain scores. No extra bonus or fourth weighting is introduced.
+    const temperament=facetProfileFit(bigFive,facetScores,mode.ocean,
+      ARCHETYPE_FACET_FOCI[candidate.mode]);
+    const facetAdjustment=temperament-fit(bigFive,mode.ocean);
     const roleValue=role.all.find(r=>r.name===candidate.role)?.score ?? 0;
     // Role fit already incorporates stat shape and visible type toolkit.
     const battle=clamp(50+1.7*(roleValue-avgRole));
