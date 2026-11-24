@@ -3,6 +3,7 @@
 // role classification, and specialty selection. All numbers are authored game
 // affinities, not psychological probabilities or validated personality measures.
 import { NATURE_EFFECTS, STAT_MEANINGS } from './data.mjs?v=v2-raw-affinities-1';
+import { bigFiveNaturePriorities } from './bigfive-facets.mjs';
 
 export const NATURE_STATS=Object.freeze(['atk','def','spa','spd','spe']);
 export const NATURE_DIMENSIONS=Object.freeze(Object.fromEntries(
@@ -77,7 +78,7 @@ function motivationPriorities(scores,core,second,third) {
 // The total is a weighted average of those contrasts. There is no reference to
 // base stats, typing, roles, abilities, or offensive strength.
 export function classifyNature({
-  enneagramScores,core,second,third,mbtiScores,mbti,bigFive=null,
+  enneagramScores,core,second,third,mbtiScores,mbti,bigFive=null,bigFiveFacets=null,
   hasMeasuredCognition=true
 }) {
   if(!validScores(enneagramScores,9)||!validScores(mbtiScores,5)||
@@ -87,7 +88,8 @@ export function classifyNature({
     throw new Error('Nature selection requires valid personality inputs.');
   const motivation=motivationPriorities(enneagramScores,core,second,third);
   const cognition=cognitivePriorities(mbtiScores,mbti);
-  const temperament=bigFive==null?null:temperamentPriorities(bigFive);
+  const temperament=(bigFive!=null||bigFiveFacets!=null)
+    ? bigFiveNaturePriorities(bigFive,bigFiveFacets) : null;
   const originalWeights={
     motivation:45,cognition:hasMeasuredCognition?30:15,
     temperament:temperament?25:0
