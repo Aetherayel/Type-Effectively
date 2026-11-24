@@ -27,5 +27,8 @@ jobs:
       - name: V2 diagnostic audit — seeded source influence and stability
         if: github.event_name == 'pull_request'
         run: npm run audit:v2
+      - name: Compare base-stat role geometry against existing classification
+        if: github.event_name == 'pull_request'
+        run: node scripts/audit-role-candidates.mjs
       - name: Browser startup — verify all 19 sliders render
         run: node scripts/smoke-browser.mjs

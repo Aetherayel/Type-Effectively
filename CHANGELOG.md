@@ -2,6 +2,12 @@
 
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## 2.0.1 (next verified merge) — Pre-Nature battle-role recalibration
+- Choose battle identity from six **base stats before Nature**, keeping Nature for effective battle stats, move/ability mechanics, and specialist stat gates.
+- Rebalance the six role-template comparisons by partially correcting their different neutral-template fit advantages; preserve the 80% stat / 20% type weighting and the five-point secondary-role threshold.
+- Let a Wall specialize in physical, special, or mixed durability; use bounded top-two-defense versus offense cues to distinguish Wall from Tank without hard 100-point requirements.
+- Keep six roles, all 36 archetypes, curated role abilities/moves, and specialist eligibility. Seeded before/after comparisons and regression tests document distribution and mechanical effects.
+
 ## 2.0.0 — Stat-specific personality recalibration
 - Require all three assessment sections for any user-visible Pokémon: cognitive scores, nine-type Enneagram scores/Rowe/ranking, and five Big Five domains. Four-letter/tritype overrides remain supplemental and cannot replace full tests. Invalid inputs clear stale results.
 - Remove the legacy raw-score FNV held-item tie hash; choose equipment by interpretable personality-family, trait, role and compatibility fits with stable exact ties.

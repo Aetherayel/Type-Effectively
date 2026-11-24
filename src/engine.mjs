@@ -1,12 +1,13 @@
 import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
-  GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
-  ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=v2-complete-stable-3';
-import { chooseHeldItem } from './held-items.mjs?v=v2-complete-stable-3';
+  GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
+  BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
+} from './data.mjs?v=v2-pre-nature-roles-1';
+import { chooseHeldItem } from './held-items.mjs?v=v2-pre-nature-roles-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
+import { classifyRole } from './roles.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
 import { refineBigFiveAffinities, facetContrastMap } from './bigfive-facets.mjs';
@@ -206,27 +207,6 @@ export function applyNature(baseStats,nature) {
   result[effect[0]]=Math.floor(baseStats[effect[0]]*1.1);
   result[effect[1]]=Math.floor(baseStats[effect[1]]*0.9);
   return result;
-}
-
-function classifyRole(stats, types) {
-  const vals=STAT_KEYS.map(k=>stats[k]);
-  const normalized=vals.map(v=>v*535/vals.reduce((a,b)=>a+b,0));
-  const scores=ROLE_NAMES.map((role, idx)=>{
-    const target=ROLE_CALIBRATED_TEMPLATES[role];
-    const physical=role==='Sweeper'||role==='Tank';
-    const options=[target];
-    if (physical) options.push([target[0],target[3],target[2],target[1],target[4],target[5]]);
-    const rms=Math.min(...options.map(t=>Math.sqrt(average(normalized.map((v,i)=>(v-t[i])**2)))));
-    const statFit=100*Math.exp(-(rms*rms)/(2*25*25));
-    const toolkit=.55*ROLE_AFFINITIES[types[0]][idx]+.45*ROLE_AFFINITIES[types[1]][idx];
-    return {name:role,score:round(.8*statFit+.2*toolkit),statFit:round(statFit),toolkit:round(toolkit)};
-  }).sort((a,b)=>b.score-a.score || ROLE_NAMES.indexOf(a.name)-ROLE_NAMES.indexOf(b.name));
-  const baseValues=STAT_KEYS.map(k=>stats[k]);
-  const spread=Math.sqrt(average(baseValues.map(s=>(s-average(baseValues))**2)));
-  return {
-    primary:scores[0],secondary:scores[1].score>=scores[0].score-5?scores[1]:null,
-    all:scores, specialization:spread<15?'Versatile':spread<25?'Focused':'Highly specialized',spread:round(spread)
-  };
 }
 
 // Standard and Hidden Abilities come from the same curated pool. Supporting
@@ -574,7 +554,9 @@ export function generateBuild(input) {
     hasRealEnneagramInput ? selectedWing : null;
   const {types,hiddenType}=deriveTyping({core,second,third,wing:typingWing});
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
-  const role=classifyRole(effectiveStats,toolkitTypes);
+  // Identity is classified from base personality stats, not a Nature
+  // modifier that changes two battle stats after the personality build.
+  const role=classifyRole(baseStats,toolkitTypes);
   // A specialization is a joint ability / tactic / item package selected only
   // after visible typing, effective stats, role, motivations and temperament.
   // Ordinary generalist selection stays intact when no package earns its place.
