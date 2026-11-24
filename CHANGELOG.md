@@ -2,6 +2,14 @@
 
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## Unreleased — Facet-first Big Five evidence
+- **Replace broad Big Five domain input with complete IPIP-NEO facet groups when available.** A full 30-facet report satisfies the Big Five requirement without redundant domain data; partial groups require measured five-domain fallback for missing facet groups. Domain-only results and old shared links retain the historical formulas.
+- Each stat draws its Big Five signal from meaning-specific facets, not a bounded correction to the parent domain. Particularly, Intellect/Imagination/Artistic Interests now determine the detailed Openness contribution to Sp. Atk even when overall Openness is low.
+- Apply available facets to independent Nature temperament priorities, archetype fit, ordinary held-item family/item fit and Trainer Guide patterns; these replace earlier broad-domain terms rather than adding bonus sources.
+- Retain existing framework blending, deterministic 535 BST, role classification, elemental typing, item compatibility and export mechanics. O6 Liberalism, A2 Morality and N3 Depression remain excluded from independent facet effects. Generic legacy theme-only consumers receive disclosed context signals rather than claimed reconstructed domain percentiles.
+- Add full facet-only input, mixed fallback, no broad-domain override, sensitivity, excluded-facet invariance and browser regression tests.
+- **Cognitive-function scoring is unchanged pending a separate calibration review.** Eight-function scores are still centered within their own report before blending and normalization.
+
 ## Unreleased — Transparent affinity scoring before 535 BST
 - Add a reversible **Pokémon stats / Before normalization** results toggle. The second view shows all six weighted, unnormalized personality affinities on a 0–100 game-score scale, their mean, and each deviation from the mean.
 - Expose Big Five, Enneagram and cognition source affinities alongside each stat's existing weights, including optional IPIP-NEO facet contributions.
