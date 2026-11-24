@@ -59,10 +59,18 @@ const change=(a,b)=>{
 };
 const outputMetrics=(before,after)=>{
   const diffs=change(before,after);
+  const statChanges=stats(before).map((x,i)=>Math.abs(x-stats(after)[i]));
   return {
     statL1:l1(stats(before),stats(after)),
-    statChanges:stats(before).map((x,i)=>Math.abs(x-stats(after)[i])),
+    statChanges,
     fields:diffs,
+    itemDetails:{
+      changed:diffs.item,
+      familyChanged:before.heldItem.family!==after.heldItem.family,
+      unchangedBaseStats:statChanges.every(delta=>delta===0),
+      noOtherClassificationChanged:!Object.entries(diffs).some(([name,changed])=>name!=='item'&&changed),
+      stableNatureRoleSpecialty:!diffs.nature&&!diffs.primaryRole&&!diffs.secondaryRole&&!diffs.specialty
+    },
     cascade:Object.values(diffs).filter(Boolean).length
   };
 };
@@ -73,10 +81,12 @@ const summarizeRows=rows=>{
   const correlations={};
   for(let i=0;i<6;i++)for(let j=i+1;j<6;j++)
     correlations[STAT_KEYS[i]+'_'+STAT_KEYS[j]]=correlation(baseline,i,j);
+  const margins=rows.map(b=>b.role.all[0].score-b.role.all[1].score);
   return {
     n:rows.length,
     meanBase:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(mean(baseline.map(row=>row[i])))])),
     topStat:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,top[i]])),
+    roleMargin:{mean:round(mean(margins)),within1:margins.filter(m=>m<=1).length,within5:margins.filter(m=>m<=5).length},
     role:counts(rows.map(b=>b.role.primary.name)),
     nature:counts(rows.map(b=>b.nature)),
     specialty:counts(rows.map(b=>b.signatureStrategy?.id||'none')),
@@ -102,17 +112,21 @@ const auditCohorts=()=>{
 const auditSourceReplacement=()=>{
   const result={};
   for(const mode of ['percentages','functions']){
+    // Use exactly the same 280 baseline personalities for all three sources,
+    // avoiding cohort composition as a confound in realized-sensitivity ranking.
+    const originals=Array.from({length:280},()=>randomInput(mode));
+    const baselines=originals.map(build);
     const bySource={};
     for(const source of ['bigFive','enneagram','cognition']){
       const metrics=[];
-      for(let i=0;i<280;i++){
-        const original=randomInput(mode);
+      for(let i=0;i<originals.length;i++){
+        const original=originals[i];
         const next={...original};
         if(source==='bigFive')next.bigFive=vector(5);
         else if(source==='enneagram')next.enneagramScores=vector(9);
         else if(mode==='functions')next.functionScores=vector(8);
         else next.mbtiScores=vector(5);
-        metrics.push(outputMetrics(build(original),build(next)));
+        metrics.push(outputMetrics(baselines[i],build(next)));
       }
       bySource[source]=summarizeDeltas(metrics);
     }
@@ -132,6 +146,13 @@ function summarizeDeltas(rows){
     meanAbsStatDelta:Object.fromEntries(STAT_KEYS.map((key,i)=>[key,round(mean(rows.map(row=>row.statChanges[i])))])),
     changedPct:Object.fromEntries(changed.map(key=>[key,round(100*mean(rows.map(row=>Number(row.fields[key]))),1)])),
     cascades3plus:rows.filter(r=>r.cascade>=3).length,
+    itemDiagnostic:{
+      itemChanges:rows.filter(r=>r.itemDetails.changed).length,
+      changedFamilies:rows.filter(r=>r.itemDetails.familyChanged).length,
+      changesWithIdenticalBaseStats:rows.filter(r=>r.itemDetails.changed&&r.itemDetails.unchangedBaseStats).length,
+      itemWasOnlyChangedOutput:rows.filter(r=>r.itemDetails.changed&&r.itemDetails.noOtherClassificationChanged).length,
+      itemChangedWithStableNatureAndRole:rows.filter(r=>r.itemDetails.changed&&r.itemDetails.stableNatureRoleSpecialty).length
+    },
     maximumChangedFields:Math.max(...cascade)
   };
 }
@@ -168,6 +189,7 @@ const auditLocalSensitivity=()=>{
 };
 const auditMissingData=()=>{
   const metrics=[],unchangedBase=[];
+  const specialty={measuredNeutral:0,omitted:0,changed:0};
   for(let i=0;i<360;i++){
     const original=randomInput('percentages');
     const measured={...original,bigFive:[50,50,50,50,50]};
@@ -175,10 +197,14 @@ const auditMissingData=()=>{
     const first=build(measured),second=build(omitted);
     metrics.push(outputMetrics(first,second));
     unchangedBase.push(stats(first).every((v,k)=>v===stats(second)[k]));
+    if(first.signatureStrategy)specialty.measuredNeutral++;
+    if(second.signatureStrategy)specialty.omitted++;
+    if(first.signatureStrategy?.id!==second.signatureStrategy?.id)specialty.changed++;
   }
   return {
     scenario:'reported neutral-50 domains versus Big Five omitted; all other inputs unchanged',
     sameBaseStats:unchangedBase.filter(Boolean).length,
+    specialty,
     ...summarizeDeltas(metrics)
   };
 };
