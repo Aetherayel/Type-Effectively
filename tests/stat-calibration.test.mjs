@@ -24,8 +24,21 @@ test('shared semantic meanings cannot drift between base stats and Nature',()=>{
 });
 
 test('calibration retains six valid stat prototypes and distinguishes signals',()=>{
-  assert.deepEqual(BASE_STAT_WEIGHTS,{bigFive:.5,enneagram:.3,cognition:.2});
-  assert.equal(sum(Object.values(BASE_STAT_WEIGHTS)),1);
+  assert.deepEqual(Object.keys(BASE_STAT_WEIGHTS),['functions','percentages','typeOnly']);
+  for(const [mode,weights] of Object.entries(BASE_STAT_WEIGHTS)){
+    assert.deepEqual(Object.keys(weights),STAT_KEYS,mode+' omits a stat');
+    for(const [key,row] of Object.entries(weights)){
+      assert.deepEqual(Object.keys(row),['bigFive','enneagram','cognition']);
+      assert.ok(Math.abs(sum(Object.values(row))-1)<1e-10,mode+'/'+key+' weights do not sum to 1');
+      assert.ok(Object.values(row).every(x=>x>=0&&x<=1));
+    }
+  }
+  assert.equal(BASE_STAT_WEIGHTS.functions.spa.cognition,.5);
+  assert.equal(BASE_STAT_WEIGHTS.functions.def.enneagram,.45);
+  assert.ok(BASE_STAT_WEIGHTS.functions.spa.cognition>
+    BASE_STAT_WEIGHTS.percentages.spa.cognition);
+  assert.ok(BASE_STAT_WEIGHTS.percentages.spa.cognition>
+    BASE_STAT_WEIGHTS.typeOnly.spa.cognition);
   assert.equal(Object.keys(ENNEAGRAM_AFFINITIES).length,9);
   for(const row of Object.values(ENNEAGRAM_AFFINITIES)){
     assert.equal(row.length,6);
@@ -50,7 +63,10 @@ test('A/T cannot leak into cognition-based capacity; normalization preserves 535
   const o=oceanAffinity([93,70,18,37,25]);
   const e=enneagramAffinity([65,65,65,65,100,65,65,65,65]);
   const m=mbtiAffinity(input);
-  const blended=STAT_KEYS.map((_,i)=>.5*o[i]+.3*e[i]+.2*m[i]);
+  const blended=STAT_KEYS.map((key,i)=>{
+    const w=BASE_STAT_WEIGHTS.percentages[key];
+    return w.bigFive*o[i]+w.enneagram*e[i]+w.cognition*m[i];
+  });
   const stats=normalizeStats(blended);
   assert.equal(sum(Object.values(stats)),535);
   assert.ok(Object.values(stats).every(n=>n>=45&&n<=140));
@@ -65,7 +81,10 @@ test('seeded defensive correlations are not near-duplicates; each stat can lead'
     const ennea=Array.from({length:9},()=>Math.floor(random()*101));
     const mbti=Array.from({length:5},()=>Math.floor(random()*101));
     const o=oceanAffinity(bigFive),e=enneagramAffinity(ennea),m=mbtiAffinity(mbti);
-    const stats=normalizeStats(STAT_KEYS.map((_,k)=>.5*o[k]+.3*e[k]+.2*m[k]));
+    const stats=normalizeStats(STAT_KEYS.map((key,k)=>{
+      const w=BASE_STAT_WEIGHTS.percentages[key];
+      return w.bigFive*o[k]+w.enneagram*e[k]+w.cognition*m[k];
+    }));
     const row=STAT_KEYS.map(k=>stats[k]);
     rows.push(row);tops[row.indexOf(Math.max(...row))]++;
   }
@@ -79,8 +98,13 @@ test('build uses audited source blend and propagates it through the results',()=
   const input={mbtiScores:[76,93,14,21,36],enneagramScores:[96,48,62,84,95,52,31,70,40],bigFive:[91,87,20,44,26]};
   const build=generateBuild(input);
   const o=oceanAffinity(input.bigFive),e=enneagramAffinity(input.enneagramScores),m=mbtiAffinity(input.mbtiScores);
-  for(let i=0;i<STAT_KEYS.length;i++)
-    assert.equal(build.affinities[STAT_KEYS[i]],Math.round(.5*o[i]+.3*e[i]+.2*m[i]));
+  assert.equal(build.statWeightMode,'percentages');
+  assert.deepEqual(build.statWeights,BASE_STAT_WEIGHTS.percentages);
+  for(let i=0;i<STAT_KEYS.length;i++){
+    const w=BASE_STAT_WEIGHTS.percentages[STAT_KEYS[i]];
+    assert.equal(build.affinities[STAT_KEYS[i]],
+      Math.round(w.bigFive*o[i]+w.enneagram*e[i]+w.cognition*m[i]));
+  }
   assert.equal(sum(Object.values(build.baseStats)),535);
   assert.equal(build.effectiveStats.hp,build.baseStats.hp);
   assert.ok(build.report&&build.archetype&&build.moves.length===4);
@@ -89,8 +113,8 @@ test('build uses audited source blend and propagates it through the results',()=
 test('user-facing score explanations match the weights',()=>{
   const app=readFileSync(new URL('../src/app.mjs',import.meta.url),'utf8');
   const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(app,/50% Big Five, 30% nine Enneagram scores, and 20% cognitive/);
-  assert.match(index,/50% Big Five/);
-  assert.match(index,/30% Enneagram/);
-  assert.match(index,/20% cognitive-style/);
+  assert.match(app,/Each stat blends Big Five/);
+  assert.match(app,/build\.statWeights\[key\]/);
+  assert.match(index,/10% to 50%/);
+  assert.match(index,/four-letter-only/);
 });
