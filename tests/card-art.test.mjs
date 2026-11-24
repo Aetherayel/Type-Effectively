@@ -88,7 +88,7 @@ test('all six roles export their primary emblem under the radar, never a hybrid 
     assert.ok(svg.includes(className),role);
     assert.ok(svg.indexOf(className)<svg.indexOf('class="stat-radar"'),role+' should stay behind stats');
     assert.equal((svg.match(/class="role-watermark role-watermark-/g)||[]).length,1,role+' must have one emblem');
-    assert.match(svg,/535 BST/);
+    assert.match(svg,/600 BST/);
     assert.match(svg,/>BATTLE ROLE<\/text>/);
   }
 });
@@ -105,7 +105,7 @@ test('real 593 Ice/Water Tank card has clipped corner motifs and shield behind t
   assert.ok(svg.indexOf('class="type-corner type-corner-primary"')<svg.indexOf('>BASE STATS<'));
   assert.ok(svg.indexOf('class="role-watermark role-watermark-tank"')<svg.indexOf('class="stat-radar"'));
   assert.match(svg,/>BATTLE ROLE<\/text>/);
-  assert.match(svg,/535 BST/);
+  assert.match(svg,/600 BST/);
   assert.match(svg,/>O:H · C:H · E:L · A:H · N:L<\/text>/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
 });
@@ -124,7 +124,7 @@ test('new elemental motifs and Support emblem export together',()=>{
   assert.ok(svg.includes('class="type-art-grass"'));
   assert.ok(svg.includes('class="role-watermark role-watermark-support"'));
   assert.ok(!svg.includes('class="role-watermark role-watermark-tank"'));
-  assert.match(svg,/535 BST/);
+  assert.match(svg,/600 BST/);
   assert.doesNotMatch(svg,/<image\b|<foreignObject\b|https:\/\//);
 });
 

@@ -50,10 +50,10 @@ test('eight-function stat identity survives identical four preference contrasts'
   assert.notDeepEqual(first.breakdown.mbti,second.breakdown.mbti,
     'the raw function-derived stat affinities must not collapse with the four-axis projection');
   assert.notDeepEqual(first.affinities,second.affinities);
-  assert.equal(Object.values(second.baseStats).reduce((a,b)=>a+b,0),535);
+  assert.equal(Object.values(second.baseStats).reduce((a,b)=>a+b,0),600);
 });
 
-test('function input yields a coherent 535-point build without fabricated A/T',()=>{
+test('function input yields a coherent 600-point build without fabricated A/T',()=>{
   const build=generateBuild(input);
   assert.equal(build.cognitiveSource,'functions');
   assert.equal(build.statWeightMode,'functions');
@@ -62,7 +62,7 @@ test('function input yields a coherent 535-point build without fabricated A/T',(
   assert.equal(build.identity,'INTJ');
   assert.equal(build.identityPreference,null);
   assert.equal(build.nature,'Quiet');
-  assert.equal(build.baseStats.hp+build.baseStats.atk+build.baseStats.def+build.baseStats.spa+build.baseStats.spd+build.baseStats.spe,535);
+  assert.equal(build.baseStats.hp+build.baseStats.atk+build.baseStats.def+build.baseStats.spa+build.baseStats.spd+build.baseStats.spe,600);
   assert.ok(build.warnings.some(w=>w.includes('A/T axis')));
   assert.deepEqual(generateBuild(input).baseStats,build.baseStats);
   assert.equal(build.moves.length,4);

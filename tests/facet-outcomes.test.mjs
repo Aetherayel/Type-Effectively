@@ -90,7 +90,7 @@ test('facet-specific outcomes remain reproducible with same complete input',()=>
   const a=generateBuild(input),b=generateBuild(input);
   assert.deepEqual(a,b);
   assert.deepEqual(a.types,generateBuild(full).types);
-  assert.equal(Object.values(a.baseStats).reduce((x,y)=>x+y,0),535);
+  assert.equal(Object.values(a.baseStats).reduce((x,y)=>x+y,0),600);
   assert.equal(a.statWeights.spa.bigFive,generateBuild(full).statWeights.spa.bigFive);
   assert.ok(!('bigFiveFacets' in a),'exact private facet inputs should not appear in public build');
 });

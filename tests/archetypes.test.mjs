@@ -84,7 +84,7 @@ test('final build retains generator rules while gaining a real field report',()=
   const build=generateBuild(input);
   assert.equal(build.title,build.archetype.title);
   assert.ok(ARCHETYPE_CATALOG.some(x=>x.id===build.archetype.id));
-  assert.equal(Object.values(build.baseStats).reduce((a,b)=>a+b,0),535);
+  assert.equal(Object.values(build.baseStats).reduce((a,b)=>a+b,0),600);
   assert.equal(build.moves.length,4);
   assert.ok(build.report.opener.includes(build.archetype.modeJoke));
   assert.match(build.report.dexEntry,/This (?:[A-Za-z]+(?: \/ [A-Za-z]+)?)-type Pokémon/);

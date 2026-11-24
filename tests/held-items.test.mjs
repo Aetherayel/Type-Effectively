@@ -48,7 +48,7 @@ test('same inputs produce the same held item without altering Pokémon battle nu
   assert.ok(first.heldItem.quip.length>0);
   assert.match(first.heldItem.why,/Type 5 core/);
   assert.match(first.heldItem.why,/role point toward/);
-  assert.equal(Object.values(first.baseStats).reduce((a,b)=>a+b,0),535);
+  assert.equal(Object.values(first.baseStats).reduce((a,b)=>a+b,0),600);
   assert.deepEqual(first.effectiveStats,second.effectiveStats);
   assert.equal(first.effectiveStats.hp,first.baseStats.hp);
   assert.equal(first.moves.length,4);
