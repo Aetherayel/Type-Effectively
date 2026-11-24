@@ -141,10 +141,19 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Verify a complete thirty-facet IPIP report satisfies Big Five by itself,
   // without using neutral 50-point domain placeholders as fake evidence.
   document.getElementById('reset-button')?.click();
-  document.getElementById('mbti-0').value='78';
-  document.getElementById('mbti-0').dispatchEvent(new Event('input',{bubbles:true}));
-  document.getElementById('ennea-0').value='82';
-  document.getElementById('ennea-0').dispatchEvent(new Event('input',{bubbles:true}));
+  // Preserve the advanced-source assertions at the end of this smoke test:
+  // restore function/Rowe inputs, but deliberately leave broad OCEAN untouched.
+  document.querySelector('[data-test-mode="advanced"]')?.click();
+  [20,90,20,30,75,40,25,60].forEach((value,i)=>{
+    const field=document.getElementById('function-'+i);
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  [32,3,4,4,32,14,-4,15,16].forEach((value,i)=>{
+    const field=document.getElementById('rowe-'+i);
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   for(let i=0;i<30;i++){
     const field=document.getElementById('facet-'+i);
     field.value=String(i===4?97:i===0?88:35+(i%6)*8);
