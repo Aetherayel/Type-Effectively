@@ -26,7 +26,21 @@ const scenarios={
   radial18WallVariants:{nature:false,templates:ROLE_TEMPLATES,radial:18,wallVariants:true},
   radial18VariantsAxes:{nature:false,templates:ROLE_TEMPLATES,radial:18,wallVariants:true,axis:true},
   radial18SoftWall:{nature:false,templates:{...ROLE_TEMPLATES,
-    Wall:[110,70,110,65,112,68]},radial:18,wallVariants:true}
+    Wall:[110,70,110,65,112,68]},radial:18,wallVariants:true},
+  directionDefault:{nature:false,templates:ROLE_TEMPLATES,directional:1.2},
+  directionVariants:{nature:false,templates:ROLE_TEMPLATES,directional:1.2,wallVariants:true},
+  directionProfiles:{nature:false,templates:{...ROLE_TEMPLATES,
+    Pivot:[95,77,93,75,82,113],Support:[99,60,82,70,119,105],Controller:[82,68,85,110,92,98]},
+    directional:1.2,wallVariants:true},
+  directionProfilesSlow:{nature:false,templates:{...ROLE_TEMPLATES,
+    Pivot:[95,77,93,75,82,113],Support:[99,60,82,70,119,105],Controller:[82,68,85,110,92,98]},
+    directional:.85,wallVariants:true},
+  directionProfilesFast:{nature:false,templates:{...ROLE_TEMPLATES,
+    Pivot:[95,77,93,75,82,113],Support:[99,60,82,70,119,105],Controller:[82,68,85,110,92,98]},
+    directional:1.6,wallVariants:true},
+  directionProfilesAxes:{nature:false,templates:{...ROLE_TEMPLATES,
+    Pivot:[95,77,93,75,82,113],Support:[99,60,82,70,119,105],Controller:[82,68,85,110,92,98]},
+    directional:1.2,wallVariants:true,axis:true}
 };
 function calculate(build,scenario){
   const stats=scenario.nature?build.effectiveStats:build.baseStats;
@@ -55,7 +69,15 @@ function calculate(build,scenario){
       return d.map(x=>statMean+x*scenario.radial/magnitude);
     });
     const rms=Math.min(...options.map(t=>Math.sqrt(mean(normalized.map((v,i)=>(v-t[i])**2)))));
-    const statFit=100*Math.exp(-rms*rms/(2*25*25));
+    // Directional alternatives compare tradeoff *direction*, not template
+    // magnitude, and therefore cannot reward being close to the average.
+    const projections=originals.map(t=>{
+      const d=t.map(v=>v-statMean),magnitude=Math.sqrt(mean(d.map(x=>x*x)));
+      return mean(normalized.map((v,i)=>(v-statMean)*d[i]/magnitude));
+    });
+    const statFit=scenario.directional
+      ? clamp(80+scenario.directional*Math.max(...projections),0,100)
+      : 100*Math.exp(-rms*rms/(2*25*25));
     const toolkit=.55*ROLE_AFFINITIES[types[0]][idx]+.45*ROLE_AFFINITIES[types[1]][idx];
     const bonus=scenario.axis?(familyAdjustment[role]||0):0;
     return {name:role,score:Math.round(.8*statFit+.2*toolkit+bonus)};
@@ -76,6 +98,10 @@ const summary={};
 for(const [name,rows] of Object.entries(observations)){
   const roles=Object.fromEntries(ROLE_NAMES.map(key=>[key,rows.filter(r=>r.primary===key).length]));
   const wall=rows.filter(r=>r.primary==='Wall'),tank=rows.filter(r=>r.primary==='Tank');
+  const roleStats=Object.fromEntries(ROLE_NAMES.map(role=>{
+    const cohort=rows.filter(r=>r.primary===role);
+    return [role,cohort.length?STAT_KEYS.map((_,i)=>round(mean(cohort.map(x=>x.stats[i])))):[]];
+  }));
   const metrics=items=>({
     n:items.length,meanTop2Bulk:round(mean(items.map(r=>r.topBulk))),
     meanBulk:round(mean(items.map(r=>r.bulkMean))),meanOffense:round(mean(items.map(r=>r.offense))),
@@ -83,11 +109,11 @@ for(const [name,rows] of Object.entries(observations)){
     twoBulkAbove100:items.filter(r=>[r.stats[0],r.stats[2],r.stats[4]].filter(v=>v>100).length>=2).length
   });
   const comparing=observations.currentEffective;
-  summary[name]={count:rows.length,roles,wall:metrics(wall),tank:metrics(tank),
+  summary[name]={count:rows.length,roles,roleStats,wall:metrics(wall),tank:metrics(tank),
     changedFromCurrent:rows.filter((r,i)=>r.primary!==comparing[i].primary).length,
     hybrid:rows.filter(r=>r.secondary).length};
 }
-const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall']){
+const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall','directionDefault','directionVariants','directionProfiles','directionProfilesSlow','directionProfilesFast','directionProfilesAxes']){
   const table={};
   observations.currentEffective.forEach((prior,i)=>{
     const after=observations[name][i];
