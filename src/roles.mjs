@@ -94,7 +94,7 @@ export function classifyRole(baseStats,types) {
     const defensiveAdjustment=adjustments[role]||0;
     return {
       name:role,
-      score:round(.8*statFit+.2*toolkit+defensiveAdjustment),
+      score:round(clamp(.8*statFit+.2*toolkit+defensiveAdjustment,0,100)),
       statFit:round(statFit),toolkit:round(toolkit),
       defensiveAdjustment:round(defensiveAdjustment*10)/10
     };
