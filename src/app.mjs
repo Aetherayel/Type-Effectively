@@ -125,10 +125,12 @@ function updateFacetEntryStatus() {
     else if(count>0)incomplete++;
   }
   $('facet-entry-status').textContent=incomplete
-    ? complete+' complete domain(s), '+incomplete+' incomplete. Fill all six percentiles in a domain or clear that group.'
-    : complete
-      ? complete+' of five domain(s) refined. Other domains retain domain-only scoring.'
-      : 'No facet groups entered. Domain-only scoring remains available.';
+    ? complete+' complete facet group(s), '+incomplete+' incomplete. Fill all six in a group or clear it.'
+    : complete===5
+      ? 'All 30 facets complete. Broad domain scores are optional and will not override these details.'
+      : complete
+        ? complete+' of five facet groups complete. Enter broad domain scores to cover missing groups.'
+        : 'No facets supplied. Enter all five broad domain scores instead.';
 }
 function setTestingPath(mode,chooseInput=true) {
   state.testMode=mode==='advanced'?'advanced':'quick';
@@ -149,7 +151,7 @@ function setTestingPath(mode,chooseInput=true) {
     $(key+'-test-detail').textContent=detail;
   });
   $('assessment-note').textContent=advanced?
-    'Longer questionnaires offer more detail, not guaranteed accuracy. Use function totals, nine Enneagram scores, five Big Five domains, and optional IPIP-NEO facet percentiles.':
+    'Longer questionnaires offer more detail, not guaranteed accuracy. Enter cognitive totals, nine Enneagram scores, and either all 30 Big Five facets or domain scores for any missing facet groups.':
     'Shorter tests with straightforward scores. You can still enter detailed data below.';
   if(chooseInput) {
     setMode('mbti',advanced?'functions':'scores');
@@ -345,13 +347,14 @@ function collectInput() {
     if(!enneagramRanking) throw new Error('Your ranking must contain each digit 1–9 exactly once.');
   }
   if(!enneagramScores&&!enneagramRanking&&!roweScores) throw new Error('Enneagram test results are required: enter nine scores, Rowe totals, or a full nine-type ranking. A tritype override alone is insufficient.');
-  if(!state.touched.bigfive)
-    throw new Error('Big Five test results are required: enter all five OCEAN domain scores before generating.');
+  const bigFiveFacets=readFacetScores();
+  if(!state.touched.bigfive && (!bigFiveFacets || bigFiveFacets.some(n=>n===null)))
+    throw new Error('Big Five test results are required: enter five broad domains or all 30 IPIP-NEO facets.');
   return {
     mbtiScores,typeOverride,functionScores,identityPreference,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
-    bigFive:readScores('bigfive',5),
-    bigFiveFacets:readFacetScores()
+    bigFive:state.touched.bigfive?readScores('bigfive',5):null,
+    bigFiveFacets
   };
 }
 function typeChip(type) {
@@ -524,24 +527,29 @@ function renderCard(build) {
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
         }).join('')+'</div>'+
         (build.facetScoring.activeDomains.length
-          ? '<p><strong>IPIP-NEO facet refinement:</strong> '+escapeHtml(build.facetScoring.activeDomains.join(', '))+
-            ' domain(s) refined. Each comparison is anchored to its reported parent domain; incomplete or absent domains use the original score. Adjustments below are to the <em>Big Five affinity before framework weighting</em> (not final base stat points):</p>'+
-            '<div class="nature-factors">'+STAT_KEYS.map(key=>{
-              const delta=build.facetScoring.corrections[key];
-              return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+(delta>0?'+':'')+delta.toFixed(1)+'</span>';
-            }).join('')+'</div>'
-          : '<p><strong>Big Five detail:</strong> Five broad domains only. Optional IPIP-NEO facet percentiles were not entered.</p>')+
+          ? '<p><strong>Facet-first Big Five:</strong> Complete groups '+escapeHtml(build.facetScoring.activeDomains.join(', '))+
+            ' replace their broad-domain contributions with meaning-specific facets. Missing groups use reported domains; no facets are added as an extra scoring source. Nature, archetype temperament, and held-item fit also use the available detail directly. '+
+            'With all 30 facets, reported broad scores cannot override the model.</p>'+
+            (Object.values(build.facetScoring.corrections).some(delta=>delta!=null)
+              ? '<p>For comparison only, Big Five affinity difference versus the domain-only formula (not bonus points):</p>'+
+                '<div class="nature-factors">'+STAT_KEYS.map(key=>{
+                  const delta=build.facetScoring.corrections[key];
+                  return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+
+                    (delta==null?'n/a':(delta>0?'+':'')+delta.toFixed(1))+'</span>';
+                }).join('')+'</div>'
+              : '<p>With no broad-domain inputs, no domain-only comparison is calculated.</p>')
+          : '<p><strong>Big Five detail:</strong> Five broad domains only; existing domain scoring remains unchanged.</p>')+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
         '<p><strong>Battle role:</strong> Classified from the 535 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
-        '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. If IPIP facets were supplied, related facets can shift the existing Big Five archetype-fit score by up to 6 points; they never replace its other evidence. Best score wins, not a measured personality likelihood.</p>'+
+        '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Facets substitute within the temperament component when present, not as a capped additive bonus. Battle fit already includes stat shape and typing. Best score wins, not a measured personality likelihood.</p>'+
         (build.facetScoring.activeDomains.length?
-          '<p><strong>Facet influence on other outcomes:</strong> The chosen archetype’s temperament fit changed by '+(build.archetype.facetAdjustment>=0?'+':'')+build.archetype.facetAdjustment.toFixed(1)+' fit points. '+
+          '<p><strong>Detailed temperament:</strong> The chosen archetype’s facet-aware fit differs from its coarse contextual approximation by '+(build.archetype.facetAdjustment>=0?'+':'')+build.archetype.facetAdjustment.toFixed(1)+' points. '+
           (build.heldItem.facetAdjustment!=null
-            ? 'The held-item family preference changed by '+(build.heldItem.facetAdjustment>=0?'+':'')+build.heldItem.facetAdjustment.toFixed(1)+' points before item eligibility and role fit.'
-            : 'A mechanically defined signature package fixes its held item; facet preferences do not override it.')+
-          ' Selected facet contrasts may also add a short Trainer’s Guide observation. Typing and Nature still use their own independent rules.</p>'
+            ? 'The item-family fit differs from its coarse comparison by '+(build.heldItem.facetAdjustment>=0?'+':'')+build.heldItem.facetAdjustment.toFixed(1)+' points.'
+            : 'A mechanically defined signature package fixes its held item.')+
+          ' These are comparisons, not additive bonuses. Facets also inform Nature; typing remains Enneagram-derived.</p>'
           :'')+
-        '<p><strong>Held item:</strong> Equipment is matched to the generated Pokémon’s personality, role, typing, moves and Ability. Optional facets can nudge eligible item families, but cannot make incompatible equipment usable or change the 535 base stats.</p>'+
+        '<p><strong>Held item:</strong> Equipment is matched to personality, role, typing, moves and Ability. Detailed facets replace broad-domain fit terms where available; they cannot make incompatible equipment usable or change 535 BST.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes the cognitive polarity used for Nature scoring and archetype interpretation, but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download Personality Card ↓</button>'+ 
