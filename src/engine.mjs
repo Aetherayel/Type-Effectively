@@ -2,7 +2,7 @@ import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
-  ROLE_CALIBRATED_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
+  ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs?v=nature-scoring-1';
 import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
@@ -123,34 +123,39 @@ export function deriveWing(core, scores) {
   return scores[before-1] >= scores[after-1] ? before : after;
 }
 
-function oceanAffinity(xs) {
+// Big Five is five broad domains feeding six different fictional strengths.
+// Avoid equating low agreeableness with assertion or stress with battle Speed.
+export function oceanAffinity(xs) {
   const [o,c,e,a,n] = xs;
-  const stability = 100 - n;
+  const stability=100-n;
   return [
-    .55*stability+.25*c+.2*a,
-    .65*e+.35*(100-a),
-    .60*c+.40*stability,
-    .65*o+.35*c,
-    .55*stability+.45*a,
-    .50*e+.35*o+.15*n
+    .55*c+.35*stability+.10*a,          // resilient persistence
+    .45*e+.20*(100-a)+.35*c,            // assertion with follow-through
+    .45*c+.30*(100-e)+.25*stability,    // maintaining boundaries
+    .60*o+.20*c+.20*(100-e),           // conceptual ingenuity
+    .65*stability+.20*a+.15*c,         // emotional regulation
+    .45*e+.35*o+.20*(100-c)            // response tempo and flexibility
   ];
 }
-function enneagramAffinity(scores) {
+export function enneagramAffinity(scores) {
   // Square the weight above a soft threshold to preserve individual peaks without discarding the other six types.
   const weights = scores.map(s=>Math.pow(Math.max(0,s-20),2)+16);
   const total = weights.reduce((a,b)=>a+b,0);
   return STAT_KEYS.map((_,i)=>weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total);
 }
-function mbtiAffinity(s) {
-  const [i,n,f,p,t] = s;
-  const e = 100-i, j = 100-p, a = 100-t;
+// Cognitive preferences are not capacities. Resilience and composure have
+// weak cognitive proxies, deliberately shrunk toward 50. 16P A/T is excluded
+// to avoid counting neuroticism again.
+export function mbtiAffinity(s) {
+  const [i,n,f,p] = s;
+  const e=100-i, sensed=100-n, t=100-f, j=100-p;
   return [
-    .45*a+.35*j+.20*f,
-    .50*e+.25*t+.25*(100-f),
-    .55*j+.45*a,
-    .55*n+.25*i+.20*j,
-    .40*f+.30*i+.30*a,
-    .45*e+.30*p+.25*t
+    .35*j+.20*i+.45*50,
+    .45*e+.35*t+.20*j,
+    .45*j+.30*i+.25*t,
+    .60*n+.25*t+.15*i,
+    .35*i+.30*j+.35*50,
+    .45*e+.35*p+.20*sensed
   ];
 }
 
@@ -517,7 +522,9 @@ export function generateBuild(input) {
   });
   const nature=natureScoring.name;
   const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores), ma=mbtiAffinity(mbtiScores);
-  const blend=STAT_KEYS.map((_,i)=>.7*oa[i]+.2*ea[i]+.1*ma[i]);
+  const blend=STAT_KEYS.map((_,i)=>
+    BASE_STAT_WEIGHTS.bigFive*oa[i]+BASE_STAT_WEIGHTS.enneagram*ea[i]+
+    BASE_STAT_WEIGHTS.cognition*ma[i]);
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
   // Do not let fabricated proxy scores supply a typing wing when the visitor
