@@ -74,7 +74,7 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,/>ICE<\/text>/);
   assert.match(svg,/>WATER<\/text>/);
   assert.match(svg,/Quiet/);
-  assert.match(svg,/535 BST/);
+  assert.match(svg,/600 BST/);
   assert.ok(svg.includes(sample.ability.name));
   assert.ok(svg.includes('↑'+sample.effectiveStats[sample.natureBoost]));
   assert.ok(svg.includes(String(sample.baseStats[sample.natureBoost])));

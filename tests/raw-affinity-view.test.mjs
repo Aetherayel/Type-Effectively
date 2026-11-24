@@ -15,7 +15,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
     {...full,bigFive:[27,94,21,69,14]}
   ]){
     const b=generateBuild(input);
-    assert.equal(total(b),535);
+    assert.equal(total(b),600);
     const {mean,rows}=affinityViewData(b);
     assert.equal(rows.length,6);
     assert.ok(mean>=0&&mean<=100);
@@ -59,7 +59,7 @@ test('the separate affinity display reports meaningful raw scores, personal mean
 test('high absolute affinity may still receive below-average fixed-budget base stat',()=>{
   const example={
     rawStatAffinities:{hp:90,atk:84,def:88,spa:75,spd:86,spe:79},
-    baseStats:{hp:99,atk:92,def:97,spa:79,spd:94,spe:74},
+    baseStats:{hp:111,atk:103,def:109,spa:89,spd:105,spe:83},
     statWeights:Object.fromEntries(STAT_KEYS.map(key=>[key,{bigFive:.5,enneagram:.3,cognition:.2}])),
     sourceStatAffinities:Object.fromEntries(STAT_KEYS.map(key=>[key,{bigFive:75,enneagram:75,cognition:75}]))
   };
@@ -68,7 +68,7 @@ test('high absolute affinity may still receive below-average fixed-budget base s
   const ingenuity=rows.find(row=>row.key==='spa');
   assert.equal(ingenuity.affinity,75);
   assert.ok(ingenuity.distance<0);
-  assert.ok(ingenuity.baseStat<535/6);
+  assert.ok(ingenuity.baseStat<600/6);
 });
 
 test('the affinity inspection UI is independent of PNG exports and downstream mechanics',()=>{

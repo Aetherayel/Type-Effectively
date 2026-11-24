@@ -196,7 +196,7 @@ test('strategy selection is deterministic and keeps ordinary scoring available',
     mbtiScores:[70,70,30,25,25],enneagramScores:[50,30,65,20,50,20,90,10,30],
     bigFive:[45,50,70,42,49]
   });
-  assert.equal(Object.values(general.baseStats).reduce((a,b)=>a+b,0),535);
+  assert.equal(Object.values(general.baseStats).reduce((a,b)=>a+b,0),600);
   assert.equal(general.moves.length,4);
   assert.ok(GROWTH_MOVES[general.core].choices.includes(general.moves[3].name));
   if(general.signatureStrategy){
@@ -271,7 +271,7 @@ test('seeded population retains generalists and validates any specialized packag
       assert.ok(b.moves.slice(0,2).some(m=>m.name===s.attackSwap.move));
     assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}));
     assert.ok(GROWTH_MOVES[b.core].choices.includes(b.moves[3].name));
-    assert.equal(Object.values(b.baseStats).reduce((a,n)=>a+n,0),535);
+    assert.equal(Object.values(b.baseStats).reduce((a,n)=>a+n,0),600);
     assert.ok(!b.report.combat.includes(s.name));
     assert.ok(!JSON.stringify(b.report).includes(s.name),
       'Trainer Guide must not mention signature strategy name: '+s.id);

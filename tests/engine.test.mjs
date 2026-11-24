@@ -60,7 +60,7 @@ test('seeded role-balance regression preserves role reachability and complete-bu
       bigFive:scores()
     });
     roles.set(build.role.primary.name,(roles.get(build.role.primary.name)||0)+1);
-    assert.equal(sum(build.baseStats),535);
+    assert.equal(sum(build.baseStats),600);
     assert.equal(build.archetype.role,build.role.primary.name);
     assert.equal(build.title,build.archetype.title);
     assert.equal(new Set(build.moves.map(move=>move.name)).size,4);
@@ -160,7 +160,7 @@ test('nature changes two non-HP stats and leaves base stats unchanged',()=>{
   assert.equal(effective.hp,b.baseStats.hp);
   assert.equal(effective[b.natureBoost],Math.floor(b.baseStats[b.natureBoost]*1.1));
   assert.equal(effective[b.natureDrop],Math.floor(b.baseStats[b.natureDrop]*.9));
-  assert.equal(sum(b.baseStats),535);
+  assert.equal(sum(b.baseStats),600);
 });
 
 test('all 162 ordered tritypes are valid builds, with exactly four distinct moves',()=>{
@@ -169,7 +169,7 @@ test('all 162 ordered tritypes are valid builds, with exactly four distinct move
   for(const head of [5,6,7])for(const heart of [2,3,4])for(const gut of [8,9,1]){
     for(const perm of permutations([head,heart,gut])){
       const build=generateBuild({mbtiScores:baseInput.mbtiScores,bigFive:baseInput.bigFive,tritypeOverride:perm.join('')});
-      assert.equal(sum(build.baseStats),535);
+      assert.equal(sum(build.baseStats),600);
       assert.equal(new Set(build.moves.map(x=>x.name)).size,4);
       assert.ok(build.types.length===1||build.types.length===2);
       assert.ok(build.role.primary.score>=0&&build.role.primary.score<=100);
@@ -195,8 +195,8 @@ test('stat normalization holds under severe extremes',()=>{
     [0,0,0,0,0,100], [100,0,100,0,100,0], [50,50,50,50,50,50]
   ]){
     const stats=normalizeStats(affinity);
-    assert.equal(sum(stats),535);
-    assert.ok(Object.values(stats).every(value=>value>=45&&value<=140));
+    assert.equal(sum(stats),600);
+    assert.ok(Object.values(stats).every(value=>value>=50&&value<=157));
   }
 });
 
@@ -212,8 +212,8 @@ test('seeded randomized builds preserve total, limits, determinism, and move uni
     };
     const build=generateBuild(input);
     const stats=Object.values(build.baseStats);
-    assert.equal(sum(build.baseStats),535);
-    assert.ok(stats.every(n=>n>=45&&n<=140));
+    assert.equal(sum(build.baseStats),600);
+    assert.ok(stats.every(n=>n>=50&&n<=157));
     assert.equal(new Set(build.moves.map(m=>m.name)).size,4);
     assert.deepEqual(generateBuild(input).baseStats,build.baseStats);
     roles.add(build.role.primary.name);
@@ -227,8 +227,22 @@ test('type-only inputs do not fabricate a wing for elemental identity',()=>{
   assert.equal(b.warnings.length,3);
   assert.equal(b.typingWing,null);
   assert.deepEqual(b.types,['Ice','Water']);
-  assert.equal(sum(b.baseStats),535);
+  assert.equal(sum(b.baseStats),600);
   const override=generateBuild({typeOverride:'INTJ',tritypeOverride:'514',wingOverride:4});
   assert.equal(override.typingWing,4);
   assert.deepEqual(override.types,['Psychic','Steel']);
+});
+
+
+test('600 BST scales the prior silhouette while making exact neutrality 100',()=>{
+  assert.deepEqual(Object.values(normalizeStats(Array(6).fill(50))),Array(6).fill(100));
+  let seed=20261124;
+  for(let i=0;i<2000;i++){
+    const affinities=Array.from({length:6},()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296)*100);
+    const old=Object.values(normalizeStats(affinities,535));
+    const next=Object.values(normalizeStats(affinities));
+    assert.equal(next.reduce((a,b)=>a+b,0),600);
+    assert.ok(next.every(v=>v>=50&&v<=157));
+    assert.ok(next.every((v,k)=>Math.abs(v-old[k]*600/535)<=2));
+  }
 });
