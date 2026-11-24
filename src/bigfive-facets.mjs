@@ -200,8 +200,8 @@ export function facetProfileFit(domains,facets,target,focus={}) {
   if(!Array.isArray(target)||target.length!==5||target.some(v=>!Number.isFinite(v)))
     throw new Error('Big Five profile fit requires five target values.');
   const meanSquared=FACET_GROUPS.reduce((sum,g,i)=>{
-    const observed=evidence.forDomain(g.code,
-      Object.fromEntries(Object.entries(focus).filter(([key])=>key[0]===g.code)));
+    const specific=Object.fromEntries(Object.entries(focus).filter(([key])=>key[0]===g.code));
+    const observed=evidence.forDomain(g.code,Object.keys(specific).length?specific:undefined);
     // Empty focus falls back to the deliberate context focus for this group.
     return sum+(observed-target[i])**2;
   },0)/5;
