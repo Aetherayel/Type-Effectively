@@ -14,6 +14,8 @@ No sign-in. No backend. No personality data submitted to a server. Just an unrea
 
 [**Try Type Effectively in your browser**](https://aetherayel.github.io/Type-Effectively/)
 
+**Owner-maintained, publicly viewable source.** Feedback is welcome; development contributions are invitation-only. Original project material is all rights reserved, subject to applicable law and GitHub's terms. See [LICENSE](LICENSE), [NOTICE](NOTICE.md), [community guidelines](CONTRIBUTING.md), and [security policy](SECURITY.md).
+
 ## Three tests, one build
 
 | Layer | Quick path | Comprehensive path | What enters the model |
