@@ -107,6 +107,27 @@ window.addEventListener('DOMContentLoaded',()=>{
     document.querySelector('.field-report')?.textContent?.includes('detailed IPIP-NEO report suggests')?'true':'false');
   document.documentElement.setAttribute('data-facet-status',
     document.getElementById('facet-entry-status')?.textContent||'');
+  // A diagnostic toggle must disclose unnormalized scores without changing
+  // the Pokémon's own radar, Nature, EV training or export data.
+  const originalRadar=document.querySelector('#stat-view-bst-panel .stat-radar')?.outerHTML;
+  const affinityPanel=document.getElementById('stat-view-affinity-panel');
+  document.documentElement.setAttribute('data-affinity-default-closed',
+    affinityPanel?.hidden&&document.getElementById('stat-view-bst')?.getAttribute('aria-pressed')==='true'?'true':'false');
+  document.getElementById('stat-view-affinity')?.click();
+  const rawSpA=document.querySelector('[data-affinity-stat="spa"] .affinity-number')?.textContent||'';
+  document.documentElement.setAttribute('data-affinity-raw-spa',rawSpA.trim());
+  document.documentElement.setAttribute('data-affinity-open',
+    !affinityPanel?.hidden&&document.getElementById('stat-view-bst-panel')?.hidden&&
+    document.getElementById('stat-view-affinity')?.getAttribute('aria-pressed')==='true'?'true':'false');
+  document.documentElement.setAttribute('data-affinity-row-count',
+    String(document.querySelectorAll('[data-affinity-stat]').length));
+  document.documentElement.setAttribute('data-affinity-source-count',
+    String(document.querySelectorAll('.affinity-source-table tbody tr').length));
+  document.getElementById('stat-view-bst')?.click();
+  document.documentElement.setAttribute('data-affinity-restored',
+    affinityPanel?.hidden&&!document.getElementById('stat-view-bst-panel')?.hidden&&
+    document.getElementById('stat-view-bst')?.getAttribute('aria-pressed')==='true'&&
+    document.querySelector('#stat-view-bst-panel .stat-radar')?.outerHTML===originalRadar?'true':'false');
   // Exercise the post-result EV trainer and both export affordances.
   document.getElementById('ev-reset')?.click();
   document.documentElement.setAttribute('data-ev-after-reset',document.getElementById('ev-budget-count')?.textContent||'');
@@ -220,6 +241,14 @@ try{
   assert.ok(!html.includes('data-mbti-mode="type"') &&
     !html.includes('data-ennea-mode="tritype"'),
     'type-only and tritype-only entry modes must not be available');
+  for(const key of ['data-affinity-default-closed','data-affinity-open','data-affinity-restored'])
+    assert.ok(html.includes(key+'="true"'),
+      'before-normalization toggle should switch views without mutating the original radar: '+key);
+  assert.ok(html.includes('data-affinity-row-count="6"')&&
+    html.includes('data-affinity-source-count="6"'),
+    'all six raw affinities and three-framework source rows must render');
+  assert.match(html,/data-affinity-raw-spa="[0-9]+\.[0-9] \s*\/ 100"/,
+    'Special Attack must expose its actual unnormalized game affinity');
   assert.ok(html.includes('data-facet-count="30"'),'all thirty optional IPIP facet fields must render');
   assert.ok(html.includes('data-facet-partial-error="Complete all six Openness facets'),
     'a partly completed facet group must not silently fabricate missing inputs');
