@@ -93,7 +93,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 
 1. **Elemental typing:** Score each of the 17 elements against all nine Enneagram motivations using `TYPE_AFFINITY`. **Primary:** core 88% + wing 12% (or core 100% if wing is unknown). **Secondary:** second fix 65% + third fix 30% + core 5%. **Hidden affinity:** third fix 60% + second fix 30% + wing 10% (or 70% third / 30% second if wing is unknown); exclude both visible types. All three selections are deterministic. Monotypes arise only when primary and secondary independently coincide.
 2. **Nature:** Score all **20 distinct non-neutral Pokémon Natures** as a motivation/cognition/temperament **priority tradeoff**, before applying Nature to stats. See the scoring specification below; MBTI letters alone no longer determine Nature.
-3. **Base affinities:** Blend **50% Big Five**, **30% nine-type Enneagram distribution**, and **20% cognition input (16Personalities percentages or directly scored eight-function profiles)**.
+3. **Base affinities:** Blend Big Five, nine-type Enneagram distribution, and cognition using **stat-specific source weights**. The cognitive contribution is adjusted according to whether users enter eight functions, actual 16Personalities percentages, or only a four-letter type (see matrix below).
 4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.25, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
 6. **Battle role (v1.1):** Match effective stats against six tactical reference profiles compressed **25% toward 535/6 per stat** (see `ROLE_TEMPLATE_SCALE` and `ROLE_CALIBRATED_TEMPLATES` in `src/data.mjs`). This corrects the systematic advantage of the unusually balanced Pivot reference without forcing equal role frequencies. Role suitability remains **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**; the existing five-point hybrid threshold is unchanged. Original reference profiles remain available in `ROLE_TEMPLATES`.
@@ -106,6 +106,19 @@ Deterministic. The same inputs always produce the same result. The output is exp
 ### Base-stat calibration and semantic contract
 
 **Base stat = relative strength. Nature = prioritized behavior at another behavior's expense.** The same six meanings apply throughout the model; no Pokémon Nature name is treated as a validated personality definition.
+
+**Stat-specific source weights** — each entry is Big Five / Enneagram / cognition; each row totals 100% independently. These are authored game-design judgments, not claims of psychometric reliability.
+
+| Stat | Eight functions entered | 16Personalities percentages entered | MBTI label only |
+| --- | --- | --- | --- |
+| HP · Resilience | 60 / 30 / 10 | 65 / 30 / 5 | 70 / 25 / 5 |
+| Attack · Assertion | 35 / 35 / 30 | 45 / 35 / 20 | 50 / 40 / 10 |
+| Defense · Fortitude | 35 / 45 / 20 | 40 / 45 / 15 | 45 / 45 / 10 |
+| Sp. Atk · Ingenuity | 25 / 25 / 50 | 45 / 30 / 25 | 50 / 40 / 10 |
+| Sp. Def · Composure | 60 / 25 / 15 | 65 / 25 / 10 | 70 / 25 / 5 |
+| Speed · Responsiveness | 40 / 25 / 35 | 50 / 25 / 25 | 60 / 30 / 10 |
+
+**Why:** Big Five supplies stronger proxies for sustained resilience and emotional composure. Enneagram motivation contributes more to principled boundaries. Detailed functions supply richer distinctions for conceptual ingenuity and responsiveness, but a categorical MBTI label supplies only coarse proxies. The extra dimensions are not automatically *truer*: the weights reflect explanatory detail, not questionnaire validity. These inputs still normalize to exactly 535 BST. Missing Big Five values remain neutral-50 placeholders rather than measured scores, preserving existing missing-data behavior; Nature scoring stays separate.
 
 | Stat | Meaning | Distinction |
 | --- | --- | --- |
@@ -137,7 +150,7 @@ Deterministic. The same inputs always produce the same result. The output is exp
 - SpD = `50 + 0.45×(0.40ti + 0.35fi + 0.25si)`
 - Spe = `50 + 0.45se + 0.35ne + 0.20te`
 
-This retains the distinctions that the four-letter reduction loses, without interpreting raw Sakinorva totals as 0–100 percentiles. Uniformly shifting every input function score has no effect. HP and SpD are attenuated, since functional preferences are weak evidence for resilience or emotional regulation. Only the 20% cognitive *branch* changes input representation; no additional scoring source is added. The four derived preference contrasts still inform Nature and legacy interpretation, keeping base-stat style and Nature priorities conceptually separate.
+This retains the distinctions that the four-letter reduction loses, without interpreting raw Sakinorva totals as 0–100 percentiles. Uniformly shifting every input function score has no effect. HP and SpD are attenuated, since functional preferences are weak evidence for resilience or emotional regulation. The stat-specific cognitive contribution changes with the reported detail; no additional scoring source is introduced. The four derived preference contrasts still inform Nature and legacy interpretation, keeping base-stat style and Nature priorities conceptually separate.
 
 HP and SpD cognitive affinities deliberately shrink toward neutral 50 because the four cognitive axes are weak evidence for resilience and emotional regulation. The 16Personalities A/T dimension is excluded to avoid double-counting emotional sensitivity. Authored nine-type Enneagram base affinities live in `ENNEAGRAM_AFFINITIES`, distinct from Nature's motivational preferences. Lower Agreeableness is only a minority contributor to Attack; Neuroticism no longer raises Speed. HP, Defense and Sp. Def can correlate, but now have different principal signals.
 
@@ -258,7 +271,7 @@ The feature is playful game training, not a new input to personality interpretat
 
 A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertion), Defense (fortitude), Sp. Atk (ingenuity), Sp. Def (composure), and Speed (responsiveness).
 
-The guide explains the fixed **535 BST** budget, the **50/30/20 Big Five / Enneagram / cognition** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
+The guide explains the fixed **535 BST** budget, the stat-specific Big Five / Enneagram / cognition affinity blends, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
 ## Elemental card artwork: 17 generated identities, 18 supported Pokémon types
 
