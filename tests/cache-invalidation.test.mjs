@@ -12,7 +12,7 @@ test('application and scoring engine share a deliberate cache invalidation key',
   assert.ok(entry,'entry script needs a versioned module URL');
   assert.ok(scoring,'app must version the engine import');
   assert.equal(entry,scoring,'entry and engine must be refreshed together');
-  assert.equal(entry,'v2-pre-nature-roles-1','V2 must not reuse a V1 scoring module cache');
+  assert.equal(entry,'v2-raw-affinities-1','V2 must not reuse a V1 scoring module cache');
   assert.notEqual(entry,'1.2.0','scoring engine must not reuse the pre-PR #27 cache key');
   assert.match(engine,/if\(growth==='Baton Pass' && !hasBatonPassSetup/);
 });

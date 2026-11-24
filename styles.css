@@ -217,6 +217,43 @@ a{color:inherit}
   border-radius:13px;
   background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--pcolor) 9%,#15272b),#111e23 80%);
 }
+/* Optional diagnostic view of the model's affinity values *before* 535 BST.
+   It is screen-only: shareable image exporters render from the build object. */
+.stat-view-switch{display:flex;gap:6px;margin:0 0 13px;padding:4px;border:1px solid #304b4a;border-radius:11px;background:#152226;max-width:420px}
+.stat-view-button{flex:1;min-width:0;padding:9px 7px;background:transparent;border:1px solid transparent;border-radius:7px;color:#9eb5ad;font:700 11px/1.25 'Space Grotesk',sans-serif;cursor:pointer}
+.stat-view-button:hover{color:#edf7f2;background:#243b3a}
+.stat-view-button.active{background:#294340;border-color:#537769;color:#e7f7e8}
+.stat-view-button:focus-visible{outline:2px solid #c9e97a;outline-offset:2px}
+#stat-view-bst-panel[hidden],#stat-view-affinity-panel[hidden]{display:none!important}
+.affinity-panel{background:#122329;border:1px solid #304b4a;border-radius:13px;padding:15px 15px 13px;margin-bottom:14px}
+.affinity-intro{font-size:12px;line-height:1.6;color:#afc7c1;margin:0 0 10px}
+.affinity-intro strong{color:#e2f2e6}
+.affinity-mean-note{display:flex;gap:4px 8px;flex-wrap:wrap;align-items:center;font:11px/1.5 'DM Mono',monospace;color:#d2ebe1;margin:0 0 14px}
+.affinity-mean-note span{color:#87a59f}
+.affinity-bars{display:grid;gap:12px}
+.affinity-row-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.affinity-row-heading>div{display:flex;flex-direction:column;gap:2px}
+.affinity-row-heading strong{font:700 12px 'Space Grotesk',sans-serif;color:#e6f6ed}
+.affinity-row-heading span{font:10px 'DM Sans',sans-serif;color:#93aba4}
+.affinity-number{white-space:nowrap;font:700 15px 'DM Mono',monospace!important}
+.affinity-number small{font:10px 'DM Mono',monospace;color:#91aaa3}
+.affinity-meter{height:9px;background:#263d41;position:relative;border-radius:5px;overflow:hidden}
+.affinity-meter-fill{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,color-mix(in srgb,var(--pcolor) 60%,#6ab7c1),#b9e4ba);border-radius:5px}
+.affinity-meter-mean{position:absolute;top:0;bottom:0;width:2px;background:#f1e8aa;box-shadow:0 0 0 1px #14272a}
+.affinity-row-foot{display:flex;justify-content:space-between;gap:5px 12px;flex-wrap:wrap;margin-top:4px;color:#9fb6b0;font:10px/1.5 'DM Mono',monospace}
+.affinity-row-foot span:first-child{color:#c8ddbb}
+.affinity-method{font-size:11px;line-height:1.65;color:#9eb7af;border-top:1px solid #2f4948;padding-top:12px;margin:13px 0 0}
+.affinity-method strong{color:#cfe7d9}
+.affinity-source-detail{border-top:1px solid #2f4948;margin-top:11px;padding-top:12px}
+.affinity-source-detail summary{cursor:pointer;color:#a9d4bf;font:700 11px 'Space Grotesk',sans-serif}
+.affinity-source-detail p{color:#9fb6af;font-size:11px;line-height:1.6;margin:8px 0}
+.affinity-table-wrap{overflow-x:auto;margin:10px 0}
+.affinity-source-table{width:100%;border-collapse:collapse;text-align:right;font:10px 'DM Mono',monospace;color:#d2e5db}
+.affinity-source-table th,.affinity-source-table td{padding:6px 5px;border-bottom:1px solid #2b4441;white-space:nowrap}
+.affinity-source-table thead th{color:#93b6a7}
+.affinity-source-table th:first-child{text-align:left}
+.affinity-source-table td small{display:block;color:#8eb0a6;font-size:9px}
+@media(max-width:420px){.affinity-panel{padding:12px 10px}.stat-view-button{font-size:10px}}
 .stat-radar{display:block;max-width:390px;width:100%;height:auto;aspect-ratio:360 / 337;margin:0 auto}
 .stat-radar-ring{fill:none;stroke:#c9e2e2;stroke-width:1;stroke-opacity:.21;vector-effect:non-scaling-stroke}
 .stat-radar-outer{stroke-opacity:.38}

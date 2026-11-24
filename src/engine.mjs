@@ -3,8 +3,8 @@ import {
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
   BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=v2-pre-nature-roles-1';
-import { chooseHeldItem } from './held-items.mjs?v=v2-pre-nature-roles-1';
+} from './data.mjs?v=v2-raw-affinities-1';
+import { chooseHeldItem } from './held-items.mjs?v=v2-raw-affinities-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { classifyRole } from './roles.mjs';
@@ -597,6 +597,15 @@ export function generateBuild(input) {
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
     baseStats,effectiveStats,statWeightMode,statWeights,
+    // Preserve the precise, unnormalized blend separately from the original
+    // rounded affinities. Raw affinities are game scores, not percentiles,
+    // and never alter the fixed 535-BST allocation or downstream mechanics.
+    rawStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,Math.round(blend[i]*10)/10])),
+    sourceStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,{
+      bigFive:Math.round(oa[i]*10)/10,
+      enneagram:Math.round(ea[i]*10)/10,
+      cognition:Math.round(ma[i]*10)/10
+    }])),
     facetScoring:{
       activeDomains:facetScoring.activeDomains,
       corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(facetScoring.corrections[i]*10)/10]))
