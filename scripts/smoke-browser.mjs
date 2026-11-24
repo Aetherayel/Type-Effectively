@@ -52,6 +52,36 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-after-nature',document.querySelector('.nature-summary')?.textContent||'');
   document.documentElement.setAttribute('data-rowe-negative',document.getElementById('rowe-6')?.value||'');
   document.documentElement.setAttribute('data-card-version',document.getElementById('build-version-footer')?.textContent||'');
+  // Facets must refine the actual browser build, not merely exist as static inputs.
+  const facetInputs=document.querySelectorAll('#bigfive-facet-groups input[type="number"]');
+  document.documentElement.setAttribute('data-facet-count',String(facetInputs.length));
+  const openness=document.getElementById('bigfive-0');
+  openness.value='25';openness.dispatchEvent(new Event('input',{bubbles:true}));
+  document.getElementById('generate-button')?.click();
+  const baseSpA=()=>{
+    const label=[...document.querySelectorAll('.stat-radar-label')].find(node=>
+      node.querySelector('.stat-radar-label-name')?.textContent==='Sp. Atk');
+    return Number(label?.querySelector('.stat-radar-label-base,.stat-radar-label-single')?.textContent);
+  };
+  const baseline=baseSpA();
+  const facetValues=[90,80,25,25,99,25];
+  const firstFacet=document.getElementById('facet-0');
+  firstFacet.value=String(facetValues[0]);
+  firstFacet.dispatchEvent(new Event('input',{bubbles:true}));
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-facet-partial-error',
+    document.getElementById('form-error')?.textContent||'');
+  facetValues.slice(1).forEach((value,i)=>{
+    const field=document.getElementById('facet-'+(i+1));
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-facet-spa-delta',String(baseSpA()-baseline));
+  document.documentElement.setAttribute('data-facet-result',
+    document.querySelector('.explain')?.textContent?.includes('IPIP-NEO facet refinement')?'true':'false');
+  document.documentElement.setAttribute('data-facet-status',
+    document.getElementById('facet-entry-status')?.textContent||'');
   // Exercise the post-result EV trainer and both export affordances.
   document.getElementById('ev-reset')?.click();
   document.documentElement.setAttribute('data-ev-after-reset',document.getElementById('ev-budget-count')?.textContent||'');
@@ -159,6 +189,14 @@ try{
     'Rowe conversion must be disclosed');
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
+  assert.ok(html.includes('data-facet-count="30"'),'all thirty optional IPIP facet fields must render');
+  assert.ok(html.includes('data-facet-partial-error="Complete all six Openness facets'),
+    'a partly completed facet group must not silently fabricate missing inputs');
+  assert.ok(Number(html.match(/data-facet-spa-delta="([^"]+)"/)?.[1])>0,
+    'high Intellect/Imagination at low overall Openness must raise Sp. Atk');
+  assert.ok(html.includes('data-facet-result="true"'),'facet scoring must appear in result explanations');
+  assert.ok(html.includes('data-facet-status="1 of five domain(s) refined'),
+    'facet entry status must show fallback for remaining domains');
   assert.ok(html.includes('data-card-version="CREATED v2.0.0"'),
     'Card footer must show the bundled version when the build is generated');
   assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),
