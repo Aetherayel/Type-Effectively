@@ -91,6 +91,10 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(workflow.includes('tag="v1.4.$patch"'));
   assert.ok(workflow.includes('if [ "$PR_NUMBER" = "33" ]; then'));
   assert.ok(workflow.includes('tag=v2.0.0'));
+  assert.ok(workflow.includes('if [ "$PR_NUMBER" = "39" ]; then'));
+  assert.ok(workflow.includes('tag=v2.1.0'));
+  assert.ok(workflow.includes('tag="v2.1.$patch"'));
+  assert.ok(workflow.indexOf('tag=v2.1.0')<workflow.indexOf('tag=v2.0.0'));
   assert.ok(workflow.includes('tag="v2.0.$patch"'));
   assert.match(workflow,/merged PRs since the v2\.0\.0 baseline/);
   assert.ok(workflow.indexOf('tag=v2.0.0')<workflow.indexOf('tag=v1.4.0'),

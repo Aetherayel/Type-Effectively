@@ -818,12 +818,15 @@ function init() {
   document.querySelectorAll('[data-ennea-mode]').forEach(button=>button.addEventListener('click',()=>setMode('ennea',button.dataset.enneaMode)));
   $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild(true,state.sampleInputs);});
   $('reset-button').addEventListener('click',clearAll);
-  $('randomize-button').addEventListener('click',randomizeBuild);
-  $('explore-sample').addEventListener('click',()=>{
+  function exploreSample(){
     if(state.confirmed.size||state.touched.functions||state.touched.rowe||state.touched.enneagram||facetFieldValues().some(Boolean)){
-      if(!state.sampleInputs&&!window.confirm('Replace your entered scores with a synthetic sample?'))return;
+      if(!state.sampleInputs&&!window.confirm('Replace your entered scores with a synthetic sample?'))return false;
     }
-    randomizeBuild();
+    randomizeBuild();return true;
+  }
+  $('randomize-button').addEventListener('click',()=>exploreSample());
+  $('explore-sample').addEventListener('click',()=>{
+    if(!exploreSample())return;
     $('result-container').scrollIntoView({block:'start'});
   });
   $('start-personal').addEventListener('click',()=>{

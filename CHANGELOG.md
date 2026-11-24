@@ -1,6 +1,6 @@
 # Changelog
 
-**Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
+**Live release numbering:** PR #39 establishes **v2.1.0**, with subsequent merged PRs incrementing v2.1.x. PR #33 retains the historical v2.0.0 baseline. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
 ## 2.1.0 — Community Beta
 - Require individual score entry for all broad questionnaire fields; explicitly entered neutral values are valid.

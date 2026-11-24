@@ -212,7 +212,7 @@ try{
 
   // A clean profile prevents collisions with other browser processes on shared
   // runners. Retry only a stalled Chrome startup, never failing assertions.
-  const runChrome=async (timeoutMs)=>{
+  const runChrome=async (timeoutMs, mobile=false)=>{
     const profile=mkdtempSync(join(tmpdir(),'type-effectively-smoke-'));
     try{
       return await new Promise((ok,fail)=>{
@@ -222,6 +222,7 @@ try{
           '--disable-extensions','--blink-settings=imagesEnabled=false',
           '--no-first-run','--no-default-browser-check',
           '--user-data-dir='+profile,
+          ...(mobile?['--window-size=390,844']:[]),
           '--virtual-time-budget=4500','--dump-dom',
           'http://127.0.0.1:'+port+'/'
         ],{stdio:['ignore','pipe','pipe']});
@@ -246,6 +247,11 @@ try{
     'Headless Chrome timed out twice; last stderr: '+result.stderr.slice(-1800)+
     '; partial output bytes: '+result.stdout.length);
   const html=result.stdout||'';
+  const mobile=await runChrome(35000,true);
+  assert.ok(!mobile.timedOut&&mobile.status===0,'narrow viewport smoke failed');
+  for(const key of ['data-hero-sample','data-personal-reset','data-explicit-neutral','data-facet-only-success'])
+    assert.ok(mobile.stdout.includes(key+'="true"'),'narrow viewport: '+key);
+  assert.ok(!mobile.stdout.includes('data-boot-error='),'narrow viewport has browser errors');
   const diagnostics=html.match(/data-boot-error="([^"]+)"/)?.[1]||'';
   const counts={
     mbti:(html.match(/data-score="mbti"/g)||[]).length,

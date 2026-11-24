@@ -71,7 +71,7 @@ test('Randomize is accessible beside the on-site card, not a submit button',()=>
   assert.ok(page.indexOf('id="randomize-button"')>page.indexOf('class="result-column"'));
   assert.ok(css.includes('.result-header-actions{display:flex'));
   assert.ok(css.includes('.randomize-button:hover'));
-  assert.ok(app.includes("addEventListener('click',randomizeBuild)"));
+  assert.ok(app.includes("addEventListener('click',()=>exploreSample())"));
 });
 
 test('randomize fills editable score controls, runs genuine engine, and labels samples',()=>{
