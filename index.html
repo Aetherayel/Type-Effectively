@@ -145,7 +145,14 @@
             <p class="panel-subtitle">The statistical backbone. Your scores shape the spread; nobody gets extra base stat points.</p>
             <div class="test-line"><a id="bigfive-test-link" href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span id="bigfive-test-detail">50 questions · free scores</span></div>
             <div id="bigfive-fields" class="slider-stack"></div>
-            <p class="mini-note">Starting values of 50 are neutral placeholders, not guesses about you. Enter the five domain percentiles (O, C, E, A, N), not the 30 separate facets. IPIP-NEO lists the domains in a different order.</p>
+            <p class="mini-note">Enter your five reported domain percentiles in O, C, E, A, N order. Untouched 50s are neutral placeholders, not measurements. IPIP-NEO reports may list the domains in a different order.</p>
+            <details class="facet-panel" id="bigfive-facet-panel">
+              <summary>Optional — refine with IPIP-NEO facets (30)</summary>
+              <p class="mini-note">Enter the 0–100 <strong>percentiles</strong> shown on your IPIP-NEO report, not raw sums. Complete all six facets within any domain you want to refine; leave other groups blank. The five domain scores above remain required and unchanged. Facets only refine that domain's existing influence on relevant stats.</p>
+              <div id="bigfive-facet-groups" class="facet-groups" aria-label="Optional IPIP-NEO facets"></div>
+              <p id="facet-entry-status" class="mini-note" role="status">No facet groups entered. Domain-only scoring remains available.</p>
+              <p class="mini-note">These are game interpretations, not psychometric capability measures. Political values and moral conformity are not assigned independent stat bonuses.</p>
+            </details>
           </section>
 
           <div id="form-error" class="form-error hidden" role="alert"></div>
