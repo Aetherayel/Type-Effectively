@@ -205,7 +205,7 @@ function setMode(group,mode) {
       'Four-letter type override <span class="muted">(optional; e.g. Sakinorva result)</span>':
       'Type override <span class="muted">(optional with scores)</span>';
     $('mbti-subtitle').textContent=mode==='functions'?
-      'Eight cognitive functions, entered directly. Their contrasts influence stats and classification without adding a second scoring engine.':
+      'Eight cognitive functions, entered directly. All eight inform base stats; their preference contrasts inform Nature and other classifications.':
       'Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.';
     $('mbti-derived').textContent=mode==='type'?'Select the four-letter type you identify with. We will use estimated percentage scores where needed.':'Your percentages determine the suggested type. You can override it below.';
     $('mbti-override').options[0].textContent=mode==='type'?'Choose a type…':
