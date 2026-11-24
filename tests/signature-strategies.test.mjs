@@ -234,7 +234,7 @@ test('the Signature Strategy callout alone explains specialist synergy',()=>{
 test('seeded population retains generalists and validates any specialized package end-to-end',()=>{
   let seed=123456789;
   const random=()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
-  const counts={generalist:0};
+  const counts={generalist:0},snowByRole={},snowByMode={},snowByTitle={};
   const exported=new Set();
   for(let i=0;i<4000;i++){
     const b=generateBuild(generateRandomBuildInput(random));
@@ -248,6 +248,11 @@ test('seeded population retains generalists and validates any specialized packag
     const s=b.signatureStrategy;
     if(!s){counts.generalist++;continue;}
     counts[s.id]=(counts[s.id]||0)+1;
+    if(s.id==='snow-bastion'){
+      snowByRole[s.matchedRole]=(snowByRole[s.matchedRole]||0)+1;
+      snowByMode[b.archetype.mode]=(snowByMode[b.archetype.mode]||0)+1;
+      snowByTitle[b.archetype.title]=(snowByTitle[b.archetype.title]||0)+1;
+    }
     assert.equal(b.ability.name,s.ability);
     assert.equal(b.moves[2].name,s.tactic);
     assert.ok([b.role.primary.name,b.role.secondary?.name].includes(s.matchedRole),
@@ -284,6 +289,9 @@ test('seeded population retains generalists and validates any specialized packag
     }
   }
   console.log('Signature strategy audit, 4,000 seeded builds:',JSON.stringify(counts));
+  console.log('Snow Bastion roles / styles, same sample:',JSON.stringify({
+    matchedRoles:snowByRole,operatingStyles:snowByMode,titles:snowByTitle
+  }));
   assert.ok(counts.generalist>2000,'specialists should not dominate random builds: '+JSON.stringify(counts));
   for(const strategy of SIGNATURE_STRATEGIES)
     assert.ok(counts[strategy.id]>0,'specialty unreachable in a full-engine seeded population: '+strategy.id);
