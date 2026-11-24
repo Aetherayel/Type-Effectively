@@ -1,8 +1,8 @@
 import {
   ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs?v=v2-raw-affinities-1';
-import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-raw-affinities-1';
+} from './data.mjs?v=v2-facet-first-1';
+import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-facet-first-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
