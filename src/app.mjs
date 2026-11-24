@@ -512,6 +512,14 @@ function renderCard(build) {
           const w=build.statWeights[key];
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
         }).join('')+'</div>'+
+        (build.facetScoring.activeDomains.length
+          ? '<p><strong>IPIP-NEO facet refinement:</strong> '+escapeHtml(build.facetScoring.activeDomains.join(', '))+
+            ' domain(s) refined. Each comparison is anchored to its reported parent domain; incomplete or absent domains use the original score. Adjustments below are to the <em>Big Five affinity before framework weighting</em> (not final base stat points):</p>'+
+            '<div class="nature-factors">'+STAT_KEYS.map(key=>{
+              const delta=build.facetScoring.corrections[key];
+              return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+(delta>0?'+':'')+delta.toFixed(1)+'</span>';
+            }).join('')+'</div>'
+          : '<p><strong>Big Five detail:</strong> Five broad domains only. Optional IPIP-NEO facet percentiles were not entered.</p>')+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
         '<p><strong>Battle role:</strong> 80% similarity to role stat targets, 20% type toolkit affinity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move. Both are chosen together, not necessarily from any official species learnset.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% MBTI-style cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Battle fit already includes stat shape and visible typing. Best score wins; this is a playful classification, not a measured personality likelihood.</p>'+
