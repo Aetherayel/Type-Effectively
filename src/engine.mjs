@@ -3,7 +3,7 @@ import {
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=nature-scoring-1';
+} from './data.mjs?v=v2-stat-calibration-1';
 import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
