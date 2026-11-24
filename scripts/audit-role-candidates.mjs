@@ -19,7 +19,14 @@ const scenarios={
     Wall:[108,72,104,73,110,68],Tank:[101,108,93,90,87,56]},axis:true},
   originalWithAxes:{nature:false,templates:ROLE_TEMPLATES,axis:true},
   moderateWall:{nature:false,templates:{...ROLE_TEMPLATES,
-    Wall:[110,70,110,65,112,68],Tank:[101,108,93,90,87,56]},axis:true}
+    Wall:[110,70,110,65,112,68],Tank:[101,108,93,90,87,56]},axis:true},
+  radial14:{nature:false,templates:ROLE_TEMPLATES,radial:14},
+  radial18:{nature:false,templates:ROLE_TEMPLATES,radial:18},
+  radial22:{nature:false,templates:ROLE_TEMPLATES,radial:22},
+  radial18WallVariants:{nature:false,templates:ROLE_TEMPLATES,radial:18,wallVariants:true},
+  radial18VariantsAxes:{nature:false,templates:ROLE_TEMPLATES,radial:18,wallVariants:true,axis:true},
+  radial18SoftWall:{nature:false,templates:{...ROLE_TEMPLATES,
+    Wall:[110,70,110,65,112,68]},radial:18,wallVariants:true}
 };
 function calculate(build,scenario){
   const stats=scenario.nature?build.effectiveStats:build.baseStats;
@@ -35,10 +42,18 @@ function calculate(build,scenario){
   };
   const types=build.types.length===1?[build.types[0],build.types[0]]:build.types;
   const ranked=ROLE_NAMES.map((role,idx)=>{
-    const target=scenario.templates[role].map(v=>statMean+.75*(v-statMean));
-    const options=[target];
-    if(role==='Sweeper'||role==='Tank')
-      options.push([target[0],target[3],target[2],target[1],target[4],target[5]]);
+    const originals=[scenario.templates[role]];
+    if(role==='Sweeper'||role==='Tank'){
+      const t=scenario.templates[role];
+      originals.push([t[0],t[3],t[2],t[1],t[4],t[5]]);
+    }
+    if(role==='Wall'&&scenario.wallVariants)
+      originals.push([120,55,135,55,90,80],[120,55,90,55,135,80]);
+    const options=originals.map(t=>{
+      if(!scenario.radial)return t.map(v=>statMean+.75*(v-statMean));
+      const d=t.map(v=>v-statMean),magnitude=Math.sqrt(mean(d.map(x=>x*x)));
+      return d.map(x=>statMean+x*scenario.radial/magnitude);
+    });
     const rms=Math.min(...options.map(t=>Math.sqrt(mean(normalized.map((v,i)=>(v-t[i])**2)))));
     const statFit=100*Math.exp(-rms*rms/(2*25*25));
     const toolkit=.55*ROLE_AFFINITIES[types[0]][idx]+.45*ROLE_AFFINITIES[types[1]][idx];
@@ -72,7 +87,7 @@ for(const [name,rows] of Object.entries(observations)){
     changedFromCurrent:rows.filter((r,i)=>r.primary!==comparing[i].primary).length,
     hybrid:rows.filter(r=>r.secondary).length};
 }
-const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall']){
+const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall']){
   const table={};
   observations.currentEffective.forEach((prior,i)=>{
     const after=observations[name][i];
