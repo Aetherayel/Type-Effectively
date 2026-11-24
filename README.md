@@ -91,7 +91,7 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **V2.0 delivers** stat-specific source weights, direct eight-function cognitive affinity scoring, recalibrated Big Five and Enneagram affinities, aligned stat and Nature meanings, and tests of overall distribution and mechanical coherence. This deliberately changes old results.
 
-**Not yet part of V2:** IPIP-NEO Big Five **facet-level** scores. The current engine accepts five broad Big Five domains, including when provided by the IPIP-NEO-300. Thirty narrower facets are a promising *future enhancement* but require a separate mapping and input contract. They must refine/replace the relevant broad-domain contribution, not be double-counted as independent evidence, and should be tested for actual differentiation against domain-only results.
+**Also included in V2:** Optional IPIP-NEO Big Five **facet-level** scoring. The five reported domains remain the basis of the Big Five contribution; complete groups of six facet percentiles may refine individual stats without adding a fourth scoring source. Old five-domain inputs and links remain valid. The mappings and safeguards are documented below.
 
 ## Generation model (v2.0; core Pokémon typing and 535 BST retained)
 
@@ -134,6 +134,27 @@ Deterministic. The same inputs always produce the same result. The output is exp
 | Sp. Atk | Ingenuity | Inventive connections and conceptual solutions |
 | Sp. Def | Composure | Emotional regulation and perspective |
 | Speed | Responsiveness | Reaction tempo and quick adaptation |
+
+### Optional IPIP-NEO facet refinement (V2.0)
+
+**Input contract:** The Big Five panel accepts all five existing domain percentiles (O, C, E, A, N) and optionally up to five **complete groups of six facet percentiles** in the same O/C/E/A/N order. Each entered value must be numeric 0–100, comparable percentile output from one IPIP-NEO report, not a raw 0–40 item sum. Empty groups fall back to the broad-domain model; partially completed groups fail validation rather than fabricating missing scores. Facets require reported parent domains. Older shared links without `bigFiveFacets` produce exactly their original V2 domain-only scores. Share links explicitly include any supplied facet percentiles; public card PNGs continue to omit exact personal scores.
+
+The domain-level Big Five affinities are calculated **exactly as before**. Facets provide bounded, stat-specific differences *inside the existing Big Five source*, before the framework's per-stat Big Five weight is applied:
+
+`refinedBigFiveStat = clamp(baseBigFiveStat + Σ over entered domain groups [parentCoefficient × 0.85 × clamp(weightedRelevantFacets − reportedDomain, −30, 30)], 0, 100)`
+
+Each `weightedRelevantFacets` is a convex blend of the named facets below. Parent coefficients follow the existing domain-level `oceanAffinity` expression, including negative signs for Neuroticism. This contrasts each selected facet percentile against its **reported domain percentile**, not against 50 or the arithmetic mean of facet percentiles. Percentiles are normative ranks and should not be treated as additive raw trait quantities: the equation is an explicit, bounded **game heuristic**.
+
+| Pokémon stat | Refining facets (weights within domain) | Why this correction |
+| --- | --- | --- |
+| HP · Resilience | C: Self-Discipline 65%, Achievement-Striving 35%; N: Vulnerability 70%, Anxiety 30% | Staying power rather than general neatness |
+| Attack · Assertion | E: Assertiveness 80%, Activity Level 20%; C: Self-Efficacy 65%, Achievement-Striving 35% | Direct agency rather than general sociability |
+| Defense · Fortitude | C: Dutifulness 40%, Cautiousness 35%, Self-Discipline 25%; N: Vulnerability 100% | Principled resistance rather than routine alone |
+| Sp. Atk · Ingenuity | O: Intellect 65%, Imagination 25%, Artistic Interests 10% | Conceptual curiosity distinct from novelty seeking |
+| Sp. Def · Composure | N: Vulnerability 50%, Anger 30%, Anxiety 20% | Reaction regulation rather than agreeableness |
+| Speed · Responsiveness | E: Activity Level 70%, Assertiveness 20%, Excitement-Seeking 10%; O: Adventurousness 75%, Imagination 25% | Initiative and adaptive tempo rather than extraversion alone |
+
+**Deliberately excluded from new facet bonuses:** O6 Liberalism (political/moral values), A2 Morality and the other Agreeableness facets, and unrelated facets in each domain. They do not receive hidden weights. Their reported **parent domains still retain their original domain-level influence**. No IPIP facet is treated as proof of intelligence, virtue, physical reaction speed, or mental health. The resulting Big Five correction is visible in the expandable build calculation as a per-stat affinity change; it is **not** an extra 535-BST budget or Nature input.
 
 **Big Five base affinities** (O/C/E/A/N are entered domains, Stability=100−N):
 
