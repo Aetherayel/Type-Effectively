@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.4.0 — Whole-profile Nature scoring**
+**Version 2.0.0 — Stat-specific personality calibration**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -87,7 +87,13 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning. **Baton Pass** is eligible only when another equipped move establishes transferable self-stat boosts, or the active standard Ability is **Speed Boost**. A Hidden Ability is an alternative, not active alongside the standard one. Snow, Aurora Veil, Reflect, Light Screen and Tailwind do not supply transferable stat stages. Builds without valid Baton Pass setup keep the other core-specific growth choices.
 
-## Generation model (v1.4; core Pokémon typing and 535 BST retained)
+## V2 boundary: existing changes versus potential next steps
+
+**V2.0 delivers** stat-specific source weights, direct eight-function cognitive affinity scoring, recalibrated Big Five and Enneagram affinities, aligned stat and Nature meanings, and tests of overall distribution and mechanical coherence. This deliberately changes old results.
+
+**Not yet part of V2:** IPIP-NEO Big Five **facet-level** scores. The current engine accepts five broad Big Five domains, including when provided by the IPIP-NEO-300. Thirty narrower facets are a promising *future enhancement* but require a separate mapping and input contract. They must refine/replace the relevant broad-domain contribution, not be double-counted as independent evidence, and should be tested for actual differentiation against domain-only results.
+
+## Generation model (v2.0; core Pokémon typing and 535 BST retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
@@ -156,7 +162,7 @@ HP and SpD cognitive affinities deliberately shrink toward neutral 50 because th
 
 **Limits:** This is a deterministic game calibration, not a validated personality assessment. The weights and prototypes are design judgments. They intentionally change downstream battle roles, abilities and moves when the recalibrated stat spread warrants it; typing, Nature mechanics, and the 535-point budget remain unchanged.
 
-### How Nature is scored (v1.4.x)
+### How Nature is scored (v1.4 onward; retained in V2)
 
 Nature answers **which behavior is prioritized, and which competing response is sacrificed?** It does **not** rank aptitude, so it never reads base stats, battle role, typing, abilities, or archetype. The five non-HP meanings are shared with base stats; the preference and capacity formulas remain separate:
 
@@ -233,7 +239,7 @@ Specialization jointly selects standard Ability, role tactic and held item. A cl
 
 The standard and Hidden Abilities are **alternative strengths**, not concurrently active. A Fire/Fighting build cannot be assigned Sand Force solely because it has a Ground hidden elemental affinity; a Water/Ice build cannot inherit Solid Rock by the same mechanism. This changes mechanical selection without altering the v1.0 seventeen-type typing or 535-BST model.
 
-The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 deliberately changes Nature selection**, so derived roles and specialist outcomes can change; the 535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remain intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
+The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 changed Nature selection; v2.0 recalibrates the base-stat model**, so derived roles and specialist outcomes can change; the 535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remain intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
 
 ### Examples
 
@@ -313,11 +319,11 @@ GitHub Pages publishes the static site from `main` through GitHub's built-in bra
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
-**Preview an open PR:** Branches do not automatically receive Pages URLs. For a quick temporary preview of the v1.4 Nature change, use [the third-party RawGitHack development viewer for PR #32](https://raw.githack.com/Aetherayel/Type-Effectively/feature/whole-profile-nature-scoring/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
+**Preview an open PR:** Branches do not automatically receive Pages URLs. For a temporary preview of the v2.0 scoring changes, use [the third-party RawGitHack development viewer for PR #33](https://raw.githack.com/Aetherayel/Type-Effectively/feature/personality-stat-recalibration/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
 
-**Automatic live releases (v1.4.x):** PR **#32** establishes **v1.4.0** upon merge and successful publication. Each later merged PR increments **v1.4.x** by merged-PR history, not arbitrary pushes or commits. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
+**Automatic live releases (v2.0.x):** PR **#33** establishes **v2.0.0** upon merge and successful publication. Each later merged PR increments **v2.0.x** by merged-PR history, not arbitrary pushes or commits. PR #32 retains its historical **v1.4.0** baseline. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x and v1.4.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.4.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.4.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x, v1.4.x and v2.0.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v2.0.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v2.0.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 
