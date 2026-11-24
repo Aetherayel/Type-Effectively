@@ -8,8 +8,8 @@ import {
 import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
-import { classifyRole } from './roles.mjs';
-import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
+import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
+import { composeFieldReport } from './profile-analysis.mjs?v=v2-600-bst-1';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
 import {
   refineBigFiveAffinities, facetContrastMap, resolveBigFiveEvidence,

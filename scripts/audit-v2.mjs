@@ -36,8 +36,8 @@ const randomInput=(mode,faceted=false)=>{
 function build(input) {
   const result=generateBuild(input);
   const values=stats(result);
-  if(sum(values)!==535 || values.some(v=>v<45||v>140))
-    throw new Error('Audit encountered a broken 535/45–140 stat invariant.');
+  if(sum(values)!==600 || values.some(v=>v<50||v>157))
+    throw new Error('Audit encountered a broken 600/50–157 stat invariant.');
   if(result.moves.length!==4)throw new Error('Audit encountered an incomplete moveset.');
   return result;
 }

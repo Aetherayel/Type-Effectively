@@ -1,6 +1,6 @@
 import { STAT_KEYS, STAT_MEANINGS, STAT_NAMES } from './data.mjs';
 
-// These values describe the model's affinity *before* the 535-BST budget
+// These values describe the model's affinity *before* the 600-BST budget
 // allocates relative strengths. Neither score is a respondent percentile.
 // Keep this alternate view separate from the canonical export/EV/radar data.
 const one=n=>Number(n).toFixed(1);
@@ -56,7 +56,7 @@ export function renderAffinityComparison(build) {
       '<span>· dotted markers show this mean in every bar</span></p>'+
     '<div class="affinity-bars">'+bars+'</div>'+
     '<p class="affinity-method">The game converts each affinity’s difference from your own average '+
-      'into a share of the same <strong>fixed 535 BST</strong>. This is why a high affinity '+
+      'into a share of the same <strong>fixed 600 BST</strong>. This is why a high affinity '+
       'can still produce a below-average Pokémon stat. The 0–100 scale is an authored game score, '+
       'not a population ranking; 50 is a neutral model reference.</p>'+
     '<details class="affinity-source-detail"><summary>Show Big Five, Enneagram and cognition contributions</summary>'+

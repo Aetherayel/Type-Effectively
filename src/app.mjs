@@ -6,11 +6,11 @@ import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, norma
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
-import { renderStatRadar } from './radar.mjs';
-import { renderAffinityComparison } from './stat-affinity-ui.mjs';
-import { renderRelatives } from './relatives-ui.mjs';
+import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
+import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=v2-600-bst-1';
+import { renderRelatives } from './relatives-ui.mjs?v=v2-600-bst-1';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=1.3.0';
+import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=v2-600-bst-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
@@ -540,7 +540,7 @@ function renderCard(build) {
               : '<p>With no broad-domain inputs, no domain-only comparison is calculated.</p>')
           : '<p><strong>Big Five detail:</strong> Five broad domains only; existing domain scoring remains unchanged.</p>')+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
-        '<p><strong>Battle role:</strong> Classified from the 600 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
+        '<p><strong>Battle role:</strong> Classified from the 600 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Relative stat thresholds use the original calibration scale; Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Facets substitute within the temperament component when present, not as a capped additive bonus. Battle fit already includes stat shape and typing. Best score wins, not a measured personality likelihood.</p>'+
         (build.facetScoring.activeDomains.length?
           '<p><strong>Detailed temperament:</strong> The chosen archetype’s facet-aware fit differs from its coarse contextual approximation by '+(build.archetype.facetAdjustment>=0?'+':'')+build.archetype.facetAdjustment.toFixed(1)+' points. '+

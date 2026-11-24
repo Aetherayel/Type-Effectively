@@ -12,7 +12,7 @@ and is never a gate or a scoring input for it.
 3. **Primary or close secondary role** matches a listed qualifying role. A secondary
    role exists only when within the established **five role-fit points** of primary.
    The qualifying role's score supplies the strategy-role fit.
-4. Nature-adjusted **effective stats** meet each minimum and maximum, if specified.
+4. Nature-adjusted **effective stats**, converted to the original 535-BST reference scale (`round(actual × 535/600)`), meet each minimum and maximum, if specified.
    This is distinct from battle-role classification, which uses **pre-Nature base stats**.
 5. If an offensive style is specified, **physical** means Atk >= Sp. Atk; **special**
    means Sp. Atk > Atk.
@@ -30,7 +30,7 @@ and is never a gate or a scoring input for it.
 
 ### Eligibility catalogue — current implementation
 
-| Strategy | Qualifying role(s) (primary or secondary) | Required / forbidden visible type | Effective stat gates | Favored Enneagram fixes | Ability · role tactic · held item |
+| Strategy | Qualifying role(s) (primary or secondary) | Required / forbidden visible type | 535-reference effective stat gates | Favored Enneagram fixes | Ability · role tactic · held item |
 | --- | --- | --- | --- | --- | --- |
 | **Snow Bastion** | **Wall, Tank, Support, Controller** | Ice / none | Def >= 83; Sp. Def >= 82 | 1, 5, 6, 9 | Snow Warning · Aurora Veil · Icy Rock |
 | Solar Engine | Sweeper | Fire / none | Speed >= 78 | 3, 7, 8 | Drought · Growth · Heat Rock |
@@ -48,8 +48,7 @@ and is never a gate or a scoring input for it.
 The favored fixes are the **members of the score-matching set**, not a hard list
 of allowable core types. The type, role, minimum stats, offensive style,
 motivation floor and overall score threshold are distinct filters.
-Only **Snow Bastion's role list and strategy-fit formula** change in this PR;
-the other eleven packages retain their established gates.
+All twelve strategies retain their established reference gates after the 600-BST transition.
 
 ### Formula for the other eleven strategies
 

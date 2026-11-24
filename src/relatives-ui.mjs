@@ -1,4 +1,4 @@
-import { matchPokemon, pokemonArtworkUrl, pokemonSpriteUrl } from './relatives.mjs';
+import { matchPokemon, pokemonArtworkUrl, pokemonSpriteUrl } from './relatives.mjs?v=v2-600-bst-1';
 import { TYPE_COLORS } from './data.mjs';
 
 let indexPromise;
@@ -62,7 +62,7 @@ function renderMatches(build,matches,meta) {
     '<div class="relatives-heading"><span class="relatives-index">BONUS DISCOVERY / 004</span><h4>Meet your <em>relatives.</em></h4>'+
     '<p>Actual Pokémon. Suspiciously similar statistics. Absolutely no family resemblance required.</p></div>'+
     section('01 / TYPE MATCH · '+typeCount,typeTitle,typeIntro,matches.typeTwins,'type')+
-    section('02 / BASE STATS','Stat siblings','Closest six-stat shapes, scaled to 535 for comparison, with a small penalty for different BSTs.',matches.statSiblings,'stat')+
+    section('02 / BASE STATS','Stat siblings','Closest six-stat shapes, scaled to your build’s BST for comparison, with a small penalty for different BSTs.',matches.statSiblings,'stat')+
     section('03 / STANDARD ABILITY',build.ability.name,'Pokémon that can actually have your standard Ability, in regular or hidden slots.',matches.standardAbility,'ability',build.ability.name)+
     section('04 / HIDDEN ABILITY',build.hiddenAbility,'Pokémon that can actually have your alternate Hidden Ability, regardless of its slot.',matches.hiddenAbility,'ability',build.hiddenAbility)+
     '<p class="relatives-source">Compared against '+matches.sampleSize.toLocaleString('en-US')+' Pokémon and forms. Stats and abilities: '+
