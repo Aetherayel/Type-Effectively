@@ -156,7 +156,7 @@ test('all 324 tritype/wing combinations give coherent, distinct abilities and un
           'off-type hidden ability for '+b.tritype+'w'+wing+': '+b.hiddenAbility);
         assert.notEqual(b.hiddenAbility,b.ability.name);
         assert.equal(new Set(b.moves.map(x=>x.name)).size,4);
-        assert.ok(ROLE_MOVES[b.signatureStrategy?.matchedRole||b.role.primary.name].includes(b.moves[2].name),
+        assert.ok(ROLE_MOVES[b.signatureStrategy?.tacticRole||b.signatureStrategy?.matchedRole||b.role.primary.name].includes(b.moves[2].name),
           'signature tactics may use the matched secondary role');
         assert.ok(GROWTH_MOVES[core].choices.includes(b.moves[3].name));
         count++;
