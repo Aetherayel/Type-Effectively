@@ -113,6 +113,16 @@ for(let i=0;i<1200;i++){
 }
 const observations=Object.fromEntries(Object.entries(scenarios).map(([key,scene])=>
   [key,profiles.map(build=>calculate(build,scene))]));
+const productionMismatches=profiles.flatMap((build,i)=>{
+  const expected=observations.neutralMix35HalfAxes[i];
+  return build.role.primary.name===expected.primary &&
+    (build.role.secondary?.name||null)===expected.secondary ? [] :
+    [{i,actual:build.role.primary.name,expected:expected.primary,
+      actualSecondary:build.role.secondary?.name||null,expectedSecondary:expected.secondary}];
+});
+if(productionMismatches.length)
+  throw new Error('Production role scorer deviated from selected audit model: '+
+    JSON.stringify(productionMismatches.slice(0,8)));
 const summary={};
 for(const [name,rows] of Object.entries(observations)){
   const roles=Object.fromEntries(ROLE_NAMES.map(key=>[key,rows.filter(r=>r.primary===key).length]));
@@ -143,4 +153,6 @@ const transitions={};for(const name of ['originalBase','adjustedBase','adjustedW
   });
   transitions[name]=Object.entries(table).sort((a,b)=>b[1]-a[1]).slice(0,15);
 }
-console.log('ROLE_COMPARE_JSON='+JSON.stringify({seed:260612,summary,transitions}));
+console.log('ROLE_COMPARE_JSON='+JSON.stringify({seed:260612,
+  selectedModel:'neutralMix35HalfAxes',productionMismatches:productionMismatches.length,
+  summary,transitions}));
