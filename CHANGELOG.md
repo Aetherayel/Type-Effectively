@@ -3,6 +3,11 @@
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
 ## 2.0.0 — Stat-specific personality recalibration
+- Require all three assessment sections for any user-visible Pokémon: cognitive scores, nine-type Enneagram scores/Rowe/ranking, and five Big Five domains. Four-letter/tritype overrides remain supplemental and cannot replace full tests. Invalid inputs clear stale results.
+- Remove the legacy raw-score FNV held-item tie hash; choose equipment by interpretable personality-family, trait, role and compatibility fits with stable exact ties.
+- Center all nine Enneagram stat prototypes around a common 50 reference per stat. Neutral inputs yield near-equal 535-BST distribution (90 / 89 / 89 / 89 / 89 / 89), preserving distinctive individual mappings and fixed stat bounds.
+- Re-run the V2 whole-model audit; keep separate Wall and Tank roles pending a design decision after observing the post-calibration role distribution.
+
 
 - Establish a single six-stat semantic contract: HP resilience, Attack assertion, Defense fortitude, Special Attack ingenuity, Special Defense composure, Speed responsiveness.
 - Recalibrate the Big Five equations and nine Enneagram six-stat prototypes to reduce overlapping defensive proxies and overly broad novelty/assertion associations.
