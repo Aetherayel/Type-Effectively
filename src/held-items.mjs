@@ -1,4 +1,5 @@
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
+import { itemFacetAdjustment } from './facet-outcomes.mjs';
 
 const TRAIT_LABELS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Emotional sensitivity'];
 const average = values => values.reduce((sum,value)=>sum+value,0)/values.length;
@@ -83,7 +84,7 @@ export function heldItemRationale({core,role,bigFive,hasBigFive=true,family}) {
 
 export function chooseHeldItem({
   tritype,core,second,third,wing,enneagramScores,bigFive,mbtiScores,
-  role,types,moves,ability,hasBigFive=true
+  role,types,moves,ability,hasBigFive=true,facetContrasts=null
 }) {
   if(!Array.isArray(enneagramScores)||enneagramScores.length!==9 ||
       !Array.isArray(bigFive)||bigFive.length!==5 ||
@@ -98,7 +99,9 @@ export function chooseHeldItem({
       Math.max(1,enneagramScores.reduce((sum,value)=>sum+value,0));
     const coreSignal=.54*ennea[core-1]+.23*ennea[second-1]+.13*ennea[third-1]+.10*weighted;
     const traits=traitFit(bigFive,family.target);
-    return [key,.68*coreSignal+.32*traits];
+    // Facets are a modest nudge to equipment *theme*, never eligibility or
+    // battle functionality; source weights and family templates stay intact.
+    return [key,.68*coreSignal+.32*traits+itemFacetAdjustment(key,facetContrasts)];
   }));
   const seed=[tritype,wing,...mbtiScores,...enneagramScores,...bigFive,role.primary.name].join('|');
   const sorted=HELD_ITEMS.filter(item=>!item.strategyOnly && isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
@@ -118,6 +121,7 @@ export function chooseHeldItem({
     name:selected.name,
     family:selected.family,
     familyLabel:family.label,
+    facetAdjustment:Math.round(itemFacetAdjustment(selected.family,facetContrasts)*10)/10,
     effect:selected.effect,
     quip:selected.quip,
     why:explanation
