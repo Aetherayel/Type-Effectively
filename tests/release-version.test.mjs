@@ -35,7 +35,7 @@ test('published V2 releases supersede older minor tags only at the exact revisio
     { tag_name:'v2.1.0',target_commitish:published,draft:false },
     { tag_name:'v2.0.99',target_commitish:previous,draft:true }
   ];
-  assert.equal(versionForRevision(published,updated),'2.0.3');
+  assert.equal(versionForRevision(published,updated),'2.1.0');
   assert.equal(versionForRevision(previous,updated),'1.1.2');
   assert.equal(versionForRevision('b'.repeat(40),updated),null);
 });
@@ -91,6 +91,10 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(workflow.includes('tag="v1.4.$patch"'));
   assert.ok(workflow.includes('if [ "$PR_NUMBER" = "33" ]; then'));
   assert.ok(workflow.includes('tag=v2.0.0'));
+  assert.ok(workflow.includes('if [ "$PR_NUMBER" = "39" ]; then'));
+  assert.ok(workflow.includes('tag=v2.1.0'));
+  assert.ok(workflow.includes('tag="v2.1.$patch"'));
+  assert.ok(workflow.indexOf('tag=v2.1.0')<workflow.indexOf('tag=v2.0.0'));
   assert.ok(workflow.includes('tag="v2.0.$patch"'));
   assert.match(workflow,/merged PRs since the v2\.0\.0 baseline/);
   assert.ok(workflow.indexOf('tag=v2.0.0')<workflow.indexOf('tag=v1.4.0'),
@@ -105,5 +109,5 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(template.includes('{{ site.github.build_revision }}'));
   assert.match(html, /id="release-version"/);
   assert.match(html, /id="footer-version"/);
-  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=2\.0\.0"/);
+  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=2\.1\.0"/);
 });

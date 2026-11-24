@@ -172,6 +172,7 @@ export function buildCardSvg(build, trainingEvs = null) {
     ${renderRoleWatermark(build.role.primary.name)}
   </g>
   <text x="76" y="105" class="overline">TYPE EFFECTIVELY</text>
+  ${build.isSample===true?'<text x="76" y="140" font-size="16" font-weight="700" fill="#d9f375">RANDOM SAMPLE · SYNTHETIC SCORES</text>':''}
   <text x="878" y="105" text-anchor="end" class="overline">${esc(identity)}</text>
   <text x="878" y="140" text-anchor="end" font-size="19" font-family="monospace" font-weight="500" fill="#9fbcb4">${esc(oceanHeaderText(build))}</text>
   <text x="76" y="192" class="title">${esc(build.title)}</text>

@@ -71,7 +71,7 @@ test('Randomize is accessible beside the on-site card, not a submit button',()=>
   assert.ok(page.indexOf('id="randomize-button"')>page.indexOf('class="result-column"'));
   assert.ok(css.includes('.result-header-actions{display:flex'));
   assert.ok(css.includes('.randomize-button:hover'));
-  assert.ok(app.includes("addEventListener('click',randomizeBuild)"));
+  assert.ok(app.includes("addEventListener('click',()=>exploreSample())"));
 });
 
 test('randomize fills editable score controls, runs genuine engine, and labels samples',()=>{
@@ -88,14 +88,16 @@ test('randomize fills editable score controls, runs genuine engine, and labels s
   assert.ok(app.includes('RANDOM SAMPLE · SYNTHETIC SCORES'));
   assert.ok(app.includes("state.isSample?'RANDOM SAMPLE':'BUILD COMPLETE'"));
   assert.ok(app.includes('sample:state.isSample'),'share links should preserve the sample label');
-  assert.ok(app.includes('runBuild(false,payload.sample===true,payload.buildVersion??null)'),'restored samples retain origin and label');
+  assert.ok(app.includes('runBuild(false,state.sampleInputs,payload.buildVersion??null)'),'restored samples retain origin and label');
   assert.ok(app.includes("history.replaceState(null,'',location.pathname+location.search)"),
     'randomizing a shared build must clear its stale hash');
 });
 
-test('manual generation and Reset clear the synthetic-sample status',()=>{
+test('manual generation preserves synthetic provenance; Reset clears it',()=>{
   assert.ok(app.includes('function runBuild(scroll=true,isSample=false,sharedVersion=undefined)'));
   assert.ok(app.includes('state.isSample=isSample;'));
+  assert.ok(app.includes('state.sampleInputs=payload.sample===true;'));
+  assert.ok(app.includes('state.sampleInputs=false;'));
   assert.ok(app.includes('state.lastBuild=null;state.lastInput=null;state.isSample=false'));
-  assert.match(app,/addEventListener\('submit',event=>\{event.preventDefault\(\);runBuild\(\);\}\)/);
+  assert.match(app,/addEventListener\('submit',event=>\{event.preventDefault\(\);runBuild\(true,state.sampleInputs\);\}\)/);
 });

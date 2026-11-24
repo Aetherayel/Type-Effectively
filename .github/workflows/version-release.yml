@@ -69,7 +69,30 @@ jobs:
             fi
           fi
 
-          if [ "$PR_NUMBER" = "33" ]; then
+          # PR #39 establishes the Community Beta baseline.
+          v21_at=$(gh api "repos/$GITHUB_REPOSITORY/pulls/39" --jq '.merged_at // empty')
+          v21_after=false
+          if [ -n "$v21_at" ]; then
+            if [[ "$MERGED_AT" > "$v21_at" ]] || \
+              { [[ "$MERGED_AT" == "$v21_at" ]] && [ "$PR_NUMBER" -gt 39 ]; }; then
+              v21_after=true
+            fi
+          fi
+          if [ "$PR_NUMBER" = "39" ]; then
+            tag=v2.1.0
+          elif [ "$v21_after" = true ]; then
+            patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" | \
+              jq -s --arg baseline "$v21_at" \
+                --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+                '[.[][] | select(.merged_at != null and
+                  (.merged_at > $baseline or (.merged_at == $baseline and .number > 39)) and
+                  (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+            if [ "$patch" -lt 1 ]; then
+              echo "::error::Could not count merged PRs since the v2.1.0 baseline."
+              exit 1
+            fi
+            tag="v2.1.$patch"
+          elif [ "$PR_NUMBER" = "33" ]; then
             tag=v2.0.0
           elif [ "$v20_after" = true ]; then
             patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" |

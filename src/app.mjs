@@ -10,7 +10,7 @@ import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
 import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=v2-600-bst-1';
 import { renderRelatives } from './relatives-ui.mjs?v=v2-600-bst-1';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=v2-600-bst-1';
+import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=community-beta-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
@@ -30,7 +30,7 @@ const oceanDetails=[
   'Cooperation & empathy','Sensitivity to stress'
 ];
 const FUNCTION_LABELS=['Extraverted intuition','Introverted intuition','Extraverted sensing','Introverted sensing','Extraverted thinking','Introverted thinking','Extraverted feeling','Introverted feeling'];
-const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,lastTrainingEvs:null,isSample:false};
+const state={mbtiMode:'scores',enneaMode:'scores',testMode:'quick',touched:{mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false},lastBuild:null,lastInput:null,lastTrainingEvs:null,isSample:false,sampleInputs:false,confirmed:new Set(),lastMode:null};
 let toastTimeout;
 
 function activeBuildVersion() {
@@ -158,6 +158,27 @@ function setTestingPath(mode,chooseInput=true) {
     setMode('ennea',advanced?'rowe':'scores');
   }
 }
+const SCORE_COUNTS={mbti:5,ennea:9,bigfive:5};
+function scoreComplete(prefix) {
+  return Array.from({length:SCORE_COUNTS[prefix]},(_,i)=>prefix+'-'+i)
+    .every(id=>state.confirmed.has(id)&&$(id+'-number').value!=='');
+}
+function clearScoreEvidence(id) {
+  state.confirmed.delete(id);
+  $(id+'-number').value='';
+  $(id+'-readout').textContent='Not entered';
+}
+function resetScoreEvidence() {
+  for(const [prefix,count] of Object.entries(SCORE_COUNTS))
+    for(let i=0;i<count;i++)clearScoreEvidence(prefix+'-'+i);
+}
+function updateScoreProgress() {
+  for(const [prefix,count] of Object.entries(SCORE_COUNTS)){
+    const entered=Array.from({length:count},(_,i)=>prefix+'-'+i)
+      .filter(id=>state.confirmed.has(id)&&$(id+'-number').value!=='').length;
+    $(prefix+'-progress').textContent=entered+' / '+count+' scores entered';
+  }
+}
 function setupFields() {
   $('mbti-score-fields').innerHTML=mbtiAxes.map(([title,left,right],i)=>sliderMarkup('mbti',i,title,left,right)).join('');
   $('function-score-fields').innerHTML=FUNCTION_KEYS.map(functionMarkup).join('');
@@ -175,14 +196,20 @@ function setupFields() {
     state.touched[el.dataset.score==='ennea'?'enneagram':el.dataset.score]=true;
     
     syncSlider(el.id,el.value);
+    state.confirmed.add(el.id);
     updateDerived();
   }));
   document.querySelectorAll('[data-number-for]').forEach(el=>el.addEventListener('input',()=>{
-    if (el.value==='') return;
     const ref=el.dataset.numberFor;
     const isMbti=ref.startsWith('mbti-');
-    const num=Math.min(100,Math.max(isMbti?50:0,Number(el.value)));
-    if (!Number.isFinite(num)) return;
+    const num=Number(el.value);
+    if (el.value===''||!Number.isInteger(num)||num<(isMbti?50:0)||num>100){
+      state.confirmed.delete(ref);
+      $(ref+'-readout').textContent='Not entered';
+      updateDerived();
+      return;
+    }
+    state.confirmed.add(ref);
     state.touched[ref.split('-')[0]==='ennea'?'enneagram':ref.split('-')[0]]=true;
     
     const score=isMbti?($(ref+'-pole').value==='right'?num:100-num):num;
@@ -191,6 +218,7 @@ function setupFields() {
   }));
   document.querySelectorAll('.pole-select').forEach(el=>el.addEventListener('change',()=>{
     const ref=el.id.replace('-pole','');
+    if(!state.confirmed.has(ref))return;
     const percent=Number($(ref+'-number').value);
     const score=el.value==='right'?percent:100-percent;
     state.touched.mbti=true;
@@ -227,7 +255,15 @@ function syncSlider(id,value) {
 function readScores(prefix,length) {
   return Array.from({length},(_,i)=>Number($(prefix+'-'+i).value));
 }
-function setScores(prefix,vals) {vals.forEach((v,i)=>syncSlider(prefix+'-'+i,v));}
+function setScores(prefix,vals) {
+  if(!Array.isArray(vals)||vals.length!==SCORE_COUNTS[prefix]||
+     vals.some(v=>typeof v!=='number'||!Number.isFinite(v)||v<0||v>100))
+    throw new Error('Invalid shared or generated '+prefix+' scores.');
+  vals.forEach((v,i)=>{
+    const id=prefix+'-'+i;
+    syncSlider(id,v);state.confirmed.add(id);
+  });
+}
 function setMode(group,mode) {
   // Labels alone are overrides, never standalone tests.
   if(group==='mbti' && !['scores','functions'].includes(mode))mode='scores';
@@ -240,6 +276,7 @@ function setMode(group,mode) {
   });
   if(group==='mbti') {
     $('mbti-score-fields').classList.toggle('hidden',mode!=='scores');
+    $('mbti-progress').classList.toggle('hidden',mode!=='scores');
     $('mbti-score-help').classList.toggle('hidden',mode!=='scores');
     $('function-score-fields').classList.toggle('hidden',mode!=='functions');
     $('function-help').classList.toggle('hidden',mode!=='functions');
@@ -256,6 +293,7 @@ function setMode(group,mode) {
     $('mbti-override').options[0].textContent=mode==='functions'?'Use function-derived suggestion':'Auto-detect from scores';
   } else {
     $('ennea-score-fields').classList.toggle('hidden',mode!=='scores');
+    $('ennea-progress').classList.toggle('hidden',mode!=='scores');
     $('ennea-ranking-fields').classList.toggle('hidden',mode!=='ranking');
     $('ennea-score-help').classList.toggle('hidden',mode!=='scores');
     $('rowe-score-fields').classList.toggle('hidden',mode!=='rowe');
@@ -274,7 +312,7 @@ function parseRanking() {
 function inferredTritype() {
   if(state.enneaMode==='rowe'?!state.touched.rowe:!state.touched.enneagram) return '';
   try {
-    if(state.enneaMode==='scores') return deriveTritype(readScores('ennea',9));
+    if(state.enneaMode==='scores') return scoreComplete('ennea')?deriveTritype(readScores('ennea',9)):'';
     if(state.enneaMode==='rowe') return deriveTritype(normalizeRoweScores(readRoweScores()));
     if(state.enneaMode==='ranking'){
       const ranking=parseRanking();if(!ranking)return '';
@@ -286,9 +324,10 @@ function inferredTritype() {
   return '';
 }
 function updateDerived() {
+  updateScoreProgress();
   const override=$('mbti-override').value;
   const selectedAT=state.mbtiMode==='functions'?$('function-identity').value:'';
-  const canSuggest=state.mbtiMode==='scores'&&state.touched.mbti;
+  const canSuggest=state.mbtiMode==='scores'&&scoreComplete('mbti');
   let suggested=canSuggest?deriveMbti(readScores('mbti',5)):'';
   if(state.mbtiMode==='functions') {
     try {
@@ -337,10 +376,10 @@ function collectInput() {
   const identityPreference=state.mbtiMode==='functions'?($('function-identity').value||null):null;
   const tritypeOverride=$('tritype-override').value.trim();
   if(tritypeOverride&&!isValidTritype(tritypeOverride)) throw new Error('Tritype needs exactly one gut (8/9/1), heart (2/3/4), and head (5/6/7) type.');
-  const mbtiScores=state.mbtiMode==='scores' && state.touched.mbti ? readScores('mbti',5):null;
+  const mbtiScores=state.mbtiMode==='scores' && scoreComplete('mbti') ? readScores('mbti',5):null;
   if(!mbtiScores&&!functionScores) throw new Error('Cognitive style test results are required: enter 16Personalities percentages or eight functions. A type override alone is insufficient.');
   let enneagramScores=null,enneagramRanking=null,roweScores=null;
-  if(state.enneaMode==='scores'&&state.touched.enneagram) enneagramScores=readScores('ennea',9);
+  if(state.enneaMode==='scores'&&scoreComplete('ennea')) enneagramScores=readScores('ennea',9);
   if(state.enneaMode==='rowe') roweScores=readRoweScores();
   if(state.enneaMode==='ranking'){
     enneagramRanking=parseRanking();
@@ -348,12 +387,12 @@ function collectInput() {
   }
   if(!enneagramScores&&!enneagramRanking&&!roweScores) throw new Error('Enneagram test results are required: enter nine scores, Rowe totals, or a full nine-type ranking. A tritype override alone is insufficient.');
   const bigFiveFacets=readFacetScores();
-  if(!state.touched.bigfive && (!bigFiveFacets || bigFiveFacets.some(n=>n===null)))
+  if(!scoreComplete('bigfive') && (!bigFiveFacets || bigFiveFacets.some(n=>n===null)))
     throw new Error('Big Five test results are required: enter five broad domains or all 30 IPIP-NEO facets.');
   return {
     mbtiScores,typeOverride,functionScores,identityPreference,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
-    bigFive:state.touched.bigfive?readScores('bigfive',5):null,
+    bigFive:scoreComplete('bigfive')?readScores('bigfive',5):null,
     bigFiveFacets
   };
 }
@@ -448,7 +487,7 @@ function renderCard(build) {
     '<article class="result-card'+(build.monotype?' monotype':'')+(cornerArtwork?' has-type-art':'')+'" style="--pcolor:'+pcolor+';--scolor:'+scolor+'">'+
     (cornerArtwork?'<div class="result-artwork" aria-hidden="true">'+cornerArtwork+'</div>':'')+
     '<div class="pokemon-header">'+
-      (state.isSample?'<div class="random-sample-mark">RANDOM SAMPLE · SYNTHETIC SCORES</div>':'')+
+      (state.isSample?'<div class="random-sample-mark">RANDOM SAMPLE · SYNTHETIC SCORES — use Reset inputs or Build my Pokémon to start a personal build.</div>':'')+
       '<div class="pokemon-type-accent" aria-hidden="true"></div>'+
       '<div class="pokemon-intro">'+
         '<div class="card-topline"><span class="card-kicker">PERSONALITY POKÉMON</span><span class="result-id">#'+build.tritype+' / '+escapeHtml(build.identity)+'</span></div>'+
@@ -555,7 +594,9 @@ function renderCard(build) {
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download Personality Card ↓</button>'+ 
       '<button type="button" id="download-trained-card" class="outline-button trained-export">Download Trained Build ↓</button>'+
       '<button type="button" id="copy-build" class="outline-button">Copy build ↗</button>'+
-      '<button type="button" id="share-build" class="outline-button">Copy share link ↗</button></div>'+
+      '<button type="button" id="share-build" class="outline-button" aria-describedby="share-privacy">Copy share link ↗</button></div>'+
+      '<p id="share-privacy" class="mini-note">Share links contain your exact questionnaire scores. Anyone with the link can read them. For public sharing, download a PNG instead; it shows identity labels and high/low Big Five indicators, not raw scores.</p>'+
+      '<p class="mini-note"><a id="build-feedback" href="https://github.com/Aetherayel/Type-Effectively/issues/new?template=build-feedback.md" target="_blank" rel="noopener noreferrer">Report an odd result or suggest an improvement ↗</a> (public GitHub issue; account required). No scores are sent automatically.</p>'+
     '</div>'+
     '<footer class="build-version-footer" id="build-version-footer">'+escapeHtml(cardVersionFooter(build))+'</footer>'+
     '</article>';
@@ -616,7 +657,7 @@ function renderCard(build) {
 }
 function buildSummary(b) {
   return [
-    'TYPE EFFECTIVELY — '+b.title,
+    'TYPE EFFECTIVELY — '+b.title+(b.isSample?' · RANDOM SAMPLE / SYNTHETIC SCORES':''),
     b.identity+' · '+b.tritype+' · '+b.types.join(' / ')+' · '+b.nature,
     'Role: '+b.role.primary.name+(b.role.secondary?' / '+b.role.secondary.name:''),
     'BST 600: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
@@ -639,7 +680,7 @@ async function copyText(value,message) {
 }
 function copyShareLink() {
   if(!state.lastInput)return;
-  const payload={version:1,buildVersion:state.lastBuild?.createdVersion||null,mode:{mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode},input:state.lastInput,sample:state.isSample,trainingEvs:state.lastTrainingEvs};
+  const payload={version:1,buildVersion:state.lastBuild?.createdVersion||null,mode:state.lastMode,input:state.lastInput,sample:state.isSample,trainingEvs:state.lastTrainingEvs};
   const hash='#build='+encodeURIComponent(JSON.stringify(payload));
   const url=location.origin+location.pathname+location.search+hash;
   copyText(url,'Link copied. Anyone with it can view these personality scores.');
@@ -666,6 +707,8 @@ function runBuild(scroll=true,isSample=false,sharedVersion=undefined) {
     build.restoredFromShare=sharedVersion!==undefined;
     build.createdVersion=build.restoredFromShare?normalizeBuildVersion(sharedVersion):build.renderVersion;
     state.isSample=isSample;
+    build.isSample=isSample;
+    state.lastMode={mbti:state.mbtiMode,ennea:state.enneaMode,testing:state.testMode};
     if(sharedVersion===undefined)state.lastTrainingEvs=null;
     state.lastBuild=build;state.lastInput=input;setError('');renderCard(build);
     if(scroll&&window.matchMedia('(max-width: 850px)').matches) $('result-container').scrollIntoView({behavior:'smooth',block:'start'});
@@ -682,6 +725,8 @@ function clearAll() {
   setScores('ennea',[50,50,50,50,50,50,50,50,50]);
   Array.from({length:9},(_,i)=>$('rowe-'+i)).forEach(el=>{el.value='';});
   setScores('bigfive',[50,50,50,50,50]);
+  resetScoreEvidence();
+  state.sampleInputs=false;
   resetFacetFields();
   $('bigfive-facet-panel').open=false;
   state.touched={mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false};
@@ -730,7 +775,8 @@ function restoreShared() {
     setMode('ennea',input.roweScores?'rowe':['scores','ranking','rowe'].includes(payload.mode.ennea)?payload.mode.ennea:'scores');
     updateDerived();$('wing-override').value=input.wingOverride||'';
     state.lastTrainingEvs=payload.trainingEvs;
-    if(runBuild(false,payload.sample===true,payload.buildVersion??null))
+    state.sampleInputs=payload.sample===true;
+    if(runBuild(false,state.sampleInputs,payload.buildVersion??null))
       showToast(payload.sample===true?'Random sample restored. Its generated scores are in the link.':'Shared build loaded. These scores are visible in the link.');
     else showToast('This shared build is missing required test results; enter all three sections.');
   }catch {showToast('That shared build link could not be read.');}
@@ -759,18 +805,34 @@ function randomizeBuild() {
   updateDerived();
   // A previous share-link hash must not continue advertising a different build.
   history.replaceState(null,'',location.pathname+location.search);
+  state.sampleInputs=true;
   runBuild(false,true);
 }
 
 function init() {
   setupFields();
+  resetScoreEvidence();
   document.querySelectorAll('[data-test-mode]').forEach(button=>button.addEventListener('click',()=>setTestingPath(button.dataset.testMode)));
   setTestingPath('quick',false);
   document.querySelectorAll('[data-mbti-mode]').forEach(button=>button.addEventListener('click',()=>setMode('mbti',button.dataset.mbtiMode)));
   document.querySelectorAll('[data-ennea-mode]').forEach(button=>button.addEventListener('click',()=>setMode('ennea',button.dataset.enneaMode)));
-  $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild();});
+  $('build-form').addEventListener('submit',event=>{event.preventDefault();runBuild(true,state.sampleInputs);});
   $('reset-button').addEventListener('click',clearAll);
-  $('randomize-button').addEventListener('click',randomizeBuild);
+  function exploreSample(){
+    if(state.confirmed.size||state.touched.functions||state.touched.rowe||state.touched.enneagram||facetFieldValues().some(Boolean)){
+      if(!state.sampleInputs&&!window.confirm('Replace your entered scores with a synthetic sample?'))return false;
+    }
+    randomizeBuild();return true;
+  }
+  $('randomize-button').addEventListener('click',()=>exploreSample());
+  $('explore-sample').addEventListener('click',()=>{
+    if(!exploreSample())return;
+    $('result-container').scrollIntoView({block:'start'});
+  });
+  $('start-personal').addEventListener('click',()=>{
+    if(state.sampleInputs)clearAll();
+    $('mbti-section').scrollIntoView({block:'start'});
+  });
   document.addEventListener('type-effectively:release-version',event=>{
     refreshPublishedBuildVersion(event.detail?.version);
   });

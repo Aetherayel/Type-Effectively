@@ -53,7 +53,7 @@ test('the live card and shared links both carry original creation version, not t
   assert.ok(app.includes('id="build-version-footer"'));
   assert.ok(stylesheet.includes('.build-version-footer'));
   assert.ok(app.includes('buildVersion:state.lastBuild?.createdVersion||null'));
-  assert.ok(app.includes('runBuild(false,payload.sample===true,payload.buildVersion??null)'));
+  assert.ok(app.includes('runBuild(false,state.sampleInputs,payload.buildVersion??null)'));
   assert.ok(app.includes("build.restoredFromShare=sharedVersion!==undefined"));
   assert.ok(app.includes('if(!build.restoredFromShare)build.createdVersion=version'));
   assert.ok(app.includes("'Version: '+cardVersionFooter(b)"));

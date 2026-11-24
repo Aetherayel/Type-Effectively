@@ -558,3 +558,11 @@ a{color:inherit}
   .ev-row>strong{font-size:14px}
   .ev-table-head{font-size:8px}
 }
+
+/* Community beta: show the payoff before the full questionnaire. */
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 10px;align-items:stretch}
+.hero-actions .primary-button,.hero-actions .outline-button{width:auto;min-height:44px}
+.hero .hero-help{font-size:13px;line-height:1.55;color:var(--muted)}
+.score-progress{color:var(--accent);font-variant-numeric:tabular-nums}
+#share-privacy,#build-feedback{overflow-wrap:anywhere}
+@media(max-width:560px){.hero-actions{flex-direction:column}.hero-actions .primary-button,.hero-actions .outline-button{width:100%;text-align:center}}
