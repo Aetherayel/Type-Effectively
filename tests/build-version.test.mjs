@@ -15,6 +15,9 @@ const build=()=>generateBuild({
 test('card provenance identifies creation and current recalculation separately',()=>{
   assert.equal(normalizeBuildVersion('v1.2.0'),'v1.2.0');
   assert.equal(normalizeBuildVersion('v1.4.0'),'v1.4.0');
+  assert.equal(normalizeBuildVersion('v2.0.0'),'v2.0.0');
+  assert.equal(cardVersionFooter({createdVersion:'v1.4.0',renderVersion:'v2.0.0'}),
+    'CREATED v1.4.0 · RECALCULATED v2.0.0');
   assert.equal(normalizeBuildVersion('v1.2.17'),'v1.2.17');
   assert.equal(normalizeBuildVersion('1.2.0'),null);
   assert.equal(normalizeBuildVersion('v1.2.0<img>'),null);

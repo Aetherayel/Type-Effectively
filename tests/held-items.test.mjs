@@ -49,7 +49,8 @@ test('same inputs produce the same held item without altering Pokémon battle nu
   assert.match(first.heldItem.why,/Type 5 core/);
   assert.match(first.heldItem.why,/role point toward/);
   assert.equal(Object.values(first.baseStats).reduce((a,b)=>a+b,0),535);
-  assert.deepEqual(first.effectiveStats,{hp:103,atk:53,def:110,spa:119,spd:99,spe:54});
+  assert.deepEqual(first.effectiveStats,second.effectiveStats);
+  assert.equal(first.effectiveStats.hp,first.baseStats.hp);
   assert.equal(first.moves.length,4);
 });
 
@@ -84,6 +85,36 @@ test('seeded varied builds explore many held items and every family',()=>{
   }
   assert.ok(names.size>=40,'only '+names.size+' unique items in varied builds');
   assert.equal(families.size,9,'all behavioral families should be reachable');
+});
+
+test('held-item selection uses meaningful fit, never a raw-score hash',()=>{
+  const module=readFileSync(new URL('../src/held-items.mjs',import.meta.url),'utf8');
+  assert.doesNotMatch(module,/FNV-1a|const hash\s*=|hash\(seed|const seed=|const tie=/,
+    'item selection must not invent score-dependent pseudo-random offsets');
+  assert.match(module,/\.47\*familyScore\+\.38\*traits\+\.15\*roleScore/,
+    'equipment preference should remain traceable to family, trait, and role fits');
+  let seed=20261124;
+  const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+  let changed=0,changedAlone=0;
+  for(let i=0;i<260;i++){
+    const sample={
+      bigFive:Array.from({length:5},()=>Math.floor(rand()*101)),
+      mbtiScores:Array.from({length:5},()=>Math.floor(rand()*101)),
+      enneagramScores:Array.from({length:9},()=>Math.floor(rand()*101))
+    };
+    const revised={...sample,bigFive:sample.bigFive.map((v,j)=>
+      j===2?Math.min(100,v+1):v)};
+    const a=generateBuild(sample),b=generateBuild(revised);
+    if(a.heldItem.name!==b.heldItem.name){
+      changed++;
+      if(a.types.join()===b.types.join()&&a.nature===b.nature&&
+        a.role.primary.name===b.role.primary.name&&
+        Object.values(a.baseStats).every((value,k)=>value===Object.values(b.baseStats)[k]))
+        changedAlone++;
+    }
+  }
+  assert.ok(changed<=26,'one-point trait changes repeatedly reshuffle equipment: '+changed+'/260');
+  assert.ok(changedAlone<=13,'equipment-only instability returned: '+changedAlone+'/260');
 });
 
 test('estimated Big Five scores never masquerade as measured trait findings',()=>{

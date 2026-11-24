@@ -84,7 +84,7 @@ test('randomize fills editable score controls, runs genuine engine, and labels s
   assert.ok(source.includes("state.touched={mbti:true,functions:false,enneagram:true,rowe:false,bigfive:true}"));
   assert.ok(source.includes("FUNCTION_KEYS.forEach"),'random builds must clear stale function inputs');
   assert.ok(source.includes('runBuild(false,true)'),'randomized build should stay in result view');
-  assert.ok(app.includes("const build=generateBuild(input)"),'use real build engine');
+  assert.ok(app.includes("const build=generateCompleteBuild(input)"),'use complete-input build engine');
   assert.ok(app.includes('RANDOM SAMPLE · SYNTHETIC SCORES'));
   assert.ok(app.includes("state.isSample?'RANDOM SAMPLE':'BUILD COMPLETE'"));
   assert.ok(app.includes('sample:state.isSample'),'share links should preserve the sample label');

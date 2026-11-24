@@ -23,20 +23,20 @@ test('all six Pokémon stats have clear human-facing interpretations',()=>{
   const guide=page.slice(page.indexOf('<section class="stat-guide"'),page.indexOf('<footer class="footer">'));
   for(const [code,interpretation] of [
     ['HP','Resilience'],
-    ['ATK','Assertiveness'],
-    ['DEF','Discipline'],
-    ['SP. ATK','Creative analysis'],
+    ['ATK','Assertion'],
+    ['DEF','Fortitude'],
+    ['SP. ATK','Ingenuity'],
     ['SP. DEF','Composure'],
-    ['SPEED','Energy']
+    ['SPEED','Responsiveness']
   ]) {
     assert.ok(guide.includes('>'+code+'</span>'),code+' label missing');
     assert.ok(guide.includes(interpretation),interpretation+' interpretation missing');
   }
   assert.equal((guide.match(/class="stat-guide-stat"/g)||[]).length,6);
   assert.ok(guide.includes('535 base stat points'));
-  assert.ok(guide.includes('70% Big Five'));
-  assert.ok(guide.includes('20% Enneagram'));
-  assert.ok(guide.includes('10% cognitive-style'));
+  assert.ok(guide.includes('Big Five / Enneagram / cognition'));
+  assert.ok(guide.includes('10% to 50%'));
+  assert.ok(guide.includes('four-letter-only'));
   assert.ok(guide.includes('raises one non-HP stat by 10%'));
   assert.ok(guide.includes('Neuroticism'));
   assert.ok(guide.includes('score of 50 or higher'));

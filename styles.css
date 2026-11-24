@@ -76,6 +76,21 @@ a{color:inherit}
 .function-entry strong{font:700 13px 'DM Mono',monospace;color:var(--accent)}
 .function-entry input{background:#15252a;border:1px solid #3e5153;border-radius:7px;color:#e7eee8;padding:9px;font:13px 'DM Mono',monospace;width:100%;min-width:0}
 .function-entry input::placeholder{color:#6e8282}
+/* Optional facet entry lives behind one disclosure, rather than adding
+   30 visible fields to the default quick personality form. */
+.facet-panel{margin-top:15px;padding:12px 13px;border:1px solid #38504d;border-radius:10px;background:#111e21}
+.facet-panel>summary{cursor:pointer;color:var(--accent);font-size:12px;font-weight:700}
+.facet-panel[open]>summary{margin-bottom:12px}
+.facet-groups{display:grid;gap:11px;margin-top:14px}
+.facet-group{border:1px solid #304648;border-radius:10px;padding:11px;margin:0;min-width:0}
+.facet-group legend{padding:0 6px;color:#d7e5db;font:600 12px 'Space Grotesk',sans-serif}
+.facet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.facet-entry{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#acbeb9;min-width:0}
+.facet-entry span{line-height:1.3}
+.facet-entry input{background:#15252a;border:1px solid #3e5153;border-radius:7px;color:#e7eee8;padding:9px;font:12px 'DM Mono',monospace;width:100%;min-width:0}
+.facet-entry input::placeholder{color:#6e8282}
+@media(max-width:390px){.facet-grid{grid-template-columns:1fr}}
+
 
 .mode-switch{background:#0e181c;border:1px solid #2a3b3e;border-radius:9px;padding:4px;display:flex;gap:4px;margin-bottom:20px}
 .mode-button{background:transparent;border:0;border-radius:7px;flex:1;color:#829795;font-weight:600;font-size:12px;padding:10px 6px;transition:background .15s,color .15s}

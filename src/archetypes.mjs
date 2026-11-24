@@ -3,6 +3,7 @@
 // Every candidate is scored on Enneagram (25%), MBTI-style dimensions (20%),
 // Big Five (25%), and the already computed battle profile (30%).
 // Battle scores already incorporate typing and stats: do not score them again.
+import { archetypeFacetAdjustment } from './facet-outcomes.mjs';
 
 const clamp = x => Math.max(0,Math.min(100,x));
 const fit = (values,ideal) => clamp(100-Math.sqrt(
@@ -122,7 +123,7 @@ export const ARCHETYPE_CATALOG = Object.freeze(modes.flatMap(mode=>
   }))
 ));
 
-export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,second,third,role}) {
+export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,second,third,role,facetContrasts=null}) {
   if(enneagramScores?.length!==9 || mbtiScores?.length!==5 || bigFive?.length!==5 ||
     !role?.all?.length) throw new Error('Archetype classification requires a complete build.');
   // Manual type overrides change the preferred pole but preserve the reported intensity.
@@ -136,7 +137,10 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
     const motivation=clamp(.69*rawMotivation+
       .18*mode.ennea[core-1]+.09*mode.ennea[second-1]+.04*mode.ennea[third-1]);
     const cognition=fit(cognitive,mode.mbti);
-    const temperament=fit(bigFive,mode.ocean);
+    // Facet detail shapes the existing 25% temperament component only;
+    // motivation, cognitive style, role identity and 36 titles remain intact.
+    const facetAdjustment=archetypeFacetAdjustment(candidate.mode,facetContrasts);
+    const temperament=clamp(fit(bigFive,mode.ocean)+facetAdjustment);
     const roleValue=role.all.find(r=>r.name===candidate.role)?.score ?? 0;
     // Role fit already incorporates stat shape and visible type toolkit.
     const battle=clamp(50+1.7*(roleValue-avgRole));
@@ -146,7 +150,7 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
       ARCHETYPE_WEIGHTS.cognition*cognition+
       ARCHETYPE_WEIGHTS.temperament*temperament+
       ARCHETYPE_WEIGHTS.battle*battle;
-    return {candidate,mode,index,score,breakdown};
+    return {candidate,mode,index,score,breakdown,facetAdjustment};
   }).sort((a,b)=>b.score-a.score || a.index-b.index);
   const winner=scored[0];
   return {
@@ -154,6 +158,7 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
     modeLabel:winner.mode.label,modeGift:winner.mode.gift,
     modeSnag:winner.mode.snag,modeJoke:winner.mode.joke,
     score:Math.round(winner.score),breakdown:winner.breakdown,
+    facetAdjustment:Math.round(winner.facetAdjustment*10)/10,
     alternatives:scored.slice(1,4).map(item=>({
       title:item.candidate.title,score:Math.round(item.score)
     })),

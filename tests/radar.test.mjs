@@ -61,12 +61,13 @@ test('radar shows post-Nature values above the original base numbers', () => {
       assert.ok(svg.includes(name+': after Nature '+build.effectiveStats[key]+', base '+build.baseStats[key]));
     }
   }
-  assert.equal(build.baseStats.spa,109);
-  assert.equal(build.effectiveStats.spa,119);
-  assert.equal(build.baseStats.spe,61);
-  assert.equal(build.effectiveStats.spe,54);
-  assert.ok(statLabels.some(s=>s.includes('>↑119</text>')&&s.includes('>109</text>')));
-  assert.ok(statLabels.some(s=>s.includes('>↓54</text>')&&s.includes('>61</text>')));
+  const boost=build.natureBoost,drop=build.natureDrop;
+  assert.equal(build.effectiveStats[boost],Math.floor(build.baseStats[boost]*1.1));
+  assert.equal(build.effectiveStats[drop],Math.floor(build.baseStats[drop]*.9));
+  assert.ok(statLabels.some(s=>s.includes('>↑'+build.effectiveStats[boost]+'</text>')&&
+    s.includes('>'+build.baseStats[boost]+'</text>')));
+  assert.ok(statLabels.some(s=>s.includes('>↓'+build.effectiveStats[drop]+'</text>')&&
+    s.includes('>'+build.baseStats[drop]+'</text>')));
 });
 
 test('without Nature changes every radar axis has a single base value', () => {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { deriveFunctionPreferences, FUNCTION_KEYS } from '../src/functions.mjs';
+import { deriveFunctionPreferences, deriveFunctionStatAffinities, FUNCTION_KEYS } from '../src/functions.mjs';
 import { deriveMbti, generateBuild } from '../src/engine.mjs';
 import { DEMOS, TEST_LINKS } from '../src/data.mjs';
 
@@ -22,9 +22,42 @@ test('function scores form transparent, bounded, continuous preference contrasts
   assert.deepEqual(deriveFunctionPreferences(totals.map(x=>x+100)),axes,'uniform score offset should not alter contrasts');
 });
 
+
+test('all eight cognitive functions directly influence the six stat affinity axes',()=>{
+  const neutral=Array(8).fill(50);
+  assert.deepEqual(deriveFunctionStatAffinities(neutral),Array(6).fill(50));
+  assert.deepEqual(deriveFunctionStatAffinities(totals),
+    deriveFunctionStatAffinities(totals.map(n=>n+100)),
+    'a common arbitrary source-scale offset must not change scoring');
+  assert.equal(deriveFunctionStatAffinities(totals).length,6);
+  assert.ok(deriveFunctionStatAffinities(totals).every(n=>n>=0&&n<=100));
+  // Stronger Ni + Ti, holding the other functions constant, must favor SpA.
+  const stronger=totals.map((v,i)=>i===1||i===5?v+20:v);
+  assert.ok(deriveFunctionStatAffinities(stronger)[3]>deriveFunctionStatAffinities(totals)[3]);
+  assert.throws(()=>deriveFunctionStatAffinities([10,20,30]),/eight numeric/);
+  assert.throws(()=>deriveFunctionStatAffinities([...totals.slice(0,7),Infinity]),/eight numeric/);
+});
+
+test('eight-function stat identity survives identical four preference contrasts',()=>{
+  const altered=[40,70,0,50,75,40,25,60];
+  assert.deepEqual(deriveFunctionPreferences(totals),deriveFunctionPreferences(altered),
+    'constructed profiles must be identical after the legacy four-axis reduction');
+  assert.notDeepEqual(deriveFunctionStatAffinities(totals),deriveFunctionStatAffinities(altered));
+  const first=generateBuild(input);
+  const second=generateBuild({...input,functionScores:altered});
+  assert.equal(first.mbti,second.mbti);
+  assert.equal(first.nature,second.nature,'Nature may still use the four preference contrasts');
+  assert.notDeepEqual(first.breakdown.mbti,second.breakdown.mbti,
+    'the raw function-derived stat affinities must not collapse with the four-axis projection');
+  assert.notDeepEqual(first.affinities,second.affinities);
+  assert.equal(Object.values(second.baseStats).reduce((a,b)=>a+b,0),535);
+});
+
 test('function input yields a coherent 535-point build without fabricated A/T',()=>{
   const build=generateBuild(input);
   assert.equal(build.cognitiveSource,'functions');
+  assert.equal(build.statWeightMode,'functions');
+  assert.equal(build.statWeights.spa.cognition,.5);
   assert.equal(build.mbti,'INTJ');
   assert.equal(build.identity,'INTJ');
   assert.equal(build.identityPreference,null);
@@ -55,6 +88,13 @@ test('function input stays mutually exclusive with legacy cognition and validate
   const previous=generateBuild({mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,bigFive:DEMOS.architect.bigfive});
   assert.equal(previous.identity,'INTJ-A');
   assert.equal(previous.cognitiveSource,'16personalities');
+  assert.equal(previous.statWeightMode,'percentages');
+  const typeOnly=generateBuild({
+    typeOverride:'INTJ',tritypeOverride:'593',bigFive:DEMOS.architect.bigfive
+  });
+  assert.equal(typeOnly.statWeightMode,'typeOnly');
+  assert.equal(typeOnly.statWeights.spa.cognition,.1);
+  assert.deepEqual(typeOnly.statWeights.spa, {bigFive:.5,enneagram:.4,cognition:.1});
 });
 
 test('optional A/T uses a disclosed type-only proxy, never a fabricated measurement',()=>{
@@ -68,8 +108,10 @@ test('optional A/T uses a disclosed type-only proxy, never a fabricated measurem
   assert.equal(assertive.identityPreference,'A');
   assert.equal(turbulent.identityPreference,'T');
   assert.equal(assertive.breakdown.mbti.length,6);
-  assert.notDeepEqual(assertive.breakdown.mbti,unspecified.breakdown.mbti);
-  assert.notDeepEqual(turbulent.breakdown.mbti,assertive.breakdown.mbti);
+  assert.deepEqual(assertive.breakdown.mbti,unspecified.breakdown.mbti);
+  assert.deepEqual(turbulent.breakdown.mbti,assertive.breakdown.mbti);
+  assert.deepEqual(assertive.baseStats,unspecified.baseStats);
+  assert.equal(assertive.nature,turbulent.nature);
   assert.ok(assertive.warnings.some(note=>note.includes('75/25 type-only proxy')));
   assert.ok(unspecified.warnings.some(note=>note.includes('A/T axis was not provided')));
   assert.deepEqual(generateBuild({...input,identityPreference:'A'}).baseStats,assertive.baseStats);

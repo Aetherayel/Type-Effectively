@@ -27,6 +27,19 @@ test('published revisions choose the newest supported minor and patch through v1
   assert.equal(versionForRevision(published, [{ tag_name:'v1.1.4', target_commitish: published, draft: true }]), null);
 });
 
+test('published V2 releases supersede older minor tags only at the exact revision',()=>{
+  const updated=[
+    ...sample,
+    { tag_name:'v2.0.0',target_commitish:published,draft:false },
+    { tag_name:'v2.0.3',target_commitish:published,draft:false },
+    { tag_name:'v2.1.0',target_commitish:published,draft:false },
+    { tag_name:'v2.0.99',target_commitish:previous,draft:true }
+  ];
+  assert.equal(versionForRevision(published,updated),'2.0.3');
+  assert.equal(versionForRevision(previous,updated),'1.1.2');
+  assert.equal(versionForRevision('b'.repeat(40),updated),null);
+});
+
 test('v1.1.0 baseline works before any release tag exists', async () => {
   const version = await fetchPublishedVersion(async () => ({
     ok: true, json: async () => ({ revision: baseline })
@@ -76,6 +89,12 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(workflow.includes('if [ "$PR_NUMBER" = "32" ]; then'));
   assert.ok(workflow.includes('tag=v1.4.0'));
   assert.ok(workflow.includes('tag="v1.4.$patch"'));
+  assert.ok(workflow.includes('if [ "$PR_NUMBER" = "33" ]; then'));
+  assert.ok(workflow.includes('tag=v2.0.0'));
+  assert.ok(workflow.includes('tag="v2.0.$patch"'));
+  assert.match(workflow,/merged PRs since the v2\.0\.0 baseline/);
+  assert.ok(workflow.indexOf('tag=v2.0.0')<workflow.indexOf('tag=v1.4.0'),
+    'v2 baseline must take precedence over historical v1.4 tags');
   assert.match(workflow, /merged PRs since the v1\.4\.0 baseline/);
   assert.ok(workflow.indexOf('tag=v1.4.0')<workflow.indexOf('tag=v1.3.0'), 'v1.4 must take precedence over historical v1.3 numbering');
   assert.ok(workflow.includes('tag="v1.3.$patch"'));
@@ -86,5 +105,5 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(template.includes('{{ site.github.build_revision }}'));
   assert.match(html, /id="release-version"/);
   assert.match(html, /id="footer-version"/);
-  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=1\.4\.0"/);
+  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=2\.0\.0"/);
 });

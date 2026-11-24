@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 1.4.0 — Whole-profile Nature scoring**
+**Version 2.0.0 — Stat-specific personality calibration**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -24,7 +24,7 @@ No sign-in. No backend. No personality data submitted to a server. Just an unrea
 
 These are independent external websites. **No test integration, scraping, affiliation, or automatic import is implied.** Users enter the result numbers manually. Comprehensive means a longer, more detailed questionnaire—not a claim of scientifically superior Enneagram or cognitive-function typing.
 
-**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. The app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The cognition dimensions are: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, and outward perceiving versus outward judging. This produces a **project-specific cognitive preference** for the whole-profile Nature scoring and stats, not a reproduction of Sakinorva's typing algorithms or a measured MBTI result. Continuous contrasts also feed stats, held items, and whole-build archetype classification.
+**Function input:** Supply all eight comparable overall numeric function totals, including decimals if needed; do not mix scores from different domains or test scales. For Nature and type suggestion, the app takes the mean difference between opposing groups and maps each to a bounded 0–100 preference centered at 50. The cognition dimensions are: introverted versus extraverted functions, intuition versus sensing, feeling versus thinking, and outward perceiving versus outward judging. These derived preferences inform whole-profile Nature scoring and other legacy classification layers; they are not Sakinorva's typing algorithms or measured MBTI results. **Base stats instead use all eight function totals directly**, centered against the within-report mean, so different function profiles can earn different stats even when their four derived preferences match. Function totals and their contrasts also inform held items and whole-build archetype classification.
 
 **Optional Sakinorva type override:** Use the existing four-letter type dropdown while entering eight functions. The app still records and scores the **same eight function totals**, but the chosen type controls the displayed identity and the cognitive polarity used in Nature scoring, and informs whole-build archetype interpretation. The function-derived suggestion remains visible for comparison. The Enneagram-derived elemental typing is unaffected by an MBTI override.
 
@@ -34,7 +34,7 @@ These are independent external websites. **No test integration, scraping, affili
 
 **Rowe normalization (authored game convention, not a validated crosswalk):** Let `low` and `high` be the smallest and largest of the nine raw totals, `mid=(low+high)/2`, and `span=max(50, high-low)`. Each type's internal score becomes `clamp(50 + 80*(raw-mid)/span, 0, 100)`. This maps the profile's relative order and distances onto the same internal domain without pretending Rowe provides percentages or forcing a narrowly spaced test result to 0/100 extremes. The 50-point reference floor and 80-point range are design choices, not empirical calibration, and two sources' resulting profiles cannot be compared as if they were the same instrument. Ties remain ties, so choose a manual tritype override if the reported test or self-typing resolves an important tie. Raw scores remain in a shared build link but are never printed on the exported PNG. Rowe's 27 instinctual subtype totals are currently **not** modeled.
 
-Don't have the full results? You can select an MBTI-style type, enter an ordered Enneagram ranking, or supply a tritype. The result clearly labels estimated inputs. If Big Five is missing, neutral 50-point placeholders are used and disclosed.
+**All three assessments are mandatory for a visible result.** Supply five 16Personalities percentages **or** eight cognitive-function scores, all nine Enneagram scores / Rowe totals **or** a complete nine-type ranking, and all five Big Five domains. Four-letter type and tritype overrides remain available **alongside** test results but cannot substitute for them. Optional IPIP-NEO facets provide more detail. Earlier shared links missing any section no longer generate a result.
 
 ### Explore random combinations
 
@@ -87,14 +87,29 @@ All affinity values are **authored game-design interpretations**, not measured l
 
 **Slot 4 (growth move)** expresses the correction the core Enneagram motivation most needs. Type 3 must share success rather than merely boost personal achievement; Type 5 must pass understanding outward rather than simply think harder; Type 6 must act despite uncertainty rather than accumulate protection. All five candidate moves per core have been audited against those lessons. Joint selection considers both slots, while preserving the identity-defining move meaning. **Baton Pass** is eligible only when another equipped move establishes transferable self-stat boosts, or the active standard Ability is **Speed Boost**. A Hidden Ability is an alternative, not active alongside the standard one. Snow, Aurora Veil, Reflect, Light Screen and Tailwind do not supply transferable stat stages. Builds without valid Baton Pass setup keep the other core-specific growth choices.
 
-## Generation model (v1.4; core Pokémon typing and 535 BST retained)
+## V2.0 stability corrections — complete inputs, no hash, neutral source priors
+
+- **Mandatory three-part assessment:** The UI accepts only actual cognitive questionnaire scores, complete Enneagram scores/Rowe totals/ranking, and all five Big Five domains. Type and tritype overrides adjust identity but cannot stand in for a missing framework. No result card, share action, EV trainer, or printed interpretation is rendered from an incomplete entry; invalid regeneration also clears previously rendered results.
+- **Held-item stability:** Removed the raw-score FNV-1a tie adjustment (previously up to ±4 score points). Eligible items are ranked on motivational family fit, Big Five trait compatibility, battle-role fit and bounded facet nuances, with stable name-based ties. A one-point questionnaire adjustment now changes held items only when substantive scores/eligibility genuinely change.
+- **Centered Enneagram stat baselines:** Each of the six authored type-prototype column means is subtracted and replaced with an affinity of 50. Identical nine-type inputs now contribute a neutral value to every stat, whatever that stat's framework weighting. Relative differences between types are preserved. At all-neutral inputs, the 535 BST becomes **HP 90 / Atk 89 / Def 89 / SpA 89 / SpD 89 / Spe 89**, compared with the previous 90 / 87 / 95 / 90 / 88 / 85.
+- **Defensive role distinction remains intentionally unresolved:** Wall is about sustained containment; Tank is a durable attacker. Their synthetic frequency should be audited separately before merging them or modifying battle-role geometry.
+
+The baseline before these changes is preserved in `docs/v2-audit-baseline.md`. Rerun `npm run audit:v2` against the current branch to compare outcome distributions.
+
+## V2 boundary: existing changes versus potential next steps
+
+**V2.0 delivers** stat-specific source weights, direct eight-function cognitive affinity scoring, recalibrated Big Five and Enneagram affinities, aligned stat and Nature meanings, and tests of overall distribution and mechanical coherence. This deliberately changes old results.
+
+**Also included in V2:** Optional IPIP-NEO Big Five **facet-level** scoring. The five reported domains remain the basis of the Big Five contribution; complete groups of six facet percentiles may refine individual stats without adding a fourth scoring source. Old five-domain inputs and links remain valid. The mappings and safeguards are documented below.
+
+## Generation model (v2.0; core Pokémon typing and 535 BST retained)
 
 Deterministic. The same inputs always produce the same result. The output is explainable.
 
 1. **Elemental typing:** Score each of the 17 elements against all nine Enneagram motivations using `TYPE_AFFINITY`. **Primary:** core 88% + wing 12% (or core 100% if wing is unknown). **Secondary:** second fix 65% + third fix 30% + core 5%. **Hidden affinity:** third fix 60% + second fix 30% + wing 10% (or 70% third / 30% second if wing is unknown); exclude both visible types. All three selections are deterministic. Monotypes arise only when primary and secondary independently coincide.
 2. **Nature:** Score all **20 distinct non-neutral Pokémon Natures** as a motivation/cognition/temperament **priority tradeoff**, before applying Nature to stats. See the scoring specification below; MBTI letters alone no longer determine Nature.
-3. **Base affinities:** Blend **70% Big Five**, **20% nine-type Enneagram distribution**, and **10% cognition input (16Personalities percentages or function-derived contrasts)**.
-4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.1, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
+3. **Base affinities:** Blend Big Five, nine-type Enneagram distribution, and cognition using **stat-specific source weights**. The cognitive contribution is adjusted according to whether users enter eight functions or actual 16Personalities percentages. The historical four-letter-only calibration remains an internal compatibility rule but is not available as a user-facing input mode (see matrix below).
+4. **Base stats:** Center the six affinities around 535/6, multiply deviations by 1.25, constrain each stat to 45–140, and redistribute/round to preserve **exactly 535 BST**.
 5. **Nature modifiers:** Apply +10% to one and −10% to another non-HP stat *after* the base stat calculation. These do not change the underlying BST.
 6. **Battle role (v1.1):** Match effective stats against six tactical reference profiles compressed **25% toward 535/6 per stat** (see `ROLE_TEMPLATE_SCALE` and `ROLE_CALIBRATED_TEMPLATES` in `src/data.mjs`). This corrects the systematic advantage of the unusually balanced Pivot reference without forcing equal role frequencies. Role suitability remains **80% stat similarity** (an RMSE-to-score conversion) plus **20% type toolkit affinity**; the existing five-point hybrid threshold is unchanged. Original reference profiles remain available in `ROLE_TEMPLATES`.
 7. **Abilities and moves:** For non-signature builds, rank standard Ability candidates by role, visible typing, stat synergy, and second fix. Select a **different Hidden Ability** from the same curated pool, **strictly requiring affinity with at least one visible Pokémon type**, then score it against battle role, stats, second fix, and third fix. The hidden *elemental* affinity remains separate and can provide monotype coverage, but never dictates an off-type Hidden Ability. Four moves comprise primary STAB, secondary STAB/coverage, a **functionally classified role tactic**, and a **corrective growth move**. The third move is chosen by role function first (offense, protection, endurance, positioning, ally support or disruption), then checked against mechanical prerequisites, stats, visible types, supporting fixes and hybrid role. The fourth move must express the Enneagram core's **growth lesson rather than its usual defensive strategy**. The last two moves are **selected as a pair**, preserving four unique moves and avoiding redundant or contradictory setups.
@@ -103,17 +118,111 @@ Deterministic. The same inputs always produce the same result. The output is exp
 9. **Whole-build archetype (post-generation):** After typing, Nature, 535-point stats, role, Abilities, moves and item are finalized, classify the result against **36 curated archetypes**: six motivational/cognitive/temperamental operating styles × six battle expressions. The game-affinity score combines **25% Enneagram motivation** (all nine scores plus ordered tritype), **20% 16Personalities cognitive preference** (five percentages, respecting overridden letters), **25% Big Five temperament**, and **30% battle-role compatibility**. Battle compatibility already reflects stats and visible typing, so neither is independently counted again. The best-ranked candidate wins; close competitors and four scoring components are shown for transparency. Nothing in archetype selection feeds backward into the Pokémon build.
 10. **Trainer Field Report:** A fictional, dynamically generated **Pokédex field entry** introduces the creature, followed by a **three-order Trainer Playbook**: practice the actual role-tactic move using the strongest stats, bring coverage for the actual type-chart weaknesses, and train the actual corrective growth move. Eight further field notes address instincts, MBTI-style habits, OCEAN temperament, deployment, vulnerabilities, contradictions, party synergy, and growth—**as advice to a Pokémon trainer**, not a clinical assessment of the player. The narrative references the complete generated build, including Nature and the 535 BST budget. Missing Big Five inputs are explicitly described as estimates, not observations. The report displays qualitative observations, not raw personal assessment scores; downloaded card behavior is unchanged.
 
-### How Nature is scored (v1.4.x)
+### Base-stat calibration and semantic contract
 
-Nature answers **which behavior is prioritized, and which competing response is sacrificed?** It does **not** rank aptitude, so it never reads base stats, battle role, typing, abilities, or archetype. Five non-HP meanings are deliberately distinct from the base-stat aptitude mappings:
+**Base stat = relative strength. Nature = prioritized behavior at another behavior's expense.** The same six meanings apply throughout the model; no Pokémon Nature name is treated as a validated personality definition.
+
+**Stat-specific source weights** — each entry is Big Five / Enneagram / cognition; each row totals 100% independently. These are authored game-design judgments, not claims of psychometric reliability.
+
+| Stat | Eight functions entered | 16Personalities percentages entered | MBTI label only |
+| --- | --- | --- | --- |
+| HP · Resilience | 60 / 30 / 10 | 65 / 30 / 5 | 70 / 25 / 5 |
+| Attack · Assertion | 35 / 35 / 30 | 45 / 35 / 20 | 50 / 40 / 10 |
+| Defense · Fortitude | 35 / 45 / 20 | 40 / 45 / 15 | 45 / 45 / 10 |
+| Sp. Atk · Ingenuity | 25 / 25 / 50 | 45 / 30 / 25 | 50 / 40 / 10 |
+| Sp. Def · Composure | 60 / 25 / 15 | 65 / 25 / 10 | 70 / 25 / 5 |
+| Speed · Responsiveness | 40 / 25 / 35 | 50 / 25 / 25 | 60 / 30 / 10 |
+
+**Why:** Big Five supplies stronger proxies for sustained resilience and emotional composure. Enneagram motivation contributes more to principled boundaries. Detailed functions supply richer distinctions for conceptual ingenuity and responsiveness. The extra dimensions are not automatically *truer*: the weights reflect explanatory detail, not questionnaire validity. These inputs still normalize to exactly 535 BST. All three framework sections are required for visible builds, so missing Big Five no longer contributes inferred neutral values in the interface. Nature scoring stays separate.
+
+| Stat | Meaning | Distinction |
+| --- | --- | --- |
+| HP | Resilience | Sustained effort and recovery |
+| Attack | Assertion | Direct action and confrontation |
+| Defense | Fortitude | Boundaries and resistance to disruption |
+| Sp. Atk | Ingenuity | Inventive connections and conceptual solutions |
+| Sp. Def | Composure | Emotional regulation and perspective |
+| Speed | Responsiveness | Reaction tempo and quick adaptation |
+
+### Optional IPIP-NEO facet refinement (V2.0)
+
+**Input contract:** The Big Five panel accepts all five existing domain percentiles (O, C, E, A, N) and optionally up to five **complete groups of six facet percentiles** in the same O/C/E/A/N order. Each entered value must be numeric 0–100, comparable percentile output from one IPIP-NEO report, not a raw 0–40 item sum. Empty groups fall back to the broad-domain model; partially completed groups fail validation rather than fabricating missing scores. Facets require reported parent domains. Older shared links without `bigFiveFacets` produce exactly their original V2 domain-only scores. Share links explicitly include any supplied facet percentiles; public card PNGs continue to omit exact personal scores.
+
+The domain-level Big Five affinities are calculated **exactly as before**. Facets provide bounded, stat-specific differences *inside the existing Big Five source*, before the framework's per-stat Big Five weight is applied:
+
+`refinedBigFiveStat = clamp(baseBigFiveStat + Σ over entered domain groups [parentCoefficient × 0.85 × clamp(weightedRelevantFacets − reportedDomain, −30, 30)], 0, 100)`
+
+Each `weightedRelevantFacets` is a convex blend of the named facets below. Parent coefficients follow the existing domain-level `oceanAffinity` expression, including negative signs for Neuroticism. This contrasts each selected facet percentile against its **reported domain percentile**, not against 50 or the arithmetic mean of facet percentiles. Percentiles are normative ranks and should not be treated as additive raw trait quantities: the equation is an explicit, bounded **game heuristic**.
+
+| Pokémon stat | Refining facets (weights within domain) | Why this correction |
+| --- | --- | --- |
+| HP · Resilience | C: Self-Discipline 65%, Achievement-Striving 35%; N: Vulnerability 70%, Anxiety 30% | Staying power rather than general neatness |
+| Attack · Assertion | E: Assertiveness 80%, Activity Level 20%; C: Self-Efficacy 65%, Achievement-Striving 35% | Direct agency rather than general sociability |
+| Defense · Fortitude | C: Dutifulness 40%, Cautiousness 35%, Self-Discipline 25%; N: Vulnerability 100% | Principled resistance rather than routine alone |
+| Sp. Atk · Ingenuity | O: Intellect 65%, Imagination 25%, Artistic Interests 10% | Conceptual curiosity distinct from novelty seeking |
+| Sp. Def · Composure | N: Vulnerability 50%, Anger 30%, Anxiety 20% | Reaction regulation rather than agreeableness |
+| Speed · Responsiveness | E: Activity Level 70%, Assertiveness 20%, Excitement-Seeking 10%; O: Adventurousness 75%, Imagination 25% | Initiative and adaptive tempo rather than extraversion alone |
+
+### Facets beyond stats: whole-build nuance, not extra stat bonuses
+
+Optional facets may shape **three additional outcomes**, always within an existing scoring mechanism:
+
+- **Archetype (six operating styles / 36 titles):** A few behaviorally relevant facets adjust the **existing 25% Big Five temperament-fit component** by at most ±6 fit points. Strategist favors conceptual care and order; Steward favors practical care and cooperation; Pathfinder favors exploration; Sentinel favors caution and duty; Catalyst favors energetic initiative; Artisan favors imagination and aesthetic feeling. Enneagram, cognition, role, and the archetype catalog remain unchanged. This is a small preference among close candidates, not a new personality label.
+- **Held item (nine equipment families):** A subset of relevant facets alters the existing **item-family preference** by at most ±4 family-fit points, e.g. Cautiousness favors preparation, Altruism favors support, and Adventurousness favors risk or adaptability. It **cannot override item legality, role fit, move prerequisites, or signature-strategy equipment**. Items remain Pokémon-mechanical, not literal personality badges.
+- **Trainer’s Guide:** Distinctive within-domain contrasts in Emotionality, Friendliness, Gregariousness, Cheerfulness, Trust, Modesty, Self-Consciousness and Immoderation may supply up to two additional gentle, descriptive observations. They do not diagnose, assign virtue, or change any stat.
+
+Each of the 30 facets is accounted for:
+
+| Domain | Individual facet outcomes (beyond its parent-domain contribution) |
+| --- | --- |
+| O | O1 Imagination: stat/archetype; O2 Artistic Interests: stat/archetype; O3 Emotionality: archetype/Guide; O4 Adventurousness: stat/archetype/item; O5 Intellect: stat/archetype/item; O6 Liberalism: **no independent use** |
+| C | C1 Self-Efficacy: stat; C2 Orderliness: archetype/item; C3 Dutifulness: stat/archetype; C4 Achievement-Striving: stat/item; C5 Self-Discipline: stat/item; C6 Cautiousness: stat/archetype/item |
+| E | E1 Friendliness: archetype/Guide; E2 Gregariousness: Guide; E3 Assertiveness: stat/archetype/item; E4 Activity Level: stat/archetype/item; E5 Excitement-Seeking: stat/archetype/item; E6 Cheerfulness: archetype/Guide |
+| A | A1 Trust: Guide; A2 Morality: **no independent use**; A3 Altruism: archetype/item; A4 Cooperation: archetype/item; A5 Modesty: Guide; A6 Sympathy: archetype/item |
+| N | N1 Anxiety: stat; N2 Anger: stat; N3 Depression: **no independent use**; N4 Self-Consciousness: Guide; N5 Immoderation: Guide; N6 Vulnerability: stat |
+
+**Safeguards:** O6 Liberalism (political/moral views), A2 Morality (moral conformity), and N3 Depression (depressive affect) have **no independent gameplay or descriptive facet effect**. All 30 facets remain reflected indirectly in their reported five broad domains. A facet difference of less than 18 percentile ranks relative to its parent cannot trigger a standalone Trainer’s Guide quirk. Stat corrections, archetype adjustments, and equipment nudges all remain deterministic and bounded; none adds another framework source or extra BST. Nature and Enneagram typing remain independent of facet-specific rules. A facet may influence role and its derived moves through legitimate changes to the base-stat spread, but cannot bypass mechanical eligibility.
+
+No IPIP facet is treated as proof of intelligence, virtue, physical reaction speed, or mental health. The resulting Big Five corrections and additional outcome adjustments are visible in the expandable build calculation; shared card images continue to omit exact scores.
+
+**Big Five base affinities** (O/C/E/A/N are entered domains, Stability=100−N):
+
+- HP = `0.55C + 0.35 Stability + 0.10A`; Atk = `0.45E + 0.20(100−A) + 0.35C`
+- Def = `0.45C + 0.30(100−E) + 0.25 Stability`; SpA = `0.60O + 0.20C + 0.20(100−E)`
+- SpD = `0.65 Stability + 0.20A + 0.15C`; Spe = `0.45E + 0.35O + 0.20(100−C)`
+
+**16Personalities cognitive base affinities** (used only without eight-function results; I/N/F/P as reported, E=100−I, S=100−N, T=100−F, J=100−P):
+
+- HP = `0.35J + 0.20I + 0.45×50`; Atk = `0.45E + 0.35T + 0.20J`
+- Def = `0.45J + 0.30I + 0.25T`; SpA = `0.60N + 0.25T + 0.15I`
+- SpD = `0.35I + 0.30J + 0.35×50`; Spe = `0.45E + 0.35P + 0.20S`
+
+**Direct eight-function base affinities** (used only when comparable Ne/Ni/Se/Si/Te/Ti/Fe/Fi totals are entered): subtract the within-profile eight-function mean from each score, producing deviations `ne,ni,se,si,te,ti,fe,fi`. Bound each resulting stat affinity to 0–100.
+
+- HP = `50 + 0.50×(0.35si + 0.30ni + 0.20te + 0.15fi)`
+- Atk = `50 + 0.50te + 0.30se + 0.20fi`
+- Def = `50 + 0.35si + 0.35fi + 0.20ni + 0.10ti`
+- SpA = `50 + 0.42ni + 0.32ne + 0.26ti`
+- SpD = `50 + 0.45×(0.40ti + 0.35fi + 0.25si)`
+- Spe = `50 + 0.45se + 0.35ne + 0.20te`
+
+This retains the distinctions that the four-letter reduction loses, without interpreting raw Sakinorva totals as 0–100 percentiles. Uniformly shifting every input function score has no effect. HP and SpD are attenuated, since functional preferences are weak evidence for resilience or emotional regulation. The stat-specific cognitive contribution changes with the reported detail; no additional scoring source is introduced. The four derived preference contrasts still inform Nature and legacy interpretation, keeping base-stat style and Nature priorities conceptually separate.
+
+HP and SpD cognitive affinities deliberately shrink toward neutral 50 because the four cognitive axes are weak evidence for resilience and emotional regulation. The 16Personalities A/T dimension is excluded to avoid double-counting emotional sensitivity. Authored nine-type Enneagram base affinities live in `ENNEAGRAM_AFFINITIES`, distinct from Nature's motivational preferences. Lower Agreeableness is only a minority contributor to Attack; Neuroticism no longer raises Speed. HP, Defense and Sp. Def can correlate, but now have different principal signals.
+
+**Limits:** This is a deterministic game calibration, not a validated personality assessment. The weights and prototypes are design judgments. They intentionally change downstream battle roles, abilities and moves when the recalibrated stat spread warrants it; typing, Nature mechanics, and the 535-point budget remain unchanged.
+
+### How Nature is scored (v1.4 onward; retained in V2)
+
+Nature answers **which behavior is prioritized, and which competing response is sacrificed?** It does **not** rank aptitude, so it never reads base stats, battle role, typing, abilities, or archetype. The five non-HP meanings are shared with base stats; the preference and capacity formulas remain separate:
 
 | Nature preference axis | Interpretation |
 | --- | --- |
 | Attack | Decisive assertion (choosing to confront/act) |
-| Defense | Protective structure (choosing boundaries/order) |
-| Sp. Atk | Reflective exploration (choosing inquiry/possibilities) |
-| Sp. Def | Patient cooperation (choosing composure/harmony) |
-| Speed | Responsive flexibility (choosing immediate adaptation) |
+| Defense | Protective fortitude (choosing boundaries/resistance) |
+| Sp. Atk | Inventive exploration (choosing inquiry/possibilities) |
+| Sp. Def | Steady composure (choosing regulation/perspective) |
+| Speed | Responsive adaptation (choosing immediate adjustment) |
 
 **Enneagram component:** Nine authored motivational prototypes, ordered Attack / Defense / Sp. Atk / Sp. Def / Speed. These are **preference scores**, not the `ENNEAGRAM_AFFINITIES` aptitude matrix used for base stats.
 
@@ -134,16 +243,16 @@ For each preference axis: `Motivation = 50 + (0.55 × core prototype + 0.25 × s
 **Cognitive component:** Let `I,N,F,P` be four 0–100 preference percentages; `E=100−I`, `S=100−N`, `T=100−F`, `J=100−P`. For an intentional type override, keep the reported distance from 50 but point it toward the overridden letter. The four preference axes (not A/T) determine:
 
 - Atk = `0.30E + 0.55T + 0.15J`; Def = `0.20I + 0.15S + 0.15T + 0.50J`
-- SpA = `0.20I + 0.55N + 0.25T`; SpD = `0.15I + 0.50F + 0.20J + 0.15S`
+- SpA = `0.20I + 0.55N + 0.25T`; SpD = `0.35I + 0.30J + 0.35×50` (weak cognitive proxy)
 - Spe = `0.30E + 0.25S + 0.45P`
 
 **Big Five component, only when measured:** `O,C,E,A,N` are the entered 0–100 domains and `Stability = 100−N`.
 
-- Atk = `0.30E + 0.40(100−A) + 0.30C`; Def = `0.55C + 0.25 Stability + 0.20(100−E)`
-- SpA = `0.50O + 0.25(100−E) + 0.25C`; SpD = `0.45A + 0.40 Stability + 0.15C`
-- Spe = `0.40E + 0.35(100−C) + 0.25O`
+- Atk = `0.30E + 0.30(100−A) + 0.40C`; Def = `0.55C + 0.25 Stability + 0.20(100−E)`
+- SpA = `0.55O + 0.25(100−E) + 0.20C`; SpD = `0.65 Stability + 0.15A + 0.20C`
+- Spe = `0.40E + 0.25(100−C) + 0.35O`
 
-For each candidate Nature's boost stat `b` and reduced stat `d`, calculate a source's **pair fit** as `50 + (sourcePriority[b] − sourcePriority[d])/2`. Score the candidate as **45% Enneagram + 30% cognition + 25% Big Five**. A four-letter-only proxy reduces cognitive weight to 15 before re-normalizing. Missing Big Five is **excluded and weights re-normalized** (60%/40% with measured cognition; 75%/25% with type-only estimates). Highest score wins; exact ties are alphabetically deterministic. No arbitrary variation or equalization quota is applied.
+For each candidate Nature's boost stat `b` and reduced stat `d`, calculate a source's **pair fit** as `50 + (sourcePriority[b] − sourcePriority[d])/2`. Score the candidate as **45% Enneagram + 30% cognition + 25% Big Five**. A four-letter-only proxy reduces cognitive weight to 15 before re-normalizing. The user-facing generator requires measured Big Five domains; internal historical fallback modes are still present for lower-level test compatibility but never generate a user-visible build. Highest score wins; exact ties are alphabetically deterministic. No arbitrary variation or equalization quota is applied.
 
 **Worked example (bundled INTJ-A / 593 sample):** Quiet (+Sp. Atk, −Speed) receives Enneagram pair fit **67.7**, cognitive pair fit **83.8**, and Big Five pair fit **75.5**. The resulting score is **74.5** after weighting (45/30/25). This is the bundled demo profile, not a fixed result for all INTJs or all 593s. Numbers are rounded for display; candidate ranking uses full precision.
 
@@ -180,7 +289,7 @@ Specialization jointly selects standard Ability, role tactic and held item. A cl
 
 The standard and Hidden Abilities are **alternative strengths**, not concurrently active. A Fire/Fighting build cannot be assigned Sand Force solely because it has a Ground hidden elemental affinity; a Water/Ice build cannot inherit Solid Rock by the same mechanism. This changes mechanical selection without altering the v1.0 seventeen-type typing or 535-BST model.
 
-The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 deliberately changes Nature selection**, so derived roles and specialist outcomes can change; the 535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remain intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
+The six possible tactical roles are Sweeper, Wall, Tank, Pivot, Support, and Controller. Specialization (versatile / focused / highly specialized) is inferred from stat dispersion rather than assigned from a personality label. **Historical v1.1 behavior:** That role calibration preserved the Nature system of its day. **v1.4 changed Nature selection; v2.0 recalibrates the base-stat model**, so derived roles and specialist outcomes can change; the 535 base-stat budget, elemental typing, archetype catalog, and hybrid threshold remain intact. A newly selected role may legitimately change the standard/Hidden Ability, move pair, held item, and Trainer Field Report; card exports and report text use the same recomputed build.
 
 ### Examples
 
@@ -216,9 +325,9 @@ The feature is playful game training, not a new input to personality interpretat
 
 ## Understanding the stats (on-site guide)
 
-A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertiveness), Defense (discipline), Sp. Atk (creative analysis), Sp. Def (composure/cooperation), and Speed (energy/responsiveness).
+A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertion), Defense (fortitude), Sp. Atk (ingenuity), Sp. Def (composure), and Speed (responsiveness).
 
-The guide explains the fixed **535 BST** budget, the **70/20/10 Big Five / Enneagram / cognition** affinity blend, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
+The guide explains the fixed **535 BST** budget, the stat-specific Big Five / Enneagram / cognition affinity blends, Nature's ±10% changes, and high/low OCEAN abbreviations. This interpretation is **site-only**: nothing was added to the downloaded PNG. All descriptions are authored symbolic metaphors, not claims of measured ability or psychological validity.
 
 ## Elemental card artwork: 17 generated identities, 18 supported Pokémon types
 
@@ -236,13 +345,13 @@ Older visual-composition samples from the pair-mapping version: [Ice/Steel Tank]
 
 **Card version provenance:** Every generated result card and its exported PNG prints the release on which that card was created (for example, **CREATED v1.2.0**) in a restrained bottom footer. The **Copy build** summary includes the same label. **Copy share link** records the origin release separately from the URL schema version. If that link is reopened after the site updates, its inputs are **recalculated using the current engine**; the footer then shows both **CREATED v1.2.0 · RECALCULATED v1.2.3**, so a changed outcome is not mistakenly attributed to the old version. Legacy links that predate this field say **CREATED VERSION UNRECORDED**, not a fabricated release. The card footer updates if the verified published patch arrives after an initial build, while previously shared source-version metadata remains immutable.
 
-**Download Personality Card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The separate **Download Trained Build** shares the same presentation and item sprite but swaps the radar for six Base / EV / Level-100 stat rows, the Nature modifier, and the current EV budget. Both cards use the same creation/recalculation version footer. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Without entered Big Five results, the card reads **OCEAN · Estimated**. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
+**Download Personality Card** produces a self-contained, branded PNG using a local SVG-to-Canvas export. It includes the Pokémon archetype, typing, Nature, battle role, **standard and Hidden Abilities, all four signature moves, the six-stat radar, plus a compact held-item illustration, name, and dry punchline**. The separate **Download Trained Build** shares the same presentation and item sprite but swaps the radar for six Base / EV / Level-100 stat rows, the Nature modifier, and the current EV budget. Both cards use the same creation/recalculation version footer. The item's detailed effect and personalized rationale remain on the results screen, not on the image. **The PNG shares only five high/low OCEAN indicators** (O, C, E, A, N) beneath the MBTI/tritype label, using **H for scores of at least 50 and L for scores below 50**. Exact Big Five values remain private to the local calculator. Cards can only be generated after all five Big Five domains have been supplied. The Enneagram and 16Personalities questionnaire scores and full input payload are also excluded. The artwork is generated locally via SVG-to-Canvas with no screenshot service or additional library; the item icon is fetched from the public PokéAPI sprite repository, with a built-in fallback if unavailable.
 
 ### Held items: a little too much personality
 
 The optional-feeling but deterministic **Held item** section is a humorous metaphor about coping strategies, not another psychological test or a battle modifier. It shows the item's real in-game effect, one dry caption, and a short **Why you got this** explanation tied to the individual's strongest input tendencies and battle role. The results screen shows the full explanation alongside an authentic held-item sprite. The PNG includes the item icon, name and dry line, but omits its effect and reasoning so the card remains compact.
 
-The catalog contains **72 regular real held-item candidates, eight per family**, plus **Flame Orb and Toxic Orb reserved for eligible specialist packages**: control & certainty, protection & boundaries, endurance & recovery, ambition & performance, risk & improvisation, adaptability & escape, preparation & contingency, persistence & repetition, and support & relationships. No item is hard-coded to one MBTI or tritype, but item effects must be compatible with the generated Pokémon. The eligible pool therefore varies by typing and moves. Varying the Big Five scores can produce different items even within the same tritype; identical complete inputs always produce identical selections. When Big Five was not entered, the explanation never pretends that neutral placeholder values were measured traits.
+The catalog contains **72 regular real held-item candidates, eight per family**, plus **Flame Orb and Toxic Orb reserved for eligible specialist packages**: control & certainty, protection & boundaries, endurance & recovery, ambition & performance, risk & improvisation, adaptability & escape, preparation & contingency, persistence & repetition, and support & relationships. No item is hard-coded to one MBTI or tritype, but item effects must be compatible with the generated Pokémon. The eligible pool therefore varies by typing and moves. Varying the Big Five scores can produce different items even within the same tritype; identical complete inputs always produce identical selections. Scores must come from all three user-entered assessment sections. No item is selected using a survey-score hash; near ties resolve by consistent item name ordering after genuine mechanical and personality fit scoring.
 
 The **Type matchups** section evaluates incoming attacks against the generated one- or two-type Pokémon using the modern (Generation VI onward) 18-type effectiveness chart. It lists 4× weaknesses, 2× weaknesses, ½× resistances, ¼× resistances, and immunities. Unaffected attacks are omitted. These multipliers describe *typing only*; abilities, items, weather, and other battle effects can change damage in an actual Pokémon battle.
 
@@ -260,11 +369,11 @@ GitHub Pages publishes the static site from `main` through GitHub's built-in bra
 
 The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `npm test` for pushes to `main` and pull requests. **It does not deploy Pages:** the built-in publisher already handles that. Do not enable a second deployment workflow without first changing the Pages publishing source in **Repository Settings → Pages**.
 
-**Preview an open PR:** Branches do not automatically receive Pages URLs. For a quick temporary preview of the v1.4 Nature change, use [the third-party RawGitHack development viewer for PR #32](https://raw.githack.com/Aetherayel/Type-Effectively/feature/whole-profile-nature-scoring/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
+**Preview an open PR:** Branches do not automatically receive Pages URLs. For a temporary preview of the v2.0 scoring changes, use [the third-party RawGitHack development viewer for PR #33](https://raw.githack.com/Aetherayel/Type-Effectively/feature/personality-stat-recalibration/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
 
-**Automatic live releases (v1.4.x):** PR **#32** establishes **v1.4.0** upon merge and successful publication. Each later merged PR increments **v1.4.x** by merged-PR history, not arbitrary pushes or commits. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
+**Automatic live releases (v2.0.x):** PR **#33** establishes **v2.0.0** upon merge and successful publication. Each later merged PR increments **v2.0.x** by merged-PR history, not arbitrary pushes or commits. PR #32 retains its historical **v1.4.0** baseline. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x and v1.4.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v1.4.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v1.4.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x, v1.4.x and v2.0.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v2.0.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v2.0.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 

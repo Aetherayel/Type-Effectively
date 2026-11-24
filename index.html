@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10171c" />
-  <meta name="application-version" content="1.4.0" />
+  <meta name="application-version" content="2.0.0" />
   <meta name="description" content="Turn your MBTI, Enneagram, and Big Five results into a custom personality Pokémon. 535 base stat points. Zero scientific claims about your battle potential." />
   <meta property="og:title" content="Type Effectively — your personality has a moveset" />
   <meta property="og:description" content="Three personality tests. One extremely specific Pokémon build." />
   <title>Type Effectively · Your personality has a moveset</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=nature-scoring-1" />
-  <script type="module" src="./src/app.mjs?v=nature-scoring-1"></script>
-  <script type="module" src="./src/release-version.mjs?v=1.4.0"></script>
+  <link rel="stylesheet" href="./styles.css?v=v2-complete-stable-3" />
+  <script type="module" src="./src/app.mjs?v=v2-complete-stable-3"></script>
+  <script type="module" src="./src/release-version.mjs?v=2.0.0"></script>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -23,7 +23,7 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span>TYPE<span class="brand-accent">/</span>EFFECTIVELY</span>
       </a>
-      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v1.4.0</span>
+      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v2.0.0</span>
       <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a></div>
     </header>
 
@@ -71,17 +71,16 @@
               <span class="panel-icon">◈</span>
             </div>
             <h3 id="mbti-title">Your cognitive style</h3>
-            <p class="panel-subtitle" id="mbti-subtitle">Five 16Personalities dimensions. Yes, we kept the percentages. They actually do something here.</p>
+            <p class="panel-subtitle" id="mbti-subtitle">Enter your complete 16Personalities percentages or eight cognitive-function scores. A four-letter type alone is not enough.</p>
             <div class="test-line"><a id="mind-test-link" href="https://www.16personalities.com/free-personality-test" target="_blank" rel="noopener noreferrer">Take the free 16Personalities test ↗</a><span id="mind-test-detail">~10 min · external site</span></div>
             <div class="mode-switch" role="group" aria-label="Cognitive input mode">
               <button type="button" class="mode-button active" data-mbti-mode="scores" aria-pressed="true">Enter my scores</button>
-              <button type="button" class="mode-button" data-mbti-mode="type" aria-pressed="false">I know my type</button>
               <button type="button" class="mode-button" data-mbti-mode="functions" aria-pressed="false">8 functions</button>
             </div>
             <div id="mbti-score-fields" class="slider-stack"></div>
             <p class="mini-note" id="mbti-score-help">Select the trait shown on your report and enter its percentage. For example: 71% Extraverted = 71 + Extraverted.</p>
             <div id="function-score-fields" class="function-grid hidden" aria-label="Eight cognitive-function scores"></div>
-            <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. Function scores influence the build continuously; a four-letter label is inferred only to keep existing game mechanics compatible.</p>
+            <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. All eight scores contribute directly to stat affinities; derived preference contrasts still determine the suggested four-letter label and inform Nature.</p>
             <div class="field-grid" id="mbti-type-fields">
               <label class="field">
                 <span id="mbti-override-label">Type override <span class="muted">(optional with scores)</span></span>
@@ -106,13 +105,12 @@
               <span class="panel-icon">◇</span>
             </div>
             <h3 id="ennea-title">Your Enneagram</h3>
-            <p class="panel-subtitle">All nine scores shape the build. We infer your ordered tritype, but you get the final say.</p>
+            <p class="panel-subtitle">Complete Enneagram results are required: all nine type scores, Rowe raw totals, or a full nine-type ranking. A tritype can override the result, not replace the test.</p>
             <div class="test-line"><a id="ennea-test-link" href="https://findmynine.com/test" target="_blank" rel="noopener noreferrer">Take the free Find My Nine test ↗</a><span id="ennea-test-detail">Full nine-score results</span></div>
             <div class="mode-switch" role="group" aria-label="Enneagram input mode">
               <button type="button" class="mode-button active" data-ennea-mode="scores" aria-pressed="true">9 scores</button>
               <button type="button" class="mode-button" data-ennea-mode="ranking" aria-pressed="false">Ranking</button>
               <button type="button" class="mode-button" data-ennea-mode="rowe" aria-pressed="false">Rowe raw</button>
-              <button type="button" class="mode-button" data-ennea-mode="tritype" aria-pressed="false">Tritype only</button>
             </div>
             <div id="ennea-score-fields" class="ennea-grid"></div>
             <p class="mini-note" id="ennea-score-help">These are 0–100 scores. For signed Rowe results, use “Rowe raw” instead of manually scaling them.</p>
@@ -142,16 +140,23 @@
               <span class="panel-icon">⌁</span>
             </div>
             <h3 id="bigfive-title">Your Big Five</h3>
-            <p class="panel-subtitle">The statistical backbone. Your scores shape the spread; nobody gets extra base stat points.</p>
+            <p class="panel-subtitle">Required: all five Big Five domains. Optional IPIP-NEO facets refine the result without adding stat points.</p>
             <div class="test-line"><a id="bigfive-test-link" href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span id="bigfive-test-detail">50 questions · free scores</span></div>
             <div id="bigfive-fields" class="slider-stack"></div>
-            <p class="mini-note">Starting values of 50 are neutral placeholders, not guesses about you. Enter the five domain percentiles (O, C, E, A, N), not the 30 separate facets. IPIP-NEO lists the domains in a different order.</p>
+            <p class="mini-note">Enter the five reported domain scores in O, C, E, A, N order. This section must be completed before a Pokémon can be generated. Default 50s are entry placeholders, not measured results. IPIP-NEO reports may list the domains in a different order.</p>
+            <details class="facet-panel" id="bigfive-facet-panel">
+              <summary>Optional — refine with IPIP-NEO facets (30)</summary>
+              <p class="mini-note">Enter the 0–100 <strong>percentiles</strong> shown on your IPIP-NEO report, not raw sums. Complete all six facets within any domain you want to refine; leave other groups blank. The five domain scores above remain required and unchanged. Facets only refine that domain's existing influence on relevant stats.</p>
+              <div id="bigfive-facet-groups" class="facet-groups" aria-label="Optional IPIP-NEO facets"></div>
+              <p id="facet-entry-status" class="mini-note" role="status">No facet groups entered. Domain-only scoring remains available.</p>
+              <p class="mini-note">These are game interpretations, not psychometric capability measures. Political values and moral conformity are not assigned independent stat bonuses.</p>
+            </details>
           </section>
 
           <div id="form-error" class="form-error hidden" role="alert"></div>
           <div class="action-bar">
             <button id="generate-button" type="submit" class="primary-button"><span class="button-spark">✳</span> Generate my Pokémon <span aria-hidden="true">↗</span></button>
-            <span class="action-aside">Runs entirely in your browser.<br />No account. No data upload.</span>
+            <span class="action-aside">All three test sections required.<br />Runs locally. No account or upload.</span>
           </div>
         </form>
 
@@ -191,19 +196,19 @@
       </div>
 
       <div class="stat-guide-grid" aria-label="What each Pokémon stat represents">
-        <div class="stat-guide-stat"><span class="stat-guide-code">HP</span><h3>Resilience</h3><p>Steadiness, endurance, and the capacity to keep going.</p></div>
-        <div class="stat-guide-stat"><span class="stat-guide-code">ATK</span><h3>Assertiveness</h3><p>Direct action, outward drive, and willingness to push.</p></div>
-        <div class="stat-guide-stat"><span class="stat-guide-code">DEF</span><h3>Discipline</h3><p>Structure, self-control, and consistency under pressure.</p></div>
-        <div class="stat-guide-stat"><span class="stat-guide-code">SP. ATK</span><h3>Creative analysis</h3><p>Curiosity, imagination, and conceptual problem-solving.</p></div>
-        <div class="stat-guide-stat"><span class="stat-guide-code">SP. DEF</span><h3>Composure &amp; cooperation</h3><p>Emotional steadiness and consideration of others.</p></div>
-        <div class="stat-guide-stat"><span class="stat-guide-code">SPEED</span><h3>Energy &amp; responsiveness</h3><p>Social momentum, openness to experience, and quick reactions.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">HP</span><h3>Resilience</h3><p>Sustaining effort and recovering after setbacks.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">ATK</span><h3>Assertion</h3><p>Taking direct action and confronting obstacles.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">DEF</span><h3>Fortitude</h3><p>Maintaining boundaries and resisting disruption.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">SP. ATK</span><h3>Ingenuity</h3><p>Connecting ideas and solving conceptual problems.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">SP. DEF</span><h3>Composure</h3><p>Regulating reactions and keeping perspective.</p></div>
+        <div class="stat-guide-stat"><span class="stat-guide-code">SPEED</span><h3>Responsiveness</h3><p>Reacting, adapting, and seizing openings quickly.</p></div>
       </div>
 
       <div class="stat-guide-notes">
         <div class="stat-guide-note">
           <h3>How the numbers work</h3>
           <p>Every build receives exactly <strong>535 base stat points</strong>. The spread emphasizes relative tendencies, not overall worth: higher Attack is not inherently better than lower Attack.</p>
-          <p>The six base stats blend <strong>70% Big Five</strong>, <strong>20% Enneagram</strong>, and <strong>10% cognitive-style</strong> scores (16Personalities dimensions or function-derived contrasts). The final stats are bounded and normalized, so they are not direct psychological test scores.</p>
+          <p>Each stat uses its own <strong>Big Five / Enneagram / cognition</strong> weights. With eight cognitive functions, cognition contributes <strong>10% to 50%</strong> depending on the stat. Entered 16Personalities percentages have less influence, and four-letter-only estimates less still. Expand the generated build explanation to see all six blends. Optional <strong>IPIP-NEO facets</strong> refine the existing Big Five contribution within entered domain groups; they never add a fourth source or extra stat points. The final stats are bounded and normalized, so they are not direct psychological test scores. Resilience is staying power, Fortitude resistance to disruption, and Composure emotional regulation: related, not interchangeable.</p>
         </div>
         <div class="stat-guide-note">
           <h3>Nature, OCEAN &amp; modifiers</h3>
@@ -214,7 +219,7 @@
       <p class="stat-guide-footnote">These are authored, game-inspired interpretations—not validated measures of resilience, intelligence, character, or mental health.</p>
     </section>
     <footer class="footer">
-      <span id="footer-version">TYPE EFFECTIVELY / V1.4.0</span>
+      <span id="footer-version">TYPE EFFECTIVELY / V2.0.0</span>
       <span>KNOW YOURSELF. KNOW YOUR WEAKNESSES. BLAME TYPE MATCHUPS.</span>
       <a href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">OPEN SOURCE ↗</a>
     </footer>

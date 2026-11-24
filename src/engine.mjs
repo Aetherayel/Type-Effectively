@@ -2,13 +2,14 @@ import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
-  ROLE_CALIBRATED_TEMPLATES, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=nature-scoring-1';
-import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
+  ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
+} from './data.mjs?v=v2-complete-stable-3';
+import { chooseHeldItem } from './held-items.mjs?v=v2-complete-stable-3';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
-import { deriveFunctionPreferences } from './functions.mjs';
+import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
+import { refineBigFiveAffinities, facetContrastMap } from './bigfive-facets.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -123,34 +124,44 @@ export function deriveWing(core, scores) {
   return scores[before-1] >= scores[after-1] ? before : after;
 }
 
-function oceanAffinity(xs) {
+// Big Five is five broad domains feeding six different fictional strengths.
+// Avoid equating low agreeableness with assertion or stress with battle Speed.
+export function oceanAffinity(xs) {
   const [o,c,e,a,n] = xs;
-  const stability = 100 - n;
+  const stability=100-n;
   return [
-    .55*stability+.25*c+.2*a,
-    .65*e+.35*(100-a),
-    .60*c+.40*stability,
-    .65*o+.35*c,
-    .55*stability+.45*a,
-    .50*e+.35*o+.15*n
+    .55*c+.35*stability+.10*a,          // resilient persistence
+    .45*e+.20*(100-a)+.35*c,            // assertion with follow-through
+    .45*c+.30*(100-e)+.25*stability,    // maintaining boundaries
+    .60*o+.20*c+.20*(100-e),           // conceptual ingenuity
+    .65*stability+.20*a+.15*c,         // emotional regulation
+    .45*e+.35*o+.20*(100-c)            // response tempo and flexibility
   ];
 }
-function enneagramAffinity(scores) {
+export function enneagramAffinity(scores) {
   // Square the weight above a soft threshold to preserve individual peaks without discarding the other six types.
   const weights = scores.map(s=>Math.pow(Math.max(0,s-20),2)+16);
   const total = weights.reduce((a,b)=>a+b,0);
-  return STAT_KEYS.map((_,i)=>weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total);
+  // Remove unequal nine-type column priors before blending sources. Uniform
+  // motivational scores produce 50 on every stat; deviations retain their
+  // original type-specific distances and meaningful differentiation.
+  return STAT_KEYS.map((_,i)=>clamp(50+
+    weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total-
+    ENNEAGRAM_STAT_BASELINE[i]));
 }
-function mbtiAffinity(s) {
-  const [i,n,f,p,t] = s;
-  const e = 100-i, j = 100-p, a = 100-t;
+// Cognitive preferences are not capacities. Resilience and composure have
+// weak cognitive proxies, deliberately shrunk toward 50. 16P A/T is excluded
+// to avoid counting neuroticism again.
+export function mbtiAffinity(s) {
+  const [i,n,f,p] = s;
+  const e=100-i, sensed=100-n, t=100-f, j=100-p;
   return [
-    .45*a+.35*j+.20*f,
-    .50*e+.25*t+.25*(100-f),
-    .55*j+.45*a,
-    .55*n+.25*i+.20*j,
-    .40*f+.30*i+.30*a,
-    .45*e+.30*p+.25*t
+    .35*j+.20*i+.45*50,
+    .45*e+.35*t+.20*j,
+    .45*j+.30*i+.25*t,
+    .60*n+.25*t+.15*i,
+    .35*i+.30*j+.35*50,
+    .45*e+.35*p+.20*sensed
   ];
 }
 
@@ -158,7 +169,7 @@ export function normalizeStats(affinities, total = 535, min = 45, max = 140) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
   const mean = average(affinities);
-  const raw = affinities.map(a=>total/6+1.1*(a-mean));
+  const raw = affinities.map(a=>total/6+1.25*(a-mean));
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
@@ -446,6 +457,23 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
   ];
 }
 
+// Rendering a Pokémon requires measured/detailed input for all three major
+// frameworks. Keep the lower-level generator available for legacy/internal
+// scoring tests, but never expose an inferred, incomplete build to visitors.
+export function requireCompletePersonalityInputs(input) {
+  if(!input||typeof input!=='object')throw new Error('Complete all three personality sections before generating.');
+  if(input.mbtiScores==null && input.functionScores==null)
+    throw new Error('Cognitive style is required: enter 16Personalities percentages or all eight cognitive-function results. A four-letter type alone is insufficient.');
+  if(input.enneagramScores==null && input.enneagramRanking==null && input.roweScores==null)
+    throw new Error('Enneagram results are required: enter nine scores, complete a nine-type ranking, or enter nine Rowe totals. A tritype alone is insufficient.');
+  if(input.bigFive==null)
+    throw new Error('Big Five results are required: enter all five domain scores before generating.');
+  return input;
+}
+export function generateCompleteBuild(input) {
+  return generateBuild(requireCompletePersonalityInputs(input));
+}
+
 export function generateBuild(input) {
   const warnings=[];
   const usingFunctions=input.functionScores!=null;
@@ -471,13 +499,13 @@ export function generateBuild(input) {
   const mbti=override || suggestedType;
   if (!MBTI_TYPES.includes(mbti)) throw new Error('Invalid MBTI type.');
   if(usingFunctions) {
-    warnings.push('Eight function totals were translated into four preference contrasts for this game. This is not Sakinorva’s typing algorithm.');
+    warnings.push('Eight function totals directly inform base stat affinities; four derived preference contrasts inform the suggested type and Nature. Neither is Sakinorva’s typing algorithm.');
     if(identityPreference)
       warnings.push('The supplied '+identityPreference+' identity label uses the existing 75/25 type-only proxy for scoring; no measured A/T percentage was supplied.');
     else
       warnings.push('The A/T axis was not provided; its contribution is neutral and no A/T label was inferred.');
     if(override && override!==suggestedType)
-      warnings.push('Your selected '+override+' type is used for Nature preference polarity and archetype interpretation; the function-derived '+suggestedType+' suggestion and raw stat affinities remain unchanged.');
+      warnings.push('Your selected '+override+' type is used for Nature preference polarity and archetype interpretation; the function-derived '+suggestedType+' suggestion and raw eight-function stat affinities remain unchanged.');
   }
 
   const usingRowe=input.roweScores!=null;
@@ -507,6 +535,8 @@ export function generateBuild(input) {
   if (!Array.isArray(ocean) || ocean.length!==5 || ocean.some(n=>!Number.isFinite(n)||n<0||n>100)) {
     throw new Error('Big Five scores must contain five numbers from 0–100.');
   }
+  if(input.bigFiveFacets!=null && input.bigFive==null)
+    throw new Error('Enter all five Big Five domain scores before adding facet percentiles.');
   if (!input.bigFive) warnings.push('Big Five scores were set to neutral 50-point placeholders for base stats; Nature scoring excludes unmeasured Big Five.');
   // Nature scores a motivational/cognitive/temperamental *preference contrast*,
   // not raw stats or an already selected battle role. Run before role selection.
@@ -516,8 +546,25 @@ export function generateBuild(input) {
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores), ma=mbtiAffinity(mbtiScores);
-  const blend=STAT_KEYS.map((_,i)=>.7*oa[i]+.2*ea[i]+.1*ma[i]);
+  // Facets refine the *existing* Big Five source, not a fourth weighting.
+  // Missing facet groups fall back to the original domain-only contribution.
+  const facetScoring=refineBigFiveAffinities(ocean,oceanAffinity(ocean),input.bigFiveFacets);
+  const facetContrasts=facetContrastMap(ocean,input.bigFiveFacets);
+  const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
+  // Use all eight measured functions when provided. The four contrasts remain
+  // useful for Nature/identity, but are a lossy representation for base stats.
+  const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
+    mbtiAffinity(mbtiScores);
+  // Stat-specific evidence strength. Functions retain eight distinct signals,
+  // percentage inputs retain four measured contrasts, and type-only inputs
+  // receive conservative cognitive weights because they use 75/25 proxies.
+  const statWeightMode=usingFunctions?'functions':
+    input.mbtiScores!=null?'percentages':'typeOnly';
+  const statWeights=BASE_STAT_WEIGHTS[statWeightMode];
+  const blend=STAT_KEYS.map((key,i)=>{
+    const w=statWeights[key];
+    return w.bigFive*oa[i]+w.enneagram*ea[i]+w.cognition*ma[i];
+  });
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
   // Do not let fabricated proxy scores supply a typing wing when the visitor
@@ -552,7 +599,7 @@ export function generateBuild(input) {
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-      role,types,moves,ability,hasBigFive:input.bigFive!=null
+      role,types,moves,ability,hasBigFive:input.bigFive!=null,facetContrasts
     });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
     input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
@@ -567,7 +614,12 @@ export function generateBuild(input) {
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
-    baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
+    baseStats,effectiveStats,statWeightMode,statWeights,
+    facetScoring:{
+      activeDomains:facetScoring.activeDomains,
+      corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(facetScoring.corrections[i]*10)/10]))
+    },
+    affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings
   };
@@ -575,9 +627,9 @@ export function generateBuild(input) {
   // base stats, role, abilities, moves, or held-item selection.
   build.archetype=classifyArchetype({
     enneagramScores:enneaScores,mbtiScores,bigFive:ocean,
-    mbti,core,second,third,role
+    mbti,core,second,third,role,facetContrasts
   });
   build.title=build.archetype.title;
-  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores});
+  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores,facetContrasts});
   return build;
 }

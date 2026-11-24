@@ -3,6 +3,7 @@
 // Every statement is a metaphor about this generated build, not a diagnosis.
 import { ENNEAGRAM_NAMES, STAT_KEYS, STAT_NAMES } from './data.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
+import { facetFieldObservations } from './facet-outcomes.mjs';
 
 const words=n=>ENNEAGRAM_NAMES[n] || 'Unknown';
 // Archetype gifts are complete third-person sentences: “Finds a route.”
@@ -74,7 +75,7 @@ const motivationNotes={
   7:'possibility and freedom',8:'agency and resolve',9:'peace and steadiness'
 };
 
-export function composeFieldReport(build,{bigFive,mbtiScores}) {
+export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null}) {
   const {archetype:a,role,baseStats,effectiveStats,types,core,second,third}=build;
   const ranked=STAT_KEYS.map((key,i)=>({key,label:STAT_NAMES[i],value:effectiveStats[key]}))
     .sort((x,y)=>y.value-x.value || STAT_KEYS.indexOf(x.key)-STAT_KEYS.indexOf(y.key));
@@ -120,6 +121,13 @@ export function composeFieldReport(build,{bigFive,mbtiScores}) {
     else
       twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 535-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 140.';
   }
+  // Distinct facet patterns provide specific field observations, not generic
+  // rewards. Most facets are expressed through the stats, archetype or item;
+  // only conspicuous additional nuances receive a small trainer note.
+  const facetObservations=facetFieldObservations(facetContrasts);
+  if(facetObservations.length)temperament+=' The detailed IPIP-NEO report suggests a couple of quirks: '+
+    facetObservations.map(item=>item.text).join(' ')+
+    ' These are relative to its overall trait domains, not fixed behavior.';
   const motivations='This species is primarily driven by '+motivationNotes[core]+' (Enneagram '+core+', '+words(core)+
     '). Its '+second+' ('+words(second)+') and '+third+' ('+words(third)+
     ') fixes add supporting instincts. Trainer tip: understand what gets it moving before asking it to act against that instinct.'+

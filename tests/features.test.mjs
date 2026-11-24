@@ -76,9 +76,9 @@ test('self-contained downloadable card includes typing, base stats, role and abi
   assert.match(svg,/Quiet/);
   assert.match(svg,/535 BST/);
   assert.ok(svg.includes(sample.ability.name));
-  assert.match(svg,/↑119/);
-  assert.match(svg,/109/);
-  assert.match(svg,/↓54/);
+  assert.ok(svg.includes('↑'+sample.effectiveStats[sample.natureBoost]));
+  assert.ok(svg.includes(String(sample.baseStats[sample.natureBoost])));
+  assert.ok(svg.includes('↓'+sample.effectiveStats[sample.natureDrop]));
   assert.equal((svg.match(/class="stat-radar-label-name"/g)||[]).length,6);
   assert.match(svg,/OCEAN shown only as high \/ low/);
   assert.match(svg,/>O:H · C:H · E:L · A:H · N:L<\/text>/);
