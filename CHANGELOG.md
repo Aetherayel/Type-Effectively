@@ -2,6 +2,12 @@
 
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## Unreleased — Signature strategy by tactical function, not archetype title
+- Allow Ice **Wall, Tank, Support or Controller** (primary or close secondary) builds to qualify for **Snow Bastion** when effective Def >= 83, Sp. Def >= 82, Enneagram motivation and full strategy fit pass all the existing mechanical checks.
+- Aurora Veil remains a protective role tactic: Wall/Tank use the fortification move pool, Support/Controller use the ally-protection move pool. The classified role and subsequent archetype title are never rewritten.
+- Give Snow Bastion a **15% planning/preparation preference** based on the existing cognitive axes and available IPIP-NEO Orderliness/Cautiousness/Intellect facets, reallocating previous role/temperament shares rather than adding arbitrary extra points. No Architect title or MBTI letter is a hard eligibility gate.
+- Preserve the other eleven strategy packages, signature move/item interactions, growth-move compatibility, fixed 535 BST, and original battle-role scoring. See `docs/specialization-eligibility.md` for the exact hard gates and selection formulas.
+
 ## Unreleased — Facet-first Big Five evidence
 - **Replace broad Big Five domain input with complete IPIP-NEO facet groups when available.** A full 30-facet report satisfies the Big Five requirement without redundant domain data; partial groups require measured five-domain fallback for missing facet groups. Domain-only results and old shared links retain the historical formulas.
 - Each stat draws its Big Five signal from meaning-specific facets, not a bounded correction to the parent domain. Particularly, Intellect/Imagination/Artistic Interests now determine the detailed Openness contribution to Sp. Atk even when overall Openness is low.
