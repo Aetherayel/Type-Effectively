@@ -36,7 +36,7 @@ test('random generator emits complete valid inputs, not a fabricated result card
     assert.equal(deriveMbti(profile.mbtiScores),build.mbti);
     assert.equal(deriveTritype(profile.enneagramScores),build.tritype);
     assert.ok(isValidTritype(build.tritype));
-    assert.equal(Object.values(build.baseStats).reduce((sum,n)=>sum+n,0),535);
+    assert.equal(Object.values(build.baseStats).reduce((sum,n)=>sum+n,0),600);
     assert.equal(build.warnings.length,0,'all three measured fields should be populated, not estimated');
     assert.ok(build.oceanBinary!==null);
   }

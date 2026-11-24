@@ -33,7 +33,7 @@ test('all six Pokémon stats have clear human-facing interpretations',()=>{
     assert.ok(guide.includes(interpretation),interpretation+' interpretation missing');
   }
   assert.equal((guide.match(/class="stat-guide-stat"/g)||[]).length,6);
-  assert.ok(guide.includes('535 base stat points'));
+  assert.ok(guide.includes('600 base stat points'));
   assert.ok(guide.includes('Big Five / Enneagram / cognition'));
   assert.ok(guide.includes('10% to 50%'));
   assert.ok(guide.includes('four-letter-only'));

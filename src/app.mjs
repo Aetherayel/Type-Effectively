@@ -1,16 +1,16 @@
 import {
   ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs?v=v2-specializations-1';
-import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-specializations-1';
+} from './data.mjs?v=v2-600-bst-1';
+import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-600-bst-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
-import { renderStatRadar } from './radar.mjs';
-import { renderAffinityComparison } from './stat-affinity-ui.mjs';
-import { renderRelatives } from './relatives-ui.mjs';
+import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
+import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=v2-600-bst-1';
+import { renderRelatives } from './relatives-ui.mjs?v=v2-600-bst-1';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=1.3.0';
+import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=v2-600-bst-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
@@ -460,7 +460,7 @@ function renderCard(build) {
       '</div>'+
     '</div>'+
     '<div class="result-body">'+
-      '<div class="result-section-title"><h4>Base stats</h4><span>535 BST</span></div>'+
+      '<div class="result-section-title"><h4>Base stats</h4><span>600 BST</span></div>'+
       '<div class="stat-view-switch" role="group" aria-label="Stat score view">'+
         '<button type="button" id="stat-view-bst" class="stat-view-button active" aria-pressed="true">Pokémon stats</button>'+
         '<button type="button" id="stat-view-affinity" class="stat-view-button" aria-pressed="false">Before normalization</button>'+
@@ -521,7 +521,7 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>535 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 535 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. The six stats are bounded and normalized to exactly 535. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>600 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 600 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. The six stats are bounded and normalized to exactly 600. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<div class="nature-factors">'+STAT_KEYS.map(key=>{
           const w=build.statWeights[key];
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
@@ -540,7 +540,7 @@ function renderCard(build) {
               : '<p>With no broad-domain inputs, no domain-only comparison is calculated.</p>')
           : '<p><strong>Big Five detail:</strong> Five broad domains only; existing domain scoring remains unchanged.</p>')+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
-        '<p><strong>Battle role:</strong> Classified from the 535 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
+        '<p><strong>Battle role:</strong> Classified from the 600 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Relative stat thresholds use the original calibration scale; Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Facets substitute within the temperament component when present, not as a capped additive bonus. Battle fit already includes stat shape and typing. Best score wins, not a measured personality likelihood.</p>'+
         (build.facetScoring.activeDomains.length?
           '<p><strong>Detailed temperament:</strong> The chosen archetype’s facet-aware fit differs from its coarse contextual approximation by '+(build.archetype.facetAdjustment>=0?'+':'')+build.archetype.facetAdjustment.toFixed(1)+' points. '+
@@ -549,7 +549,7 @@ function renderCard(build) {
             : 'A mechanically defined signature package fixes its held item.')+
           ' These are comparisons, not additive bonuses. Facets also inform Nature; typing remains Enneagram-derived.</p>'
           :'')+
-        '<p><strong>Held item:</strong> Equipment is matched to personality, role, typing, moves and Ability. Detailed facets replace broad-domain fit terms where available; they cannot make incompatible equipment usable or change 535 BST.</p>'+
+        '<p><strong>Held item:</strong> Equipment is matched to personality, role, typing, moves and Ability. Detailed facets replace broad-domain fit terms where available; they cannot make incompatible equipment usable or change 600 BST.</p>'+
         '<p><strong>Your suggested labels:</strong> '+escapeHtml(build.suggestedType)+' / '+build.suggestedTritype+' before any manual overrides. '+(build.cognitiveSource==='functions'?'The inferred four letters are a game-compatible summary of the function contrasts, not a Sakinorva result. A chosen type override changes the cognitive polarity used for Nature scoring and archetype interpretation, but does not overwrite the original function strengths. '+(build.identityPreference?'Your '+escapeHtml(build.identityPreference)+' label supplies a categorical identity proxy. ':'No A/T classification was supplied. '):'')+'These are interpretations, not clinical findings.</p>'+
       '</details>'+warningHtml+
       '<div class="result-actions"><button type="button" id="download-card" class="outline-button primary-export">Download Personality Card ↓</button>'+ 
@@ -619,7 +619,7 @@ function buildSummary(b) {
     'TYPE EFFECTIVELY — '+b.title,
     b.identity+' · '+b.tritype+' · '+b.types.join(' / ')+' · '+b.nature,
     'Role: '+b.role.primary.name+(b.role.secondary?' / '+b.role.secondary.name:''),
-    'BST 535: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
+    'BST 600: '+STAT_KEYS.map((k,i)=>STAT_NAMES[i]+' '+b.baseStats[k]).join(' · '),
     'Ability: '+b.ability.name+' · Hidden: '+b.hiddenAbility,
     'Held item: '+b.heldItem.name+' — '+b.heldItem.quip,
     'Moves: '+b.moves.map(m=>m.name).join(' / '),

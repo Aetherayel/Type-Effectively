@@ -53,7 +53,7 @@ test('30 complete facets satisfy the third required personality assessment witho
   const facets=sameDomainFacets(domains);
   assert.equal(hasCompleteBigFiveEvidence(null,facets),true);
   const build=generateCompleteBuild({...full,bigFive:null,bigFiveFacets:facets});
-  assert.equal(sum(Object.values(build.baseStats)),535);
+  assert.equal(sum(Object.values(build.baseStats)),600);
   assert.ok(build.role.primary.name&&build.nature&&build.archetype);
   assert.equal(build.facetScoring.activeDomains.length,5);
   assert.equal(build.oceanSource,'facet-context');
@@ -137,7 +137,7 @@ test('political values, moral conformity, and depression have no independent gam
   }
 });
 
-test('facet detail has deterministic 535 BST, valid role coverage and no fourth source',()=>{
+test('facet detail has deterministic 600 BST, valid role coverage and no fourth source',()=>{
   let seed=3707;
   const rand=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
   const tops=Array(6).fill(0),roles=new Set();
@@ -149,8 +149,8 @@ test('facet detail has deterministic 535 BST, valid role coverage and no fourth 
       enneagramScores:Array.from({length:9},()=>Math.floor(rand()*101)),
       bigFiveFacets:facets
     });
-    assert.equal(sum(Object.values(build.baseStats)),535);
-    assert.ok(Object.values(build.baseStats).every(n=>n>=45&&n<=140));
+    assert.equal(sum(Object.values(build.baseStats)),600);
+    assert.ok(Object.values(build.baseStats).every(n=>n>=50&&n<=157));
     assert.equal(build.statWeights.spa.bigFive,.45);
     const spread=STAT_KEYS.map(k=>build.baseStats[k]);
     tops[spread.indexOf(Math.max(...spread))]++;

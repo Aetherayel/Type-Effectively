@@ -81,5 +81,5 @@ test('EV training operates downstream and leaves engine-computed characteristics
     baseStats: build.baseStats, effectiveStats: build.effectiveStats,
     role: build.role, nature: build.nature, types: build.types, archetype: build.archetype
   }, unchanged);
-  assert.equal(STAT_KEYS.reduce((total, key) => total + build.baseStats[key], 0), 535);
+  assert.equal(STAT_KEYS.reduce((total, key) => total + build.baseStats[key], 0), 600);
 });

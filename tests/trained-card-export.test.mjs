@@ -23,7 +23,7 @@ test('personality card remains an independent original with base radar and uncha
   const trained=buildTrainedCardSvg(b,training);
   assert.equal(buildCardSvg(b),original,'training export must not mutate identity card');
   assert.ok(original.includes('>BASE STATS</text>'));
-  assert.ok(original.includes('>535 BST</text>'));
+  assert.ok(original.includes('>600 BST</text>'));
   assert.ok(original.includes('class="stat-radar"'));
   assert.ok(!original.includes('>TRAINED STATS</text>'));
   assert.ok(!original.includes('LEVEL 100 · 31 IVs'));

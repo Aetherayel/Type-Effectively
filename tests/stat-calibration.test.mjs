@@ -56,7 +56,7 @@ test('calibration retains six valid stat prototypes and distinguishes signals',(
   assert.ok(stability>2*agreeableness);
 });
 
-test('A/T cannot leak into cognition-based capacity; normalization preserves 535',()=>{
+test('A/T cannot leak into cognition-based capacity; normalization preserves 600',()=>{
   const input=[75,90,20,20,0];
   assert.deepEqual(mbtiAffinity(input),mbtiAffinity([...input.slice(0,4),100]));
   assert.ok(mbtiAffinity(input).every(n=>n>=0&&n<=100));
@@ -68,8 +68,8 @@ test('A/T cannot leak into cognition-based capacity; normalization preserves 535
     return w.bigFive*o[i]+w.enneagram*e[i]+w.cognition*m[i];
   });
   const stats=normalizeStats(blended);
-  assert.equal(sum(Object.values(stats)),535);
-  assert.ok(Object.values(stats).every(n=>n>=45&&n<=140));
+  assert.equal(sum(Object.values(stats)),600);
+  assert.ok(Object.values(stats).every(n=>n>=50&&n<=157));
 });
 
 test('seeded defensive correlations are not near-duplicates; each stat can lead',()=>{
@@ -105,7 +105,7 @@ test('build uses audited source blend and propagates it through the results',()=
     assert.equal(build.affinities[STAT_KEYS[i]],
       Math.round(w.bigFive*o[i]+w.enneagram*e[i]+w.cognition*m[i]));
   }
-  assert.equal(sum(Object.values(build.baseStats)),535);
+  assert.equal(sum(Object.values(build.baseStats)),600);
   assert.equal(build.effectiveStats.hp,build.baseStats.hp);
   assert.ok(build.report&&build.archetype&&build.moves.length===4);
 });

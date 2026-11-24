@@ -42,7 +42,7 @@ test('matching ability includes Pokémon with the ability in any slot',()=>{
   assert.ok(b.hiddenAbility.some(p=>p.name==='Frosmoth'));
 });
 
-test('stat siblings use a reproducible, transparent 535-normalized comparison',()=>{
+test('stat siblings use a reproducible, transparent 600-normalized comparison',()=>{
   const b=build('593');
   const matches=matchPokemon(b,index.pokemon);
   assert.equal(matches.statSiblings.length,4);

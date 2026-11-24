@@ -33,7 +33,7 @@ test('complete alternative assessments and label overrides remain compatible',()
   ];
   for(const input of pairs){
     const build=generateCompleteBuild(input);
-    assert.equal(Object.values(build.baseStats).reduce((x,y)=>x+y,0),535);
+    assert.equal(Object.values(build.baseStats).reduce((x,y)=>x+y,0),600);
     assert.ok(build.role.primary.name);
     assert.equal(build.moves.length,4);
   }
@@ -50,7 +50,8 @@ test('neutral reference contains no authored stat prior',()=>{
     bigFive:Array(5).fill(50)
   });
   const stats=STAT_KEYS.map(key=>build.baseStats[key]);
-  assert.equal(stats.reduce((x,y)=>x+y,0),535);
+  assert.equal(stats.reduce((x,y)=>x+y,0),600);
+  assert.deepEqual(stats,Array(6).fill(100));
   assert.ok(Math.max(...stats)-Math.min(...stats)<=1,
     'neutral profile should generate nearly equal base stats: '+stats);
   assert.ok(Math.abs(stats[2]-stats[5])<=1);

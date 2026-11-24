@@ -1,13 +1,13 @@
 import {
   ROLE_AFFINITIES, ROLE_CALIBRATED_TEMPLATES, ROLE_NAMES,
-  ROLE_TEMPLATE_SCALE, STAT_KEYS
+  ROLE_TEMPLATE_SCALE, STAT_KEYS, REFERENCE_STAT_TOTAL
 } from './data.mjs';
 
-// Battle identity is chosen from the immutable 535-BST personality silhouette,
+// Battle identity is chosen from the immutable pre-Nature personality silhouette,
 // before Nature changes battle performance. Nature still affects actual moves,
 // abilities, and specialist stat gates downstream.
-const BASE_STAT_TOTAL=535;
-const STAT_CENTER=BASE_STAT_TOTAL/STAT_KEYS.length;
+// Keep the authored role geometry in its original reference units.
+const STAT_CENTER=REFERENCE_STAT_TOTAL/STAT_KEYS.length;
 const ROLE_SIMILARITY_SIGMA=25;
 const NEUTRAL_REFERENCE=80;
 
@@ -69,7 +69,7 @@ export function classifyRole(baseStats,types) {
       types.some(type=>!ROLE_AFFINITIES[type]))
     throw new Error('Battle role requires six base stats and valid Pokémon typing.');
   const raw=STAT_KEYS.map(k=>baseStats[k]);
-  const normalized=raw.map(v=>v*BASE_STAT_TOTAL/raw.reduce((a,b)=>a+b,0));
+  const normalized=raw.map(v=>v*REFERENCE_STAT_TOTAL/raw.reduce((a,b)=>a+b,0));
   const source=Object.fromEntries(STAT_KEYS.map((key,i)=>[key,normalized[i]]));
   const bulk=defensiveRoleMetrics(source);
   const physicalWall=clamp(
@@ -100,7 +100,8 @@ export function classifyRole(baseStats,types) {
     };
   }).sort((a,b)=>b.score-a.score||
     ROLE_NAMES.indexOf(a.name)-ROLE_NAMES.indexOf(b.name));
-  const spread=Math.sqrt(mean(raw.map(v=>(v-mean(raw))**2)));
+  // Dispersion labels and diagnostics use the same reference units as role fit.
+  const spread=Math.sqrt(mean(normalized.map(v=>(v-mean(normalized))**2)));
   return {
     primary:scored[0],
     secondary:scored[1].score>=scored[0].score-5?scored[1]:null,

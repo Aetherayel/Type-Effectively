@@ -1,7 +1,7 @@
 // A playful, evidence-linked field report for the generated creature.
 // Returned text never includes exact raw personality scores; the user already supplied them.
 // Every statement is a metaphor about this generated build, not a diagnosis.
-import { ENNEAGRAM_NAMES, STAT_KEYS, STAT_NAMES } from './data.mjs';
+import { ENNEAGRAM_NAMES, STAT_KEYS, STAT_NAMES, toReferenceStats } from './data.mjs';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { facetFieldObservations } from './facet-outcomes.mjs';
 
@@ -103,7 +103,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
   } else if(build.facetScoring.activeDomains.length) {
     temperament='This Pokémon has detailed IPIP-NEO evidence for '+build.facetScoring.activeDomains.join(', ')+
       '. The Trainer’s Guide looks at the specific facet signals rather than pretending a broad-domain average tells the whole story.';
-    twist='Its modeled affinities and final battle stats describe different things. A strong personality tendency can still receive fewer of the fixed 535 battle-stat points when other tendencies dominate.';
+    twist='Its modeled affinities and final battle stats describe different things. A strong personality tendency can still receive fewer of the fixed 600 battle-stat points when other tendencies dominate.';
   } else {
     const strong=bigFive.map((value,i)=>({value,key:highs[i],index:i}))
       .filter(item=>Math.abs(item.value-50)>=15)
@@ -116,14 +116,14 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
       twist='Interesting combination: high curiosity with high structure. The mind wants an unexplored region; the calendar wants the expedition planned.';
     else if(bigFive[0]>=65 && bigFive[1]<=40)
       twist='Curiosity has the keys and structure is riding in the back seat. Wonderful for discovery; bring a save point.';
-    else if(bigFive[2]<=35 && effectiveStats.spe>=100)
+    else if(bigFive[2]<=35 && toReferenceStats(effectiveStats).spe>=100)
       twist='A quieter social profile somehow produced a fast-moving Pokémon. Apparently talking less does not require taking fewer turns.';
     else if(bigFive[4]<=30 && severe.length)
       twist='Low reported stress sensitivity, high vulnerability to '+severe[0]+'. Confidence does not cancel the damage chart.';
     else if(bigFive[1]>=75 && role.primary.name==='Pivot')
       twist='A structured temperament paired with a Pivot role: it may prefer a plan, yet its best move is knowing when to change positions.';
     else
-      twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 535-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 140.';
+      twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 600-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 157.';
   }
   // Distinct facet patterns provide specific field observations, not generic
   // rewards. Most facets are expressed through the stats, archetype or item;
@@ -137,7 +137,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
     ') fixes add supporting instincts. Trainer tip: understand what gets it moving before asking it to act against that instinct.'+
     (build.typingWing!=null?' An evidenced '+build.typingWing+' wing slightly influences its primary typing.':' No unverified wing was assumed for typing.');
   const combat='Deploy this '+types.join(' / ')+' Pokémon as a '+role.primary.name+': it '+ROLE_FLAIR[role.primary.name]+
-    '. Its strongest effective stats are '+join(top)+'. '+build.nature+' Nature modifies the base spread after the fixed 535-point budget.'+
+    '. Its strongest effective stats are '+join(top)+'. '+build.nature+' Nature modifies the base spread after the fixed 600-point budget.'+
     (role.secondary?' '+role.secondary.name+' is a close alternative style; keep a second plan in the bag.':'');
   const growth='Teach and reinforce '+build.moves[3].name+', the growth move associated with core '+core+'. '+
     sentence(build.moves[3].why)+' The goal is to expand the Pokémon’s options beyond its favorite trick, not to schedule it a therapy appointment.';

@@ -42,7 +42,7 @@ test('Rowe input shares the existing Enneagram engine, respects tritype override
   assert.deepEqual(b.types,control.types);
   assert.deepEqual(b.moves,control.moves);
   assert.ok(b.warnings.some(w=>w.includes('Rowe signed totals')));
-  assert.equal(Object.values(b.baseStats).reduce((a,x)=>a+x,0),535);
+  assert.equal(Object.values(b.baseStats).reduce((a,x)=>a+x,0),600);
   assert.deepEqual(generateBuild({...base,roweScores:raw}).baseStats,generateBuild({...base,roweScores:raw}).baseStats);
   assert.throws(()=>generateBuild({...base,roweScores:raw,enneagramScores:DEMOS.architect.enneagram}),/not both/);
 });

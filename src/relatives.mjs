@@ -24,11 +24,12 @@ export function unpackPokemon(record) {
 export function statComparison(pokemon, build) {
   const target=STAT_KEYS.map(key=>build.baseStats[key]);
   const bst=pokemon.stats.reduce((a,b)=>a+b,0);
-  // Compare six-dimensional *shape* at an equal 535-point scale,
+  const targetTotal=target.reduce((a,b)=>a+b,0);
+  // Compare six-dimensional *shape* at the build's own total,
   // then use actual-BST difference as a mild, explicit tie-break penalty.
-  const scaled=pokemon.stats.map(n=>n*535/bst);
+  const scaled=pokemon.stats.map(n=>n*targetTotal/bst);
   const spreadGap=Math.sqrt(target.reduce((sum,n,i)=>sum+(n-scaled[i])**2,0)/6);
-  const bstGap=Math.abs(bst-535);
+  const bstGap=Math.abs(bst-targetTotal);
   return {
     bst,bstGap,
     spreadGap:Number(spreadGap.toFixed(1)),

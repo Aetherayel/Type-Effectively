@@ -1,6 +1,6 @@
 import { STAT_KEYS, STAT_NAMES, TYPE_COLORS } from './data.mjs';
 import { level100Stats, TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs } from './ev-training.mjs';
-import { renderStatRadar } from './radar.mjs';
+import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
 import { loadItemSprite } from './item-sprites.mjs';
 import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 import { cardVersionLabels } from './build-version.mjs';
@@ -122,7 +122,7 @@ export function buildCardSvg(build, trainingEvs = null) {
     .replace('<svg class="stat-radar"','<svg x="145" y="386" width="670" height="627" class="stat-radar"'):null;
   const statsPanel=trainingEvs===null?
     '<text x="76" y="399" class="overline">BASE STATS</text>'+
-    '<text x="882" y="399" text-anchor="end" class="overline">535 BST</text>'+
+    '<text x="882" y="399" text-anchor="end" class="overline">600 BST</text>'+
     radar+
     '<text x="480" y="1052" text-anchor="middle" font-size="18" fill="#a9c2ba">'+
       esc(build.nature)+' Nature · +10% '+esc(build.natureBoost.toUpperCase())+

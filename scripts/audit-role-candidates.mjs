@@ -3,9 +3,9 @@
 // Run: node scripts/audit-role-candidates.mjs
 import assert from 'node:assert/strict';
 import { generateCompleteBuild } from '../src/engine.mjs';
-import { ROLE_AFFINITIES, ROLE_CALIBRATED_TEMPLATES, ROLE_NAMES, STAT_KEYS } from '../src/data.mjs';
+import { ROLE_AFFINITIES, ROLE_CALIBRATED_TEMPLATES, ROLE_NAMES, STAT_KEYS, REFERENCE_STAT_TOTAL, toReferenceStats } from '../src/data.mjs';
 import { classifyRole } from '../src/roles.mjs';
-const total=535,mean=xs=>xs.reduce((a,b)=>a+b,0)/xs.length;
+const total=REFERENCE_STAT_TOTAL,mean=xs=>xs.reduce((a,b)=>a+b,0)/xs.length;
 const round=(x,d=1)=>Number(x.toFixed(d));
 const labels=['Sweeper','Wall','Tank','Pivot','Support','Controller'];
 let seed=260612;
@@ -48,7 +48,7 @@ for(let i=0;i<1200;i++){
   assert.deepEqual(build.role,reclassified,'production and independent classification diverged');
   pairings.push({before:original,after:{
     primary:build.role.primary.name,secondary:build.role.secondary?.name||null},
-    metrics:roleMetrics(build.baseStats)});
+    metrics:roleMetrics(toReferenceStats(build.baseStats))});
 }
 function summarize(field){
   const roles=pairings.map(row=>({...row[field],metrics:row.metrics}));
@@ -59,7 +59,7 @@ function summarize(field){
       bulkMean:round(mean(selected.map(row=>row.metrics.bulkMean))),
       offense:round(mean(selected.map(row=>row.metrics.offense))),
       defensivePriority:round(mean(selected.map(row=>row.metrics.gap))),
-      twoDefensiveStatsAbove100:selected.filter(row=>row.metrics.twoOver100).length}];
+      twoDefensiveStatsAbove100Reference:selected.filter(row=>row.metrics.twoOver100).length}];
   }));
   return {roles:roleCounts(roles),
     hybrids:roles.filter(row=>row.secondary).length,defensive:summaries};

@@ -15,9 +15,9 @@ const baseInput={
 const toObject=xs=>Object.fromEntries(STAT_KEYS.map((key,i)=>[key,xs[i]]));
 const total=stats=>STAT_KEYS.reduce((sum,k)=>sum+stats[k],0);
 
-test('role identity comes from 535-BST before Nature battle modifiers',()=>{
+test('role identity comes from 600-BST before Nature battle modifiers',()=>{
   const build=generateCompleteBuild(baseInput);
-  assert.equal(total(build.baseStats),535);
+  assert.equal(total(build.baseStats),600);
   assert.notDeepEqual(build.effectiveStats,build.baseStats);
   assert.deepEqual(build.effectiveStats,applyNature(build.baseStats,build.nature));
   assert.deepEqual(build.role,classifyRole(build.baseStats,build.types));
@@ -90,7 +90,7 @@ test('seeded role recalibration retains all six identities without a Tank or Piv
     if(role==='Wall')wall.push(build.role.defensiveMetrics);
     if(role==='Tank')tank.push(build.role.defensiveMetrics);
     assert.deepEqual(build.role,classifyRole(build.baseStats,build.types));
-    assert.equal(total(build.baseStats),535);
+    assert.equal(total(build.baseStats),600);
     assert.equal(build.moves.length,4);
     assert.ok(build.role.all.every(item=>ROLE_NAMES.includes(item.name)));
   }

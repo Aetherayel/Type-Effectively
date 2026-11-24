@@ -2,19 +2,20 @@ import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
-  BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=v2-specializations-1';
-import { chooseHeldItem } from './held-items.mjs?v=v2-specializations-1';
+  BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS,
+  BASE_STAT_TOTAL, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
+} from './data.mjs?v=v2-600-bst-1';
+import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
-import { classifyRole } from './roles.mjs';
-import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
+import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
+import { composeFieldReport } from './profile-analysis.mjs?v=v2-600-bst-1';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
 import {
   refineBigFiveAffinities, facetContrastMap, resolveBigFiveEvidence,
   hasCompleteBigFiveEvidence
 } from './bigfive-facets.mjs';
-import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=v2-specializations-1';
+import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=v2-600-bst-1';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -169,11 +170,11 @@ export function mbtiAffinity(s) {
   ];
 }
 
-export function normalizeStats(affinities, total = 535, min = 45, max = 140) {
+export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(45*total/REFERENCE_STAT_TOTAL), max = Math.round(140*total/REFERENCE_STAT_TOTAL)) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
   const mean = average(affinities);
-  const raw = affinities.map(a=>total/6+1.25*(a-mean));
+  const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*(a-mean));
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
@@ -212,6 +213,7 @@ export function applyNature(baseStats,nature) {
   return result;
 }
 
+// Stat-based ability and move helpers consume 535-reference effective stats.
 // Standard and Hidden Abilities come from the same curated pool. Supporting
 // Enneagram fixes affect the ranking, but cannot force an unrelated type.
 const ABILITY_HINTS={
@@ -564,6 +566,10 @@ export function generateBuild(input) {
   });
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
+  // Ability/move/strategy thresholds were calibrated in 535-BST units.
+  // Use the equivalent relative battle shape, not an across-the-board buff
+  // to the eligibility of high-stat tactics. Actual stats remain on the build.
+  const referenceEffectiveStats=toReferenceStats(effectiveStats);
   // Do not let fabricated proxy scores supply a typing wing when the visitor
   // entered only a tritype. Explicit wing or actual scores/ranking can do so.
   const hasRealEnneagramInput=input.enneagramScores!=null || input.enneagramRanking!=null || usingRowe;
@@ -578,17 +584,17 @@ export function generateBuild(input) {
   // after visible typing, effective stats, role, motivations and temperament.
   // Ordinary generalist selection stays intact when no package earns its place.
   const signatureStrategy=selectSignatureStrategy({
-    types,role,stats:effectiveStats,core,second,third,
+    types,role,stats:referenceEffectiveStats,core,second,third,
     bigFive:ocean,hasBigFive,mbtiScores,bigFiveFacets:input.bigFiveFacets??null
   });
   const ability=signatureStrategy?signatureAbility(signatureStrategy):
-    chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
+    chooseAbility(role.primary.name,toolkitTypes,referenceEffectiveStats,second);
   const hiddenAbility=chooseHiddenAbility({
     role:role.primary.name,secondaryRole:role.secondary?.name,
-    types,stats:effectiveStats,second,third,standard:ability
+    types,stats:referenceEffectiveStats,second,third,standard:ability
   });
   const moveTypes=types.length===1?[types[0],hiddenType]:types;
-  const moves=chooseMoves(moveTypes,types,role,effectiveStats,core,second,third,signatureStrategy,ability);
+  const moves=chooseMoves(moveTypes,types,role,referenceEffectiveStats,core,second,third,signatureStrategy,ability);
   if (types.length===1) moves[1].category=hiddenType+' coverage (hidden affinity)';
   // Item choice follows move choice: equipment must actually work with its
   // holder and the four signature moves.
@@ -618,7 +624,7 @@ export function generateBuild(input) {
     baseStats,effectiveStats,statWeightMode,statWeights,
     // Preserve the precise, unnormalized blend separately from the original
     // rounded affinities. Raw affinities are game scores, not percentiles,
-    // and never alter the fixed 535-BST allocation or downstream mechanics.
+    // and never alter the fixed 600-BST allocation or downstream mechanics.
     rawStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,Math.round(blend[i]*10)/10])),
     sourceStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,{
       bigFive:Math.round(oa[i]*10)/10,

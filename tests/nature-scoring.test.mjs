@@ -93,7 +93,7 @@ test('Nature selection is separate from base stats but applied before role/EV tr
   });
   assert.equal(build.nature,build.natureScoring.name);
   assert.deepEqual(build.effectiveStats,applyNature(build.baseStats,build.nature));
-  assert.equal(Object.values(build.baseStats).reduce((sum,v)=>sum+v,0),535);
+  assert.equal(Object.values(build.baseStats).reduce((sum,v)=>sum+v,0),600);
   const trained=level100Stats(build.baseStats,build.natureBoost,build.natureDrop,[0,0,0,0,0,0]);
   for(const k of NATURE_STATS){
     const before=2*build.baseStats[k]+31+5;
