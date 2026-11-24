@@ -2,7 +2,7 @@
 // NOT a sample of actual people, not psychometric validation or calibration.
 // Run: node scripts/audit-v2.mjs
 // The generator is the sole authority for every observation.
-import { generateBuild } from '../src/engine.mjs';
+import { generateBuild, oceanAffinity, enneagramAffinity, mbtiAffinity } from '../src/engine.mjs';
 import { STAT_KEYS, MBTI_TYPES } from '../src/data.mjs';
 import { FACET_GROUPS } from '../src/bigfive-facets.mjs';
 
@@ -222,6 +222,26 @@ const auditFacetRefinement=()=>{
   return {domainOnlyVersusFacets:summarizeDeltas(metrics),protectedOutputs};
 };
 
+// A neutral *source baseline*, not a human profile. All domain scores and all
+// preference axes equal 50; all nine Enneagram motivations have equal strength.
+const auditNeutralBaseline=()=>{
+  const input={
+    bigFive:Array(5).fill(50),mbtiScores:Array(5).fill(50),
+    enneagramScores:Array(9).fill(50)
+  };
+  const sample=build(input);
+  return {
+    input:'all five Big Five domains, all five 16P axes, all nine Enneagram types = 50',
+    sourceAffinities:{
+      bigFive:oceanAffinity(input.bigFive).map(x=>round(x)),
+      enneagram:enneagramAffinity(input.enneagramScores).map(x=>round(x)),
+      cognition:mbtiAffinity(input.mbtiScores).map(x=>round(x))
+    },
+    blendedAffinities:STAT_KEYS.map(key=>sample.affinities[key]),
+    stats:sample.baseStats,
+    spread:Math.max(...stats(sample))-Math.min(...stats(sample))
+  };
+};
 const audit={
   metadata:{
     branch:'feature/personality-stat-recalibration',
@@ -230,6 +250,7 @@ const audit={
     sensitivity:'Controlled input replacements and +1/+5 input-point perturbations on random synthetic baselines.',
     metrics:'meanStatAbsDelta = mean absolute base-stat point difference across six stats; changedPct is percentage of paired builds with changed output.'
   },
+  neutralBaseline:auditNeutralBaseline(),
   cohorts:auditCohorts(),
   sourceReplacement:auditSourceReplacement(),
   localSensitivity:auditLocalSensitivity(),
