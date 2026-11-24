@@ -100,6 +100,10 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
   if(!bigFive){
     temperament='No measured Big Five scores were supplied for this specimen. Its temperament was estimated with neutral placeholders; do not mistake the Professor’s guesswork for observed behavior.';
     twist='The temperament data is missing. Treat this as a provisional field guide: get some actual observations before declaring what makes this Pokémon tick.';
+  } else if(build.facetScoring.activeDomains.length) {
+    temperament='This Pokémon has detailed IPIP-NEO evidence for '+build.facetScoring.activeDomains.join(', ')+
+      '. The Trainer’s Guide looks at the specific facet signals rather than pretending a broad-domain average tells the whole story.';
+    twist='Its modeled affinities and final battle stats describe different things. A strong personality tendency can still receive fewer of the fixed 535 battle-stat points when other tendencies dominate.';
   } else {
     const strong=bigFive.map((value,i)=>({value,key:highs[i],index:i}))
       .filter(item=>Math.abs(item.value-50)>=15)
@@ -127,7 +131,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
   const facetObservations=facetFieldObservations(facetContrasts);
   if(facetObservations.length)temperament+=' The detailed IPIP-NEO report suggests a couple of quirks: '+
     facetObservations.map(item=>item.text).join(' ')+
-    ' These are relative to its overall trait domains, not fixed behavior.';
+    ' These are striking reported facet scores relative to a neutral game reference, not fixed behavior.';
   const motivations='This species is primarily driven by '+motivationNotes[core]+' (Enneagram '+core+', '+words(core)+
     '). Its '+second+' ('+words(second)+') and '+third+' ('+words(third)+
     ') fixes add supporting instincts. Trainer tip: understand what gets it moving before asking it to act against that instinct.'+
