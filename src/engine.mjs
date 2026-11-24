@@ -3,8 +3,8 @@ import {
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
   ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
-} from './data.mjs?v=v2-facet-outcomes-2';
-import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
+} from './data.mjs?v=v2-complete-stable-3';
+import { chooseHeldItem } from './held-items.mjs?v=v2-complete-stable-3';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
