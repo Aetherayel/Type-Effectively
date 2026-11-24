@@ -82,6 +82,13 @@ export const ENNEAGRAM_AFFINITIES = Object.freeze({
   8:[91,100,96,58,62,84],// direct agency and resistance
   9:[99,45,96,63,95,49]  // sustained steadiness
 });
+// Subtract the authored nine-type column prior before blending frameworks.
+// A uniformly weighted Enneagram profile must be neutral (50) on all six
+// stat axes; individual type differences are retained without a Defense prior.
+export const ENNEAGRAM_STAT_BASELINE=Object.freeze(
+  ENNEAGRAM_AFFINITIES[1].map((_,i)=>
+    Object.values(ENNEAGRAM_AFFINITIES).reduce((sum,row)=>sum+row[i],0)/9)
+);
 
 // Valid MBTI labels are retained as identities, not Nature assignments.
 export const MBTI_TYPES = Object.freeze([
