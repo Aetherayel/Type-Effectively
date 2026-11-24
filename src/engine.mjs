@@ -9,6 +9,7 @@ import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
+import { refineBigFiveAffinities } from './bigfive-facets.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -512,6 +513,8 @@ export function generateBuild(input) {
   if (!Array.isArray(ocean) || ocean.length!==5 || ocean.some(n=>!Number.isFinite(n)||n<0||n>100)) {
     throw new Error('Big Five scores must contain five numbers from 0–100.');
   }
+  if(input.bigFiveFacets!=null && input.bigFive==null)
+    throw new Error('Enter all five Big Five domain scores before adding facet percentiles.');
   if (!input.bigFive) warnings.push('Big Five scores were set to neutral 50-point placeholders for base stats; Nature scoring excludes unmeasured Big Five.');
   // Nature scores a motivational/cognitive/temperamental *preference contrast*,
   // not raw stats or an already selected battle role. Run before role selection.
@@ -521,7 +524,10 @@ export function generateBuild(input) {
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores);
+  // Facets refine the *existing* Big Five source, not a fourth weighting.
+  // Missing facet groups fall back to the original domain-only contribution.
+  const facetScoring=refineBigFiveAffinities(ocean,oceanAffinity(ocean),input.bigFiveFacets);
+  const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
   const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
@@ -586,6 +592,10 @@ export function generateBuild(input) {
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
     baseStats,effectiveStats,statWeightMode,statWeights,
+    facetScoring:{
+      activeDomains:facetScoring.activeDomains,
+      corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(facetScoring.corrections[i]*10)/10]))
+    },
     affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings
