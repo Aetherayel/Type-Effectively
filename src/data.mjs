@@ -80,7 +80,7 @@ export const ENNEAGRAM_AFFINITIES = Object.freeze({
   6:[87,58,94,77,82,54], // vigilance and preparation
   7:[69,76,42,95,48,100],// possibilities and adaptation
   8:[91,100,96,58,62,84],// direct agency and resistance
-  9:[99,45,75,63,95,49]  // sustained steadiness
+  9:[99,45,96,63,95,49]  // sustained steadiness
 });
 
 // Valid MBTI labels are retained as identities, not Nature assignments.
