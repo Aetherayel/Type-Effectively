@@ -106,6 +106,15 @@ export const NATURE_EFFECTS = Object.freeze({
 });
 
 export const STAT_KEYS = ['hp','atk','def','spa','spd','spe'];
+// Public power budget versus the stable role/move/strategy calibration scale.
+export const REFERENCE_STAT_TOTAL = 535;
+export const BASE_STAT_TOTAL = 600;
+export const BASE_STAT_MIN = Math.round(45*BASE_STAT_TOTAL/REFERENCE_STAT_TOTAL);
+export const BASE_STAT_MAX = Math.round(140*BASE_STAT_TOTAL/REFERENCE_STAT_TOTAL);
+export const STAT_AFFINITY_SCALE = 1.25;
+export const toReferenceStats = stats => Object.fromEntries(
+  STAT_KEYS.map(key=>[key,Math.round(stats[key]*REFERENCE_STAT_TOTAL/BASE_STAT_TOTAL)])
+);
 export const STAT_NAMES = ['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed'];
 // One semantic contract: base stats = relative strengths, Nature = preferences.
 export const STAT_MEANINGS = Object.freeze({
@@ -168,7 +177,7 @@ export const ROLE_TEMPLATE_SCALE = 0.75;
 export const ROLE_CALIBRATED_TEMPLATES = Object.freeze(Object.fromEntries(
   Object.entries(ROLE_TEMPLATES).map(([role,template])=>[
     role,Object.freeze(template.map(value=>
-      535/STAT_KEYS.length + ROLE_TEMPLATE_SCALE*(value-535/STAT_KEYS.length)))
+      REFERENCE_STAT_TOTAL/STAT_KEYS.length + ROLE_TEMPLATE_SCALE*(value-REFERENCE_STAT_TOTAL/STAT_KEYS.length)))
   ])
 ));
 export const ROLE_DESCRIPTIONS = {

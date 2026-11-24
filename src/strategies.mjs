@@ -158,6 +158,7 @@ export function protectivePlanningFit({mbtiScores=null,bigFive,bigFiveFacets=nul
 }
 
 
+// stats are Nature-adjusted 535-reference values, not the displayed 600-BST stats.
 export function selectSignatureStrategy({
   types,role,stats,core,second,third,bigFive,hasBigFive=true,
   mbtiScores=null,bigFiveFacets=null
