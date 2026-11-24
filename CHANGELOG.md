@@ -2,6 +2,12 @@
 
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## Unreleased — Transparent affinity scoring before 535 BST
+- Add a reversible **Pokémon stats / Before normalization** results toggle. The second view shows all six weighted, unnormalized personality affinities on a 0–100 game-score scale, their mean, and each deviation from the mean.
+- Expose Big Five, Enneagram and cognition source affinities alongside each stat's existing weights, including optional IPIP-NEO facet contributions.
+- Preserve the original 535-point base-stat radar, Nature effects, battle roles, EV training and both PNG exports regardless of the selected results view. Clarify that game affinities are neither population percentiles nor validated ability estimates.
+- Add deterministic model/result tests and headless browser coverage for both toggle directions and unchanged stat-radar output.
+
 ## 2.0.1 (next verified merge) — Pre-Nature battle-role recalibration
 - Choose battle identity from six **base stats before Nature**, keeping Nature for effective battle stats, move/ability mechanics, and specialist stat gates.
 - Rebalance the six role-template comparisons by partially correcting their different neutral-template fit advantages; preserve the 80% stat / 20% type weighting and the five-point secondary-role threshold.
