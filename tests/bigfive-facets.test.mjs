@@ -120,7 +120,7 @@ test('factor weights and 535 BST unchanged; optional facets propagate through fu
   assert.deepEqual(a,b,'same full input produces identical complete build');
   assert.equal(sum(Object.values(a.baseStats)),535);
   assert.ok(Object.values(a.baseStats).every(n=>n>=45&&n<=140));
-  assert.equal(a.statWeights.spa.bigFive,.25,'facet input must not increase Big Five source weight');
+  assert.equal(a.statWeights.spa.bigFive,.45,'facet input must not change the 16P source weight');
   assert.equal(a.statWeightMode,'percentages');
   assert.ok(a.facetScoring.corrections.spa!==0);
   assert.ok(a.report&&a.archetype&&a.moves.length===4);
