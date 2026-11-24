@@ -61,9 +61,21 @@ test('different Big Five patterns diversify items even for a shared 593 tritype'
       (i*19)%101,(i*33+17)%101,(i*47+29)%101,
       (i*59+31)%101,(i*71+43)%101
     ];
-    const build=generateBuild({...architectInput,bigFive});
+    const input={...architectInput,bigFive};
+    const build=generateBuild(input);
     assert.equal(build.tritype,'593');
-    choices.add(build.heldItem.name);
+    // Specialist equipment is mechanically fixed, so keep this regression
+    // about the *ordinary* item scorer rather than accidentally measuring
+    // how often a Snow Warning set correctly receives Icy Rock.
+    const ordinary=chooseHeldItem({
+      tritype:build.tritype,core:build.core,second:build.second,third:build.third,
+      wing:build.wing,enneagramScores:input.enneagramScores,bigFive,
+      mbtiScores:input.mbtiScores,role:build.role,types:build.types,
+      moves:build.moves,ability:build.ability
+    });
+    choices.add(ordinary.name);
+    if(build.signatureStrategy)
+      assert.equal(build.heldItem.name,build.signatureStrategy.item);
   }
   assert.ok(choices.size>=10,'only '+choices.size+' items for 36 distinct Big Five profiles');
 });
