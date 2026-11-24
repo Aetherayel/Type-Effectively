@@ -10,7 +10,10 @@ import { classifyNature } from './nature.mjs';
 import { classifyRole } from './roles.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
-import { refineBigFiveAffinities, facetContrastMap } from './bigfive-facets.mjs';
+import {
+  refineBigFiveAffinities, facetContrastMap, resolveBigFiveEvidence,
+  hasCompleteBigFiveEvidence
+} from './bigfive-facets.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -446,8 +449,8 @@ export function requireCompletePersonalityInputs(input) {
     throw new Error('Cognitive style is required: enter 16Personalities percentages or all eight cognitive-function results. A four-letter type alone is insufficient.');
   if(input.enneagramScores==null && input.enneagramRanking==null && input.roweScores==null)
     throw new Error('Enneagram results are required: enter nine scores, complete a nine-type ranking, or enter nine Rowe totals. A tritype alone is insufficient.');
-  if(input.bigFive==null)
-    throw new Error('Big Five results are required: enter all five domain scores before generating.');
+  if(!hasCompleteBigFiveEvidence(input.bigFive,input.bigFiveFacets))
+    throw new Error('Big Five results are required: supply five domains or all 30 IPIP-NEO facets.');
   return input;
 }
 export function generateCompleteBuild(input) {
@@ -511,25 +514,33 @@ export function generateBuild(input) {
   const selectedWing=input.wingOverride==null||input.wingOverride==='' ? deriveWing(core,enneaScores) : Number(input.wingOverride);
   if (!wingNeighbors.includes(selectedWing)) throw new Error('Your wing must be adjacent to your core type.');
 
-  const ocean=input.bigFive || [50,50,50,50,50];
-  if (!Array.isArray(ocean) || ocean.length!==5 || ocean.some(n=>!Number.isFinite(n)||n<0||n>100)) {
-    throw new Error('Big Five scores must contain five numbers from 0–100.');
-  }
-  if(input.bigFiveFacets!=null && input.bigFive==null)
-    throw new Error('Enter all five Big Five domain scores before adding facet percentiles.');
-  if (!input.bigFive) warnings.push('Big Five scores were set to neutral 50-point placeholders for base stats; Nature scoring excludes unmeasured Big Five.');
+  // Full facet reports can supply the entire Big Five section by themselves.
+  // For partial facet reports, only missing groups use reported domains.
+  // Context values support legacy theme/summary packages; they are not
+  // calculated IPIP-NEO domain percentiles.
+  const reportedOcean=input.bigFive??null;
+  const evidence=resolveBigFiveEvidence(
+    reportedOcean??(input.bigFiveFacets==null?[50,50,50,50,50]:null),
+    input.bigFiveFacets
+  );
+  const ocean=evidence.context;
+  const hasBigFive=reportedOcean!=null||input.bigFiveFacets!=null;
+  if(!hasBigFive)
+    warnings.push('Big Five scores were set to neutral placeholders for internal compatibility. User-visible results require complete Big Five evidence.');
   // Nature scores a motivational/cognitive/temperamental *preference contrast*,
   // not raw stats or an already selected battle role. Run before role selection.
   const natureScoring=classifyNature({
     enneagramScores:enneaScores,core,second,third,mbtiScores,mbti,
-    bigFive:input.bigFive??null,
+    bigFive:reportedOcean,bigFiveFacets:input.bigFiveFacets??null,
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  // Facets refine the *existing* Big Five source, not a fourth weighting.
-  // Missing facet groups fall back to the original domain-only contribution.
-  const facetScoring=refineBigFiveAffinities(ocean,oceanAffinity(ocean),input.bigFiveFacets);
-  const facetContrasts=facetContrastMap(ocean,input.bigFiveFacets);
+  // Facet-first calculation: each available full facet group REPLACES the
+  // corresponding broad-domain term in the Big Five stat formula.
+  const facetScoring=refineBigFiveAffinities(
+    reportedOcean??ocean,oceanAffinity(reportedOcean??ocean),input.bigFiveFacets
+  );
+  const facetContrasts=facetContrastMap(reportedOcean??ocean,input.bigFiveFacets);
   const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
@@ -562,7 +573,7 @@ export function generateBuild(input) {
   // Ordinary generalist selection stays intact when no package earns its place.
   const signatureStrategy=selectSignatureStrategy({
     types,role,stats:effectiveStats,core,second,third,
-    bigFive:ocean,hasBigFive:input.bigFive!=null
+    bigFive:ocean,hasBigFive
   });
   const ability=signatureStrategy?signatureAbility(signatureStrategy):
     chooseAbility(role.primary.name,toolkitTypes,effectiveStats,second);
@@ -576,12 +587,13 @@ export function generateBuild(input) {
   // Item choice follows move choice: equipment must actually work with its
   // holder and the four signature moves.
   const heldItem=signatureStrategy?signatureHeldItem(signatureStrategy,{
-    core,role,bigFive:ocean,hasBigFive:input.bigFive!=null
+    core,role,bigFive:ocean,hasBigFive
   }):
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-      role,types,moves,ability,hasBigFive:input.bigFive!=null,facetContrasts
+      role,types,moves,ability,hasBigFive,facetContrasts,
+      facetScores:input.bigFiveFacets??null
     });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
     input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
@@ -590,7 +602,8 @@ export function generateBuild(input) {
     cognitiveSource:usingFunctions?'functions':'16personalities', enneagramSource:usingRowe?'rowe':'standard',
     // Keep only high/low OCEAN flags on the result; never expose raw Big Five scores in the PNG.
     // 1 = at least 50 (higher), 0 = below 50 (lower), null = unmeasured.
-    oceanBinary:input.bigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
+    oceanBinary:hasBigFive ? ocean.map(value=>value>=50 ? 1 : 0) : null,
+    oceanSource:input.bigFiveFacets?'facet-context':(reportedOcean?'reported-domains':'missing'),
     natureBoost:NATURE_EFFECTS[nature][0],natureDrop:NATURE_EFFECTS[nature][1],
     tritype, suggestedTritype, suggestedType, wing:selectedWing, typingWing,
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
@@ -608,7 +621,9 @@ export function generateBuild(input) {
     }])),
     facetScoring:{
       activeDomains:facetScoring.activeDomains,
-      corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(facetScoring.corrections[i]*10)/10]))
+      method:'facet-first',
+      corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,
+        facetScoring.corrections[i]==null?null:Math.round(facetScoring.corrections[i]*10)/10]))
     },
     affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
@@ -618,9 +633,10 @@ export function generateBuild(input) {
   // base stats, role, abilities, moves, or held-item selection.
   build.archetype=classifyArchetype({
     enneagramScores:enneaScores,mbtiScores,bigFive:ocean,
-    mbti,core,second,third,role,facetContrasts
+    mbti,core,second,third,role,facetContrasts,
+    facetScores:input.bigFiveFacets??null
   });
   build.title=build.archetype.title;
-  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores,facetContrasts});
+  build.report=composeFieldReport(build,{bigFive:hasBigFive?ocean:null,mbtiScores,facetContrasts});
   return build;
 }
