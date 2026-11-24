@@ -597,6 +597,15 @@ export function generateBuild(input) {
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
     baseStats,effectiveStats,statWeightMode,statWeights,
+    // Preserve the precise, unnormalized blend separately from the original
+    // rounded affinities. Raw affinities are game scores, not percentiles,
+    // and never alter the fixed 535-BST allocation or downstream mechanics.
+    rawStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,Math.round(blend[i]*10)/10])),
+    sourceStatAffinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,{
+      bigFive:Math.round(oa[i]*10)/10,
+      enneagram:Math.round(ea[i]*10)/10,
+      cognition:Math.round(ma[i]*10)/10
+    }])),
     facetScoring:{
       activeDomains:facetScoring.activeDomains,
       corrections:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(facetScoring.corrections[i]*10)/10]))
