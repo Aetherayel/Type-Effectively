@@ -4,12 +4,6 @@ import { itemFacetAdjustment } from './facet-outcomes.mjs';
 const TRAIT_LABELS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Emotional sensitivity'];
 const average = values => values.reduce((sum,value)=>sum+value,0)/values.length;
 const traitFit = (scores,target) => 100-average(scores.map((score,i)=>Math.abs(score-target[i])));
-const hash = value => {
-  // FNV-1a; browser-independent deterministic tie-breaker, not true randomness.
-  let out=2166136261;
-  for(let i=0;i<value.length;i++)out=Math.imul(out^value.charCodeAt(i),16777619);
-  return out>>>0;
-};
 
 // Only reject equipment whose key mechanic contradicts this specific build.
 // Situational reactive items remain flavor-eligible; impossible prerequisites do not.
@@ -103,15 +97,16 @@ export function chooseHeldItem({
     // battle functionality; source weights and family templates stay intact.
     return [key,.68*coreSignal+.32*traits+itemFacetAdjustment(key,facetContrasts)];
   }));
-  const seed=[tritype,wing,...mbtiScores,...enneagramScores,...bigFive,role.primary.name].join('|');
+  // Rank by actual thematic and tactical fit only. Never hash raw survey
+  // values into a pseudo-random bonus: one-point input changes must not
+  // reshuffle otherwise identical equipment choices.
   const sorted=HELD_ITEMS.filter(item=>!item.strategyOnly && isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
     const familyScore=familyScores[item.family];
     const traits=traitFit(bigFive,item.targets);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
       role.secondary && item.roles.includes(role.secondary.name) ? 75 : 35;
-    const tie=(hash(seed+'|'+item.name)/4294967295-.5)*8;
-    return {item,score:.47*familyScore+.38*traits+.15*roleScore+tie};
-  }).sort((a,b)=>b.score-a.score || a.item.name.localeCompare(b.item.name));
+    return {item,score:.47*familyScore+.38*traits+.15*roleScore};
+  }).sort((a,b)=>b.score-a.score || a.item.name.localeCompare(b.item.name)); // stable exact ties
   if(!sorted.length)throw new Error('No compatible thematic held item.');
   const selected=sorted[0].item;
   const family=ITEM_FAMILIES[selected.family];
