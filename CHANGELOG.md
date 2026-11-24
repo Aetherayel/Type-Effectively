@@ -2,6 +2,12 @@
 
 **Live release numbering:** PR #33 establishes **v2.0.0**, with subsequent merged PRs incrementing v2.0.x. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## 2.1.0 — Community Beta
+- Require individual score entry for all broad questionnaire fields; explicitly entered neutral values are valid.
+- Add hero sample and personal-build actions, progress indicators and privacy guidance before sharing.
+- Preserve synthetic provenance on edited samples, shared builds, summaries and both PNG cards.
+- Add public feedback template and update documentation. No scoring formulas or game mechanics changed.
+
 ## Unreleased — Signature strategy by tactical function, not archetype title
 - Allow Ice **Wall, Tank, Support or Controller** (primary or close secondary) builds to qualify for **Snow Bastion** when effective Def >= 83, Sp. Def >= 82, Enneagram motivation and full strategy fit pass all the existing mechanical checks.
 - Aurora Veil remains a protective role tactic: Wall/Tank use the fortification move pool, Support/Controller use the ally-protection move pool. The classified role and subsequent archetype title are never rewritten.

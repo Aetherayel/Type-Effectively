@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10171c" />
-  <meta name="application-version" content="2.0.0" />
+  <meta name="application-version" content="2.1.0" />
   <meta name="description" content="Turn your MBTI, Enneagram, and Big Five results into a custom personality Pokémon. 600 base stat points. Zero scientific claims about your battle potential." />
   <meta property="og:title" content="Type Effectively — your personality has a moveset" />
   <meta property="og:description" content="Three personality tests. One extremely specific Pokémon build." />
   <title>Type Effectively · Your personality has a moveset</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=v2-600-bst-1" />
-  <script type="module" src="./src/app.mjs?v=v2-600-bst-1"></script>
-  <script type="module" src="./src/release-version.mjs?v=2.0.0"></script>
+  <link rel="stylesheet" href="./styles.css?v=community-beta-1" />
+  <script type="module" src="./src/app.mjs?v=community-beta-1"></script>
+  <script type="module" src="./src/release-version.mjs?v=2.1.0"></script>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -23,7 +23,7 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span>TYPE<span class="brand-accent">/</span>EFFECTIVELY</span>
       </a>
-      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v2.0.0</span>
+      <div class="header-actions"><span class="release-version" id="release-version" title="Version from the last successful GitHub Pages release">v2.1.0</span>
       <a class="header-link" href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">View the source <span aria-hidden="true">↗</span></a></div>
     </header>
 
@@ -31,6 +31,11 @@
       <div class="eyebrow"><span class="status-pip"></span> AN UNOFFICIAL PERSONALITY EXPERIMENT <span class="eyebrow-num">/ 001</span></div>
       <h1 id="hero-title">Your personality<br />has a <em>moveset.</em></h1>
       <p>Put three personality theories in a blender. Get one highly specific Pokémon build. Apparently introspection needed a damage calculator.</p>
+      <div class="hero-actions">
+        <button type="button" id="explore-sample" class="primary-button">Explore a sample ↗</button>
+        <button type="button" id="start-personal" class="outline-button">Build my Pokémon ↓</button>
+      </div>
+      <p class="hero-help">Try a synthetic build instantly, or bring your three personality test results. No sign-in.</p>
       <div class="hero-meta">
         <span><strong>600</strong> BASE STAT POINTS</span>
         <span class="meta-divider"></span>
@@ -78,6 +83,7 @@
               <button type="button" class="mode-button" data-mbti-mode="functions" aria-pressed="false">8 functions</button>
             </div>
             <div id="mbti-score-fields" class="slider-stack"></div>
+            <p id="mbti-progress" class="mini-note score-progress" role="status">0 / 5 scores entered</p>
             <p class="mini-note" id="mbti-score-help">Select the trait shown on your report and enter its percentage. For example: 71% Extraverted = 71 + Extraverted.</p>
             <div id="function-score-fields" class="function-grid hidden" aria-label="Eight cognitive-function scores"></div>
             <p class="mini-note hidden" id="function-help">Enter the eight comparable overall function totals from your report (Ne, Ni, Se, Si, Te, Ti, Fe, Fi). Raw numbers and decimals are fine; these are not percentages. Do not mix domain-specific scores. All eight scores contribute directly to stat affinities; derived preference contrasts still determine the suggested four-letter label and inform Nature.</p>
@@ -113,6 +119,7 @@
               <button type="button" class="mode-button" data-ennea-mode="rowe" aria-pressed="false">Rowe raw</button>
             </div>
             <div id="ennea-score-fields" class="ennea-grid"></div>
+            <p id="ennea-progress" class="mini-note score-progress" role="status">0 / 9 scores entered</p>
             <p class="mini-note" id="ennea-score-help">These are 0–100 scores. For signed Rowe results, use “Rowe raw” instead of manually scaling them.</p>
             <div id="rowe-score-fields" class="ennea-grid hidden" aria-label="Nine signed Rowe Enneagram type totals"></div>
             <p class="mini-note hidden" id="rowe-score-help">Enter the nine raw type totals exactly as Rowe reports them. Negative values are supported. The app preserves their relative distances with a conservative, explicitly authored conversion. Rowe subtype scores and instinctual stacking are not used in the Pokémon formula.</p>
@@ -143,7 +150,8 @@
             <p class="panel-subtitle">Required: your Big Five results. Enter five broad domains, or use all 30 IPIP-NEO facets for a more differentiated build.</p>
             <div class="test-line"><a id="bigfive-test-link" href="https://oceantest.net/test" target="_blank" rel="noopener noreferrer">Take the free Ocean Test ↗</a><span id="bigfive-test-detail">50 questions · free scores</span></div>
             <div id="bigfive-fields" class="slider-stack"></div>
-            <p class="mini-note">Quick path: enter the five domain scores in O, C, E, A, N order. For a full 30-facet report, leave these sliders untouched: the facets supply this section independently. Default 50s are placeholders, not measured results.</p>
+            <p id="bigfive-progress" class="mini-note score-progress" role="status">0 / 5 scores entered</p>
+            <p class="mini-note">Quick path: enter the five domain scores in O, C, E, A, N order. For a full 30-facet report, leave these sliders untouched: the facets supply this section independently. Sliders start at 50 as placeholders. Enter each actual score, including a 50, in the number field to confirm it.</p>
             <details class="facet-panel" id="bigfive-facet-panel">
               <summary>Detailed Big Five — IPIP-NEO facets (30)</summary>
               <p class="mini-note">Enter the 0–100 <strong>facet percentiles</strong> from your IPIP-NEO report, not raw sums. Complete all six facets for each detailed group. A complete group <strong>replaces</strong> the corresponding broad trait when scoring; missing groups use your broad scores. All 30 facets can replace the five broad inputs entirely. This does not change the 600-point BST budget.</p>
@@ -213,14 +221,15 @@
         <div class="stat-guide-note">
           <h3>Nature, OCEAN &amp; modifiers</h3>
           <p>Your <strong>Nature</strong> is selected from the full Enneagram, cognitive preference, and measured Big Five profile. It represents a preferred behavior at the cost of another. This raises one non-HP stat by 10% and lowers another by 10%. When modified, the radar shows the adjusted number above its base value. Expand <strong>Why this Nature?</strong> in results to see the contributing scores.</p>
-          <p><strong>OCEAN</strong> stands for <strong>Openness, Conscientiousness, Extraversion, Agreeableness,</strong> and <strong>Neuroticism</strong> (emotional sensitivity). On shared cards, <strong>H</strong> means a score of 50 or higher and <strong>L</strong> means below 50; “Estimated” means no Big Five scores were entered.</p>
+          <p><strong>OCEAN</strong> stands for <strong>Openness, Conscientiousness, Extraversion, Agreeableness,</strong> and <strong>Neuroticism</strong> (emotional sensitivity). On shared cards, <strong>H</strong> means a score of 50 or higher and <strong>L</strong> means below 50; all 30 facets may also supply these indicators through the model's contextual scores.</p>
         </div>
       </div>
       <p class="stat-guide-footnote">These are authored, game-inspired interpretations—not validated measures of resilience, intelligence, character, or mental health.</p>
     </section>
     <footer class="footer">
-      <span id="footer-version">TYPE EFFECTIVELY / V2.0.0</span>
+      <span id="footer-version">TYPE EFFECTIVELY / V2.1.0</span>
       <span>KNOW YOURSELF. KNOW YOUR WEAKNESSES. BLAME TYPE MATCHUPS.</span>
+      <a href="https://github.com/Aetherayel/Type-Effectively/issues/new?template=build-feedback.md" target="_blank" rel="noopener noreferrer">FEEDBACK ↗</a>
       <a href="https://github.com/Aetherayel/Type-Effectively" target="_blank" rel="noopener noreferrer">OPEN SOURCE ↗</a>
     </footer>
   </div>

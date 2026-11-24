@@ -3,7 +3,7 @@
 // slow browser caches cannot make the visible version jump forward.
 const RELEASES_URL = 'https://api.github.com/repos/Aetherayel/Type-Effectively/releases?per_page=100';
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
-const PATCH_TAG_PATTERN = /^v(?:1\.(?:1|2|3|4)|2\.0)\.(?:0|[1-9][0-9]*)$/;
+const PATCH_TAG_PATTERN = /^v(?:1\.(?:1|2|3|4)|2\.(?:0|1))\.(?:0|[1-9][0-9]*)$/;
 
 export function versionForRevision(revision, releases) {
   if (!SHA_PATTERN.test(revision) || !Array.isArray(releases)) return null;

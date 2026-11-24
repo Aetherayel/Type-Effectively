@@ -22,15 +22,36 @@ window.addEventListener('unhandledrejection',event=>{
 window.addEventListener('DOMContentLoaded',()=>{
   // Three sections are mandatory. The user may not generate from only two,
   // nor may a prior completed build remain visible after a failed submission.
-  document.getElementById('mbti-0').value='75';
-  document.getElementById('mbti-0').dispatchEvent(new Event('input',{bubbles:true}));
-  document.getElementById('ennea-0').value='75';
-  document.getElementById('ennea-0').dispatchEvent(new Event('input',{bubbles:true}));
-  document.getElementById('generate-button')?.click();
+  const enter=(id,value)=>{
+    const field=document.getElementById(id);
+    field.value=String(value);field.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+  const generate=()=>document.getElementById('generate-button').click();
+  const flag=(name,value)=>document.documentElement.setAttribute(name,String(Boolean(value)));
+  enter('mbti-0',75);generate();
+  flag('data-partial-mbti',!document.querySelector('.result-card')&&document.getElementById('form-error').textContent.includes('Cognitive style'));
+  for(let i=1;i<5;i++)enter('mbti-'+i+'-number',50);
+  enter('ennea-0',75);generate();
+  flag('data-partial-ennea',!document.querySelector('.result-card')&&document.getElementById('form-error').textContent.includes('Enneagram test results'));
+  for(let i=1;i<9;i++)enter('ennea-'+i+'-number',50);
+  enter('bigfive-0-number',50);generate();
+  flag('data-partial-bigfive',!document.querySelector('.result-card')&&document.getElementById('form-error').textContent.includes('Big Five test results'));
   document.documentElement.setAttribute('data-missing-bigfive',
     document.getElementById('form-error')?.textContent?.includes('Big Five test results are required')?'true':'false');
   document.documentElement.setAttribute('data-missing-bigfive-no-card',
     document.querySelector('.result-card')===null?'true':'false');
+  for(let i=1;i<5;i++)enter('bigfive-'+i+'-number',50);
+  generate();flag('data-explicit-neutral',document.querySelector('.result-card'));
+  enter('bigfive-2-number','');generate();
+  flag('data-cleared-score',!document.querySelector('.result-card'));
+  document.getElementById('reset-button').click();
+  document.getElementById('explore-sample').click();
+  flag('data-hero-sample',document.querySelector('.random-sample-mark'));
+  flag('data-share-warning',document.getElementById('share-privacy')?.textContent.includes('exact questionnaire scores'));
+  flag('data-feedback-link',document.getElementById('build-feedback')?.href.includes('build-feedback.md'));
+  generate();flag('data-sample-stays-labeled',document.querySelector('.random-sample-mark'));
+  document.getElementById('start-personal').click();
+  flag('data-personal-reset',!document.querySelector('.result-card')&&document.getElementById('mbti-0-number').value==='');
   document.getElementById('randomize-button')?.click();
   document.querySelector('[data-mbti-mode="functions"]')?.click();
   document.getElementById('generate-button')?.click();
@@ -263,7 +284,7 @@ try{
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
   for(const key of ['data-missing-bigfive','data-missing-bigfive-no-card',
-      'data-missing-mind','data-invalid-clears-card','data-missing-enneagram'])
+      'data-missing-mind','data-invalid-clears-card','data-missing-enneagram','data-partial-mbti','data-partial-ennea','data-partial-bigfive','data-explicit-neutral','data-cleared-score','data-hero-sample','data-share-warning','data-feedback-link','data-sample-stays-labeled','data-personal-reset'])
     assert.ok(html.includes(key+'="true"'),key+' should block rendering incomplete builds');
   assert.ok(!html.includes('data-mbti-mode="type"') &&
     !html.includes('data-ennea-mode="tritype"'),
@@ -292,7 +313,7 @@ try{
     'all thirty facets must satisfy Big Five without reported broad domains');
   assert.ok(html.includes('data-facet-only-status="All 30 facets complete.'),
     'facet-only status must confirm that domain inputs are optional');
-  assert.ok(html.includes('data-card-version="CREATED v2.0.0"'),
+  assert.ok(html.includes('data-card-version="CREATED v2.1.0"'),
     'Card footer must show the bundled version when the build is generated');
   assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),
     'Card footer must update when the published release is verified');
