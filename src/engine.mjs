@@ -9,7 +9,7 @@ import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
 import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
-import { refineBigFiveAffinities } from './bigfive-facets.mjs';
+import { refineBigFiveAffinities, facetContrastMap } from './bigfive-facets.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -527,6 +527,7 @@ export function generateBuild(input) {
   // Facets refine the *existing* Big Five source, not a fourth weighting.
   // Missing facet groups fall back to the original domain-only contribution.
   const facetScoring=refineBigFiveAffinities(ocean,oceanAffinity(ocean),input.bigFiveFacets);
+  const facetContrasts=facetContrastMap(ocean,input.bigFiveFacets);
   const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
@@ -576,7 +577,7 @@ export function generateBuild(input) {
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-      role,types,moves,ability,hasBigFive:input.bigFive!=null
+      role,types,moves,ability,hasBigFive:input.bigFive!=null,facetContrasts
     });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
     input.mbtiScores ? (mbtiScores[4] >= 50?'-T':'-A') : '');
@@ -604,9 +605,9 @@ export function generateBuild(input) {
   // base stats, role, abilities, moves, or held-item selection.
   build.archetype=classifyArchetype({
     enneagramScores:enneaScores,mbtiScores,bigFive:ocean,
-    mbti,core,second,third,role
+    mbti,core,second,third,role,facetContrasts
   });
   build.title=build.archetype.title;
-  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores});
+  build.report=composeFieldReport(build,{bigFive:input.bigFive,mbtiScores,facetContrasts});
   return build;
 }
