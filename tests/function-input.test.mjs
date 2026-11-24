@@ -68,8 +68,10 @@ test('optional A/T uses a disclosed type-only proxy, never a fabricated measurem
   assert.equal(assertive.identityPreference,'A');
   assert.equal(turbulent.identityPreference,'T');
   assert.equal(assertive.breakdown.mbti.length,6);
-  assert.notDeepEqual(assertive.breakdown.mbti,unspecified.breakdown.mbti);
-  assert.notDeepEqual(turbulent.breakdown.mbti,assertive.breakdown.mbti);
+  assert.deepEqual(assertive.breakdown.mbti,unspecified.breakdown.mbti);
+  assert.deepEqual(turbulent.breakdown.mbti,assertive.breakdown.mbti);
+  assert.deepEqual(assertive.baseStats,unspecified.baseStats);
+  assert.equal(assertive.nature,turbulent.nature);
   assert.ok(assertive.warnings.some(note=>note.includes('75/25 type-only proxy')));
   assert.ok(unspecified.warnings.some(note=>note.includes('A/T axis was not provided')));
   assert.deepEqual(generateBuild({...input,identityPreference:'A'}).baseStats,assertive.baseStats);
