@@ -48,7 +48,11 @@ const scenarios={
   neutralMix65:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.65,wallVariants:true},
   neutralMix50NewTank:{nature:false,templates:{...ROLE_TEMPLATES,Tank:[101,108,93,90,87,56]},neutralMix:.5,wallVariants:true},
   neutralMix50NoVariants:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.5},
-  neutralMix75:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.75,wallVariants:true}
+  neutralMix75:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.75,wallVariants:true},
+  neutralMix35Axes:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.35,wallVariants:true,axis:true},
+  neutralMix35HalfAxes:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.35,wallVariants:true,axis:true,axisScale:.5},
+  neutralMix30:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.30,wallVariants:true},
+  neutralMix40:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.40,wallVariants:true}
 };
 function calculate(build,scenario){
   const stats=scenario.nature?build.effectiveStats:build.baseStats;
@@ -94,7 +98,7 @@ function calculate(build,scenario){
       statFit=(1-scenario.neutralMix)*statFit+scenario.neutralMix*corrected;
     }
     const toolkit=.55*ROLE_AFFINITIES[types[0]][idx]+.45*ROLE_AFFINITIES[types[1]][idx];
-    const bonus=scenario.axis?(familyAdjustment[role]||0):0;
+    const bonus=scenario.axis?(scenario.axisScale??1)*(familyAdjustment[role]||0):0;
     return {name:role,score:Math.round(.8*statFit+.2*toolkit+bonus)};
   }).sort((a,b)=>b.score-a.score||ROLE_NAMES.indexOf(a.name)-ROLE_NAMES.indexOf(b.name));
   return {primary:ranked[0].name,secondary:ranked[1].score>=ranked[0].score-5?ranked[1].name:null,
@@ -128,7 +132,7 @@ for(const [name,rows] of Object.entries(observations)){
     changedFromCurrent:rows.filter((r,i)=>r.primary!==comparing[i].primary).length,
     hybrid:rows.filter(r=>r.secondary).length};
 }
-const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall','directionDefault','directionVariants','directionProfiles','directionProfilesSlow','directionProfilesFast','directionProfilesAxes','neutralCorrected','neutralCorrectedVariants','neutralMix35','neutralMix50','neutralMix65','neutralMix50NewTank','neutralMix50NoVariants','neutralMix75']){
+const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall','directionDefault','directionVariants','directionProfiles','directionProfilesSlow','directionProfilesFast','directionProfilesAxes','neutralCorrected','neutralCorrectedVariants','neutralMix35','neutralMix50','neutralMix65','neutralMix50NewTank','neutralMix50NoVariants','neutralMix75','neutralMix35Axes','neutralMix35HalfAxes','neutralMix30','neutralMix40']){
   const table={};
   observations.currentEffective.forEach((prior,i)=>{
     const after=observations[name][i];
