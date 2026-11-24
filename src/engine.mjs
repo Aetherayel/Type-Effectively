@@ -8,7 +8,7 @@ import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { composeFieldReport } from './profile-analysis.mjs?v=signature-copy-29';
-import { deriveFunctionPreferences } from './functions.mjs';
+import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=signature-copy-29';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
@@ -476,13 +476,13 @@ export function generateBuild(input) {
   const mbti=override || suggestedType;
   if (!MBTI_TYPES.includes(mbti)) throw new Error('Invalid MBTI type.');
   if(usingFunctions) {
-    warnings.push('Eight function totals were translated into four preference contrasts for this game. This is not Sakinorva’s typing algorithm.');
+    warnings.push('Eight function totals directly inform base stat affinities; four derived preference contrasts inform the suggested type and Nature. Neither is Sakinorva’s typing algorithm.');
     if(identityPreference)
       warnings.push('The supplied '+identityPreference+' identity label uses the existing 75/25 type-only proxy for scoring; no measured A/T percentage was supplied.');
     else
       warnings.push('The A/T axis was not provided; its contribution is neutral and no A/T label was inferred.');
     if(override && override!==suggestedType)
-      warnings.push('Your selected '+override+' type is used for Nature preference polarity and archetype interpretation; the function-derived '+suggestedType+' suggestion and raw stat affinities remain unchanged.');
+      warnings.push('Your selected '+override+' type is used for Nature preference polarity and archetype interpretation; the function-derived '+suggestedType+' suggestion and raw eight-function stat affinities remain unchanged.');
   }
 
   const usingRowe=input.roweScores!=null;
@@ -521,7 +521,11 @@ export function generateBuild(input) {
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores), ma=mbtiAffinity(mbtiScores);
+  const oa=oceanAffinity(ocean), ea=enneagramAffinity(enneaScores);
+  // Use all eight measured functions when provided. The four contrasts remain
+  // useful for Nature/identity, but are a lossy representation for base stats.
+  const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
+    mbtiAffinity(mbtiScores);
   const blend=STAT_KEYS.map((_,i)=>
     BASE_STAT_WEIGHTS.bigFive*oa[i]+BASE_STAT_WEIGHTS.enneagram*ea[i]+
     BASE_STAT_WEIGHTS.cognition*ma[i]);
