@@ -20,8 +20,29 @@ window.addEventListener('unhandledrejection',event=>{
     String(event.reason));
 });
 window.addEventListener('DOMContentLoaded',()=>{
-  // Exercise the actual results UI, not merely the slider bootstrap.
+  // Three sections are mandatory. The user may not generate from only two,
+  // nor may a prior completed build remain visible after a failed submission.
+  document.getElementById('mbti-0').value='75';
+  document.getElementById('mbti-0').dispatchEvent(new Event('input',{bubbles:true}));
+  document.getElementById('ennea-0').value='75';
+  document.getElementById('ennea-0').dispatchEvent(new Event('input',{bubbles:true}));
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-missing-bigfive',
+    document.getElementById('form-error')?.textContent?.includes('Big Five test results are required')?'true':'false');
+  document.documentElement.setAttribute('data-missing-bigfive-no-card',
+    document.querySelector('.result-card')===null?'true':'false');
   document.getElementById('randomize-button')?.click();
+  document.querySelector('[data-mbti-mode="functions"]')?.click();
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-missing-mind',
+    document.getElementById('form-error')?.textContent?.includes('all eight cognitive-function totals')?'true':'false');
+  document.documentElement.setAttribute('data-invalid-clears-card',
+    document.querySelector('.result-card')===null?'true':'false');
+  document.querySelector('[data-mbti-mode="scores"]')?.click();
+  document.querySelector('[data-ennea-mode="rowe"]')?.click();
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-missing-enneagram',
+    document.getElementById('form-error')?.textContent?.includes('all nine raw Rowe')?'true':'false');
   // Switch to the comprehensive path and exercise real eight-score submission.
   document.querySelector('[data-test-mode="advanced"]')?.click();
   const scores=[20,90,20,30,75,40,25,60];
@@ -193,6 +214,12 @@ try{
     'Rowe conversion must be disclosed');
   assert.ok(html.includes('data-rowe-negative="-4"'),
     'Negative Rowe scores must survive direct entry');
+  for(const key of ['data-missing-bigfive','data-missing-bigfive-no-card',
+      'data-missing-mind','data-invalid-clears-card','data-missing-enneagram'])
+    assert.ok(html.includes(key+'="true"'),key+' should block rendering incomplete builds');
+  assert.ok(!html.includes('data-mbti-mode="type"') &&
+    !html.includes('data-ennea-mode="tritype"'),
+    'type-only and tritype-only entry modes must not be available');
   assert.ok(html.includes('data-facet-count="30"'),'all thirty optional IPIP facet fields must render');
   assert.ok(html.includes('data-facet-partial-error="Complete all six Openness facets'),
     'a partly completed facet group must not silently fabricate missing inputs');
