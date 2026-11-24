@@ -40,7 +40,15 @@ const scenarios={
     directional:1.6,wallVariants:true},
   directionProfilesAxes:{nature:false,templates:{...ROLE_TEMPLATES,
     Pivot:[95,77,93,75,82,113],Support:[99,60,82,70,119,105],Controller:[82,68,85,110,92,98]},
-    directional:1.2,wallVariants:true,axis:true}
+    directional:1.2,wallVariants:true,axis:true},
+  neutralCorrected:{nature:false,templates:ROLE_TEMPLATES,neutralMix:1},
+  neutralCorrectedVariants:{nature:false,templates:ROLE_TEMPLATES,neutralMix:1,wallVariants:true},
+  neutralMix35:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.35,wallVariants:true},
+  neutralMix50:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.5,wallVariants:true},
+  neutralMix65:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.65,wallVariants:true},
+  neutralMix50NewTank:{nature:false,templates:{...ROLE_TEMPLATES,Tank:[101,108,93,90,87,56]},neutralMix:.5,wallVariants:true},
+  neutralMix50NoVariants:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.5},
+  neutralMix75:{nature:false,templates:ROLE_TEMPLATES,neutralMix:.75,wallVariants:true}
 };
 function calculate(build,scenario){
   const stats=scenario.nature?build.effectiveStats:build.baseStats;
@@ -75,9 +83,16 @@ function calculate(build,scenario){
       const d=t.map(v=>v-statMean),magnitude=Math.sqrt(mean(d.map(x=>x*x)));
       return mean(normalized.map((v,i)=>(v-statMean)*d[i]/magnitude));
     });
-    const statFit=scenario.directional
+    let statFit=scenario.directional
       ? clamp(80+scenario.directional*Math.max(...projections),0,100)
       : 100*Math.exp(-rms*rms/(2*25*25));
+    if(scenario.neutralMix){
+      const originDistance=Math.min(...options.map(t=>
+        Math.sqrt(mean(t.map(v=>(v-statMean)**2)))));
+      const neutralFit=100*Math.exp(-originDistance*originDistance/(2*25*25));
+      const corrected=clamp(80+statFit-neutralFit,0,100);
+      statFit=(1-scenario.neutralMix)*statFit+scenario.neutralMix*corrected;
+    }
     const toolkit=.55*ROLE_AFFINITIES[types[0]][idx]+.45*ROLE_AFFINITIES[types[1]][idx];
     const bonus=scenario.axis?(familyAdjustment[role]||0):0;
     return {name:role,score:Math.round(.8*statFit+.2*toolkit+bonus)};
@@ -113,7 +128,7 @@ for(const [name,rows] of Object.entries(observations)){
     changedFromCurrent:rows.filter((r,i)=>r.primary!==comparing[i].primary).length,
     hybrid:rows.filter(r=>r.secondary).length};
 }
-const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall','directionDefault','directionVariants','directionProfiles','directionProfilesSlow','directionProfilesFast','directionProfilesAxes']){
+const transitions={};for(const name of ['originalBase','adjustedBase','adjustedWithAxes','moderateWall','radial14','radial18','radial22','radial18WallVariants','radial18VariantsAxes','radial18SoftWall','directionDefault','directionVariants','directionProfiles','directionProfilesSlow','directionProfilesFast','directionProfilesAxes','neutralCorrected','neutralCorrectedVariants','neutralMix35','neutralMix50','neutralMix65','neutralMix50NewTank','neutralMix50NoVariants','neutralMix75']){
   const table={};
   observations.currentEffective.forEach((prior,i)=>{
     const after=observations[name][i];
