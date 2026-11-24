@@ -526,9 +526,16 @@ export function generateBuild(input) {
   // useful for Nature/identity, but are a lossy representation for base stats.
   const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
     mbtiAffinity(mbtiScores);
-  const blend=STAT_KEYS.map((_,i)=>
-    BASE_STAT_WEIGHTS.bigFive*oa[i]+BASE_STAT_WEIGHTS.enneagram*ea[i]+
-    BASE_STAT_WEIGHTS.cognition*ma[i]);
+  // Stat-specific evidence strength. Functions retain eight distinct signals,
+  // percentage inputs retain four measured contrasts, and type-only inputs
+  // receive conservative cognitive weights because they use 75/25 proxies.
+  const statWeightMode=usingFunctions?'functions':
+    input.mbtiScores!=null?'percentages':'typeOnly';
+  const statWeights=BASE_STAT_WEIGHTS[statWeightMode];
+  const blend=STAT_KEYS.map((key,i)=>{
+    const w=statWeights[key];
+    return w.bigFive*oa[i]+w.enneagram*ea[i]+w.cognition*ma[i];
+  });
   const baseStats=normalizeStats(blend);
   const effectiveStats=applyNature(baseStats,nature);
   // Do not let fabricated proxy scores supply a typing wing when the visitor
@@ -578,7 +585,8 @@ export function generateBuild(input) {
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
-    baseStats,effectiveStats,affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
+    baseStats,effectiveStats,statWeightMode,statWeights,
+    affinities:Object.fromEntries(STAT_KEYS.map((k,i)=>[k,round(blend[i])])),
     breakdown:{bigFive:oa,enneagram:ea,mbti:ma},
     warnings
   };
