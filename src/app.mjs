@@ -4,6 +4,7 @@ import {
 } from './data.mjs?v=v2-stat-calibration-1';
 import { deriveMbti, deriveTritype, generateBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-stat-calibration-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
+import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
 import { renderStatRadar } from './radar.mjs';
 import { renderRelatives } from './relatives-ui.mjs';
@@ -93,6 +94,41 @@ function readFunctionScores() {
     throw new Error('Cognitive-function totals must be finite numbers.');
   return scores;
 }
+function facetMarkup(group,index) {
+  return '<fieldset class="facet-group"><legend>'+group.code+' · '+escapeHtml(group.label)+'</legend>'+
+    '<div class="facet-grid">'+group.facets.map((label,j)=>{
+      const i=index*6+j;
+      return '<label class="facet-entry" for="facet-'+i+'"><span>'+group.code+(j+1)+' · '+escapeHtml(label)+'</span>'+
+        '<input id="facet-'+i+'" type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="Percentile" aria-label="'+escapeHtml(label)+' percentile"/></label>';
+    }).join('')+'</div></fieldset>';
+}
+function facetFieldValues() {
+  return FACET_KEYS.map((_,i)=>$('facet-'+i).value.trim());
+}
+function readFacetScores() {
+  const strings=facetFieldValues();
+  if(strings.every(v=>v===''))return null;
+  const scores=strings.map(v=>v===''?null:Number(v));
+  return validateFacetScores(scores);
+}
+function resetFacetFields() {
+  FACET_KEYS.forEach((_,i)=>{$('facet-'+i).value='';});
+  updateFacetEntryStatus();
+}
+function updateFacetEntryStatus() {
+  const strings=facetFieldValues();
+  let complete=0,incomplete=0;
+  for(let i=0;i<FACET_GROUPS.length;i++){
+    const count=strings.slice(i*6,i*6+6).filter(Boolean).length;
+    if(count===6)complete++;
+    else if(count>0)incomplete++;
+  }
+  $('facet-entry-status').textContent=incomplete
+    ? complete+' complete domain(s), '+incomplete+' incomplete. Fill all six percentiles in a domain or clear that group.'
+    : complete
+      ? complete+' of five domain(s) refined. Other domains retain domain-only scoring.'
+      : 'No facet groups entered. Domain-only scoring remains available.';
+}
 function setTestingPath(mode,chooseInput=true) {
   state.testMode=mode==='advanced'?'advanced':'quick';
   document.querySelectorAll('[data-test-mode]').forEach(button=>{
@@ -104,7 +140,7 @@ function setTestingPath(mode,chooseInput=true) {
   const entries=[
     ['mind',advanced?TEST_LINKS.functions:TEST_LINKS.mbti,advanced?'Take the Sakinorva Functions test ↗':'Take the free 16Personalities test ↗',advanced?'256 questions · function domains':'~10 min · external site'],
     ['ennea',advanced?TEST_LINKS.rowe:TEST_LINKS.enneagram,advanced?'Take the Rowe Enneagram test ↗':'Take the free Find My Nine test ↗',advanced?'306 questions · nine scores':'Full nine-score results'],
-    ['bigfive',advanced?TEST_LINKS.ipipneo300:TEST_LINKS.bigfive,advanced?'Take the IPIP-NEO-300 test ↗':'Take the free Ocean Test ↗',advanced?'300 questions · domain percentiles':'50 questions · free scores']
+    ['bigfive',advanced?TEST_LINKS.ipipneo300:TEST_LINKS.bigfive,advanced?'Take the IPIP-NEO-300 test ↗':'Take the free Ocean Test ↗',advanced?'300 questions · domains + 30 facets':'50 questions · free scores']
   ];
   entries.forEach(([key,href,title,detail])=>{
     const link=$(key+'-test-link');
@@ -112,7 +148,7 @@ function setTestingPath(mode,chooseInput=true) {
     $(key+'-test-detail').textContent=detail;
   });
   $('assessment-note').textContent=advanced?
-    'Longer questionnaires offer more detail, not guaranteed accuracy. Use comparable function totals, nine Enneagram scores, and five Big Five domain percentiles.':
+    'Longer questionnaires offer more detail, not guaranteed accuracy. Use function totals, nine Enneagram scores, five Big Five domains, and optional IPIP-NEO facet percentiles.':
     'Shorter tests with straightforward scores. You can still enter detailed data below.';
   if(chooseInput) {
     setMode('mbti',advanced?'functions':'scores');
@@ -125,6 +161,9 @@ function setupFields() {
   $('ennea-score-fields').innerHTML=Array.from({length:9},(_,i)=>enneagramMarkup(i+1)).join('');
   $('rowe-score-fields').innerHTML=Array.from({length:9},(_,i)=>roweMarkup(i+1)).join('');
   $('bigfive-fields').innerHTML=OCEAN_LABELS.map((label,i)=>sliderMarkup('bigfive',i,label,oceanDetails[i],'High '+label)).join('');
+  $('bigfive-facet-groups').innerHTML=FACET_GROUPS.map(facetMarkup).join('');
+  FACET_KEYS.forEach((_,i)=>$('facet-'+i).addEventListener('input',updateFacetEntryStatus));
+  updateFacetEntryStatus();
   const typeSelect=$('mbti-override');
   [...MBTI_TYPES].sort().forEach(type=>{
     const el=document.createElement('option');el.value=type;el.textContent=type;typeSelect.append(el);
@@ -306,7 +345,8 @@ function collectInput() {
   return {
     mbtiScores,typeOverride,functionScores,identityPreference,enneagramScores,enneagramRanking,roweScores,tritypeOverride,
     wingOverride:$('wing-override').value,
-    bigFive:state.touched.bigfive?readScores('bigfive',5):null
+    bigFive:state.touched.bigfive?readScores('bigfive',5):null,
+    bigFiveFacets:readFacetScores()
   };
 }
 function typeChip(type) {
@@ -586,6 +626,8 @@ function clearAll() {
   setScores('ennea',[50,50,50,50,50,50,50,50,50]);
   Array.from({length:9},(_,i)=>$('rowe-'+i)).forEach(el=>{el.value='';});
   setScores('bigfive',[50,50,50,50,50]);
+  resetFacetFields();
+  $('bigfive-facet-panel').open=false;
   state.touched={mbti:false,functions:false,enneagram:false,rowe:false,bigfive:false};
   $('mbti-override').value='';$('function-identity').value='';
   $('tritype-override').value='';$('ennea-ranking').value='';$('wing-override').value='';
@@ -617,6 +659,12 @@ function restoreShared() {
       state.touched.rowe=true;
     }
     if(input.bigFive){setScores('bigfive',input.bigFive);state.touched.bigfive=true;}
+    if(input.bigFiveFacets){
+      validateFacetScores(input.bigFiveFacets);
+      input.bigFiveFacets.forEach((value,i)=>{$('facet-'+i).value=value==null?'':String(value);});
+      $('bigfive-facet-panel').open=true;
+      updateFacetEntryStatus();
+    }
     $('mbti-override').value=input.typeOverride||'';
     $('function-identity').value=input.functionScores&&['A','T'].includes(input.identityPreference)?
       input.identityPreference:'';
@@ -643,6 +691,8 @@ function randomizeBuild() {
   setScores('mbti',input.mbtiScores);
   setScores('ennea',input.enneagramScores);
   setScores('bigfive',input.bigFive);
+  resetFacetFields();
+  $('bigfive-facet-panel').open=false;
   state.touched={mbti:true,functions:false,enneagram:true,rowe:false,bigfive:true};
   $('mbti-override').value='';
   $('function-identity').value='';
