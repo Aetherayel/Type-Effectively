@@ -66,14 +66,14 @@ export function isHeldItemCompatible(item,{types,moves,ability=null}){
 // Both ordinary and signature-selected items explain their personality fit
 // using the same language. Battle-mechanic combinations belong in the single
 // Signature Strategy panel, never the held-item rationale.
-export function heldItemRationale({core,role,bigFive,hasBigFive=true,family}) {
+export function heldItemRationale({core,role,bigFive,hasBigFive=true,family,facetScores=null}) {
   const signal=bigFive.map((value,i)=>({i,value,distance:Math.abs(value-50)}))
     .sort((a,b)=>b.distance-a.distance||a.i-b.i)[0];
-  const traitPhrase=hasBigFive && signal.distance>=13
+  const traitPhrase=hasBigFive && !facetScores && signal.distance>=13
     ? (signal.value>50?'higher ':'lower ')+TRAIT_LABELS[signal.i]
     : null;
   return 'Your Type '+core+' core'+
-    (traitPhrase?', '+traitPhrase:'')+
+    (traitPhrase?', '+traitPhrase:facetScores?', detailed Big Five facets':'')+
     ', and '+role.primary.name+' role point toward '+family.insight+'.';
 }
 
@@ -111,7 +111,7 @@ export function chooseHeldItem({
   if(!sorted.length)throw new Error('No compatible thematic held item.');
   const selected=sorted[0].item;
   const family=ITEM_FAMILIES[selected.family];
-  const explanation=heldItemRationale({core,role,bigFive,hasBigFive,family});
+  const explanation=heldItemRationale({core,role,bigFive,hasBigFive,family,facetScores});
 
   return {
     name:selected.name,
