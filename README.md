@@ -154,7 +154,27 @@ Each `weightedRelevantFacets` is a convex blend of the named facets below. Paren
 | Sp. Def · Composure | N: Vulnerability 50%, Anger 30%, Anxiety 20% | Reaction regulation rather than agreeableness |
 | Speed · Responsiveness | E: Activity Level 70%, Assertiveness 20%, Excitement-Seeking 10%; O: Adventurousness 75%, Imagination 25% | Initiative and adaptive tempo rather than extraversion alone |
 
-**Deliberately excluded from new facet bonuses:** O6 Liberalism (political/moral values), A2 Morality and the other Agreeableness facets, and unrelated facets in each domain. They do not receive hidden weights. Their reported **parent domains still retain their original domain-level influence**. No IPIP facet is treated as proof of intelligence, virtue, physical reaction speed, or mental health. The resulting Big Five correction is visible in the expandable build calculation as a per-stat affinity change; it is **not** an extra 535-BST budget or Nature input.
+### Facets beyond stats: whole-build nuance, not extra stat bonuses
+
+Optional facets may shape **three additional outcomes**, always within an existing scoring mechanism:
+
+- **Archetype (six operating styles / 36 titles):** A few behaviorally relevant facets adjust the **existing 25% Big Five temperament-fit component** by at most ±6 fit points. Strategist favors conceptual care and order; Steward favors practical care and cooperation; Pathfinder favors exploration; Sentinel favors caution and duty; Catalyst favors energetic initiative; Artisan favors imagination and aesthetic feeling. Enneagram, cognition, role, and the archetype catalog remain unchanged. This is a small preference among close candidates, not a new personality label.
+- **Held item (nine equipment families):** A subset of relevant facets alters the existing **item-family preference** by at most ±4 family-fit points, e.g. Cautiousness favors preparation, Altruism favors support, and Adventurousness favors risk or adaptability. It **cannot override item legality, role fit, move prerequisites, or signature-strategy equipment**. Items remain Pokémon-mechanical, not literal personality badges.
+- **Trainer’s Guide:** Distinctive within-domain contrasts in Emotionality, Friendliness, Gregariousness, Cheerfulness, Trust, Modesty, Self-Consciousness and Immoderation may supply up to two additional gentle, descriptive observations. They do not diagnose, assign virtue, or change any stat.
+
+Each of the 30 facets is accounted for:
+
+| Domain | Individual facet outcomes (beyond its parent-domain contribution) |
+| --- | --- |
+| O | O1 Imagination: stat/archetype; O2 Artistic Interests: stat/archetype; O3 Emotionality: archetype/Guide; O4 Adventurousness: stat/archetype/item; O5 Intellect: stat/archetype/item; O6 Liberalism: **no independent use** |
+| C | C1 Self-Efficacy: stat; C2 Orderliness: archetype/item; C3 Dutifulness: stat/archetype; C4 Achievement-Striving: stat/item; C5 Self-Discipline: stat/item; C6 Cautiousness: stat/archetype/item |
+| E | E1 Friendliness: archetype/Guide; E2 Gregariousness: Guide; E3 Assertiveness: stat/archetype/item; E4 Activity Level: stat/archetype/item; E5 Excitement-Seeking: stat/archetype/item; E6 Cheerfulness: archetype/Guide |
+| A | A1 Trust: Guide; A2 Morality: **no independent use**; A3 Altruism: archetype/item; A4 Cooperation: archetype/item; A5 Modesty: Guide; A6 Sympathy: archetype/item |
+| N | N1 Anxiety: stat; N2 Anger: stat; N3 Depression: **no independent use**; N4 Self-Consciousness: Guide; N5 Immoderation: Guide; N6 Vulnerability: stat |
+
+**Safeguards:** O6 Liberalism (political/moral views), A2 Morality (moral conformity), and N3 Depression (depressive affect) have **no independent gameplay or descriptive facet effect**. All 30 facets remain reflected indirectly in their reported five broad domains. A facet difference of less than 18 percentile ranks relative to its parent cannot trigger a standalone Trainer’s Guide quirk. Stat corrections, archetype adjustments, and equipment nudges all remain deterministic and bounded; none adds another framework source or extra BST. Nature and Enneagram typing remain independent of facet-specific rules. A facet may influence role and its derived moves through legitimate changes to the base-stat spread, but cannot bypass mechanical eligibility.
+
+No IPIP facet is treated as proof of intelligence, virtue, physical reaction speed, or mental health. The resulting Big Five corrections and additional outcome adjustments are visible in the expandable build calculation; shared card images continue to omit exact scores.
 
 **Big Five base affinities** (O/C/E/A/N are entered domains, Stability=100−N):
 
