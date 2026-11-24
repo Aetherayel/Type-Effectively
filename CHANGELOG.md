@@ -9,7 +9,7 @@
 - Replace a universal framework blend with **per-stat weights** for Big Five, Enneagram, and cognition. When users supply all eight cognitive functions, they contribute directly and receive greater relative emphasis for conceptual ingenuity and responsiveness. Entered 16Personalities percentages and four-letter MBTI-only inputs use progressively more conservative cognitive weight profiles.
 - Preserve the 535-point base-stat total, 45–140 stat bounds, deterministic behavior, distinct Nature priority scoring, and existing battle mechanics. Expect generated role, ability, moves, and exported cards to change when the base stat shape warrants it.
 - Disclose each stat's source weights in the result explanations, refresh browser module caches, and extend distribution, source-sensitivity, Nature, and end-to-end validation.
-- **Facet scores are not yet implemented**: IPIP-NEO's 30 Big Five facets are under design consideration and will need a separately validated score-mapping and fallback strategy.
+- Add optional IPIP-NEO facet percentiles for up to five complete domain groups (30 facets), with exact reported-domain fallback, bounded stat-specific refinements, shared-link round trips, validation, and per-stat affinity explanation. Facets adjust only the existing Big Five source; no fourth source, extra BST, or unrelated political/moral facet bonuses.
 
 ## 1.4.0 — Whole-profile Nature classification
 
