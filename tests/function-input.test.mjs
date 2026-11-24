@@ -56,6 +56,8 @@ test('eight-function stat identity survives identical four preference contrasts'
 test('function input yields a coherent 535-point build without fabricated A/T',()=>{
   const build=generateBuild(input);
   assert.equal(build.cognitiveSource,'functions');
+  assert.equal(build.statWeightMode,'functions');
+  assert.equal(build.statWeights.spa.cognition,.5);
   assert.equal(build.mbti,'INTJ');
   assert.equal(build.identity,'INTJ');
   assert.equal(build.identityPreference,null);
@@ -86,6 +88,13 @@ test('function input stays mutually exclusive with legacy cognition and validate
   const previous=generateBuild({mbtiScores:DEMOS.architect.mbti,enneagramScores:DEMOS.architect.enneagram,bigFive:DEMOS.architect.bigfive});
   assert.equal(previous.identity,'INTJ-A');
   assert.equal(previous.cognitiveSource,'16personalities');
+  assert.equal(previous.statWeightMode,'percentages');
+  const typeOnly=generateBuild({
+    typeOverride:'INTJ',tritypeOverride:'593',bigFive:DEMOS.architect.bigfive
+  });
+  assert.equal(typeOnly.statWeightMode,'typeOnly');
+  assert.equal(typeOnly.statWeights.spa.cognition,.1);
+  assert.deepEqual(typeOnly.statWeights.spa, {bigFive:.5,enneagram:.4,cognition:.1});
 });
 
 test('optional A/T uses a disclosed type-only proxy, never a fabricated measurement',()=>{
