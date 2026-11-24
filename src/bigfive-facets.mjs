@@ -125,7 +125,9 @@ export function resolveBigFiveEvidence(domains,facets) {
         throw new Error('Invalid facet focus for domain '+domain+': '+key);
       return sum+weight;
     },0);
-    return entries.reduce((sum,[key,w])=>sum+w*values[INDEX[key]],0)/total;
+    // Floating-point weighted means of 0–100 percentiles can exceed 100 by
+    // a few ulps; keep constructed theme proxies inside the legal input span.
+    return clamp(entries.reduce((sum,[key,w])=>sum+w*values[INDEX[key]],0)/total,0,100);
   };
   const forDomain=(domain,focus)=>{
     if(active.has(domain))return facetValue(domain,focus);
