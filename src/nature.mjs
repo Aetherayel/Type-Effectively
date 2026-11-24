@@ -2,7 +2,7 @@
 // This independent, deterministic classifier runs before Nature-adjusted stats,
 // role classification, and specialty selection. All numbers are authored game
 // affinities, not psychological probabilities or validated personality measures.
-import { NATURE_EFFECTS, STAT_MEANINGS } from './data.mjs?v=v2-facets-1';
+import { NATURE_EFFECTS, STAT_MEANINGS } from './data.mjs?v=v2-facet-outcomes-2';
 
 export const NATURE_STATS=Object.freeze(['atk','def','spa','spd','spe']);
 export const NATURE_DIMENSIONS=Object.freeze(Object.fromEntries(
