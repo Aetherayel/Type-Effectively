@@ -100,9 +100,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('generate-button')?.click();
   document.documentElement.setAttribute('data-facet-spa-delta',String(baseSpA()-baseline));
   document.documentElement.setAttribute('data-facet-result',
-    document.querySelector('.explain')?.textContent?.includes('IPIP-NEO facet refinement')?'true':'false');
+    document.querySelector('.explain')?.textContent?.includes('Facet-first Big Five')?'true':'false');
   document.documentElement.setAttribute('data-facet-other-outcomes',
-    document.querySelector('.explain')?.textContent?.includes('Facet influence on other outcomes')?'true':'false');
+    document.querySelector('.explain')?.textContent?.includes('Detailed temperament')?'true':'false');
   document.documentElement.setAttribute('data-facet-story-note',
     document.querySelector('.field-report')?.textContent?.includes('detailed IPIP-NEO report suggests')?'true':'false');
   document.documentElement.setAttribute('data-facet-status',
@@ -138,6 +138,33 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.setAttribute('data-trained-export',Boolean(document.getElementById('download-trained-card')));
   document.dispatchEvent(new CustomEvent('type-effectively:release-version',{detail:{version:'v2.0.8'}}));
   document.documentElement.setAttribute('data-verified-version',document.getElementById('build-version-footer')?.textContent||'');
+  // Verify a complete thirty-facet IPIP report satisfies Big Five by itself,
+  // without using neutral 50-point domain placeholders as fake evidence.
+  document.getElementById('reset-button')?.click();
+  // Preserve the advanced-source assertions at the end of this smoke test:
+  // restore function/Rowe inputs, but deliberately leave broad OCEAN untouched.
+  document.querySelector('[data-test-mode="advanced"]')?.click();
+  [20,90,20,30,75,40,25,60].forEach((value,i)=>{
+    const field=document.getElementById('function-'+i);
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  [32,3,4,4,32,14,-4,15,16].forEach((value,i)=>{
+    const field=document.getElementById('rowe-'+i);
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  for(let i=0;i<30;i++){
+    const field=document.getElementById('facet-'+i);
+    field.value=String(i===4?97:i===0?88:35+(i%6)*8);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  document.getElementById('generate-button')?.click();
+  document.documentElement.setAttribute('data-facet-only-success',
+    Boolean(document.querySelector('.result-card'))&&
+    !document.getElementById('form-error')?.textContent?'true':'false');
+  document.documentElement.setAttribute('data-facet-only-status',
+    document.getElementById('facet-entry-status')?.textContent||'');
 });
 </script>`;
 const server=createServer((req,res)=>{
@@ -259,8 +286,12 @@ try{
     'facet impacts on archetype and equipment should be disclosed');
   assert.ok(html.includes('data-facet-story-note="true"'),
     'substantial differences in a narrative facet should appear in the Trainer Guide');
-  assert.ok(html.includes('data-facet-status="1 of five domain(s) refined'),
+  assert.ok(html.includes('data-facet-status="1 of five facet groups complete'),
     'facet entry status must show fallback for remaining domains');
+  assert.ok(html.includes('data-facet-only-success="true"'),
+    'all thirty facets must satisfy Big Five without reported broad domains');
+  assert.ok(html.includes('data-facet-only-status="All 30 facets complete.'),
+    'facet-only status must confirm that domain inputs are optional');
   assert.ok(html.includes('data-card-version="CREATED v2.0.0"'),
     'Card footer must show the bundled version when the build is generated');
   assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),

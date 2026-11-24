@@ -34,7 +34,7 @@ These are independent external websites. **No test integration, scraping, affili
 
 **Rowe normalization (authored game convention, not a validated crosswalk):** Let `low` and `high` be the smallest and largest of the nine raw totals, `mid=(low+high)/2`, and `span=max(50, high-low)`. Each type's internal score becomes `clamp(50 + 80*(raw-mid)/span, 0, 100)`. This maps the profile's relative order and distances onto the same internal domain without pretending Rowe provides percentages or forcing a narrowly spaced test result to 0/100 extremes. The 50-point reference floor and 80-point range are design choices, not empirical calibration, and two sources' resulting profiles cannot be compared as if they were the same instrument. Ties remain ties, so choose a manual tritype override if the reported test or self-typing resolves an important tie. Raw scores remain in a shared build link but are never printed on the exported PNG. Rowe's 27 instinctual subtype totals are currently **not** modeled.
 
-**All three assessments are mandatory for a visible result.** Supply five 16Personalities percentages **or** eight cognitive-function scores, all nine Enneagram scores / Rowe totals **or** a complete nine-type ranking, and all five Big Five domains. Four-letter type and tritype overrides remain available **alongside** test results but cannot substitute for them. Optional IPIP-NEO facets provide more detail. Earlier shared links missing any section no longer generate a result.
+**All three assessments are mandatory for a visible result.** Supply five 16Personalities percentages **or** eight cognitive-function scores, all nine Enneagram scores / Rowe totals **or** a complete nine-type ranking, and either five Big Five domains **or** all 30 IPIP-NEO facets. Four-letter type and tritype overrides remain available **alongside** test results but cannot substitute for them. Optional IPIP-NEO facets provide more detail. Earlier shared links missing any section no longer generate a result.
 
 ### Explore random combinations
 
@@ -100,7 +100,7 @@ The baseline before these changes is preserved in `docs/v2-audit-baseline.md`. R
 
 **V2.0 delivers** stat-specific source weights, direct eight-function cognitive affinity scoring, recalibrated Big Five and Enneagram affinities, aligned stat and Nature meanings, and tests of overall distribution and mechanical coherence. This deliberately changes old results.
 
-**Also included in V2:** Optional IPIP-NEO Big Five **facet-level** scoring. The five reported domains remain the basis of the Big Five contribution; complete groups of six facet percentiles may refine individual stats without adding a fourth scoring source. Old five-domain inputs and links remain valid. The mappings and safeguards are documented below.
+**Also included in V2:** IPIP-NEO **facet-first** scoring. Complete facet groups replace broad-domain inputs within the relevant scoring pathways; a full 30-facet report can satisfy Big Five without additional domain scores. Old five-domain inputs and links remain valid.
 
 ## Generation model (v2.0; core Pokémon typing and 535 BST retained)
 
@@ -146,46 +146,34 @@ Deterministic. The same inputs always produce the same result. The output is exp
 | Sp. Def | Composure | Emotional regulation and perspective |
 | Speed | Responsiveness | Reaction tempo and quick adaptation |
 
-### Optional IPIP-NEO facet refinement (V2.0)
+### Facet-first Big Five scoring (V2)
 
-**Input contract:** The Big Five panel accepts all five existing domain percentiles (O, C, E, A, N) and optionally up to five **complete groups of six facet percentiles** in the same O/C/E/A/N order. Each entered value must be numeric 0–100, comparable percentile output from one IPIP-NEO report, not a raw 0–40 item sum. Empty groups fall back to the broad-domain model; partially completed groups fail validation rather than fabricating missing scores. Facets require reported parent domains. Older shared links without `bigFiveFacets` produce exactly their original V2 domain-only scores. Share links explicitly include any supplied facet percentiles; public card PNGs continue to omit exact personal scores.
+**Three-section rule stays mandatory.** The Big Five section can be fulfilled in either of two ways: (a) all five reported broad O/C/E/A/N scores, or (b) **all 30 IPIP-NEO facet percentiles**. Users may combine the two: each *complete group of six* facets replaces that broad domain for downstream scoring; any group not entered uses its reported parent domain. No group may be partially filled. Raw test sums do not substitute for facet percentiles. Existing domain-only inputs and shared links remain compatible.
 
-The domain-level Big Five affinities are calculated **exactly as before**. Facets provide bounded, stat-specific differences *inside the existing Big Five source*, before the framework's per-stat Big Five weight is applied:
+**When facets exist, broad domains do not constrain or add a bonus to their contribution.** Each outcome uses a selected subset of facets relevant to its meaning. Each stat still receives its original Big Five / Enneagram / cognition framework weight, and every Pokémon still has **exactly 535 BST**.
 
-`refinedBigFiveStat = clamp(baseBigFiveStat + Σ over entered domain groups [parentCoefficient × 0.85 × clamp(weightedRelevantFacets − reportedDomain, −30, 30)], 0, 100)`
-
-Each `weightedRelevantFacets` is a convex blend of the named facets below. Parent coefficients follow the existing domain-level `oceanAffinity` expression, including negative signs for Neuroticism. This contrasts each selected facet percentile against its **reported domain percentile**, not against 50 or the arithmetic mean of facet percentiles. Percentiles are normative ranks and should not be treated as additive raw trait quantities: the equation is an explicit, bounded **game heuristic**.
-
-| Pokémon stat | Refining facets (weights within domain) | Why this correction |
-| --- | --- | --- |
-| HP · Resilience | C: Self-Discipline 65%, Achievement-Striving 35%; N: Vulnerability 70%, Anxiety 30% | Staying power rather than general neatness |
-| Attack · Assertion | E: Assertiveness 80%, Activity Level 20%; C: Self-Efficacy 65%, Achievement-Striving 35% | Direct agency rather than general sociability |
-| Defense · Fortitude | C: Dutifulness 40%, Cautiousness 35%, Self-Discipline 25%; N: Vulnerability 100% | Principled resistance rather than routine alone |
-| Sp. Atk · Ingenuity | O: Intellect 65%, Imagination 25%, Artistic Interests 10% | Conceptual curiosity distinct from novelty seeking |
-| Sp. Def · Composure | N: Vulnerability 50%, Anger 30%, Anxiety 20% | Reaction regulation rather than agreeableness |
-| Speed · Responsiveness | E: Activity Level 70%, Assertiveness 20%, Excitement-Seeking 10%; O: Adventurousness 75%, Imagination 25% | Initiative and adaptive tempo rather than extraversion alone |
-
-### Facets beyond stats: whole-build nuance, not extra stat bonuses
-
-Optional facets may shape **three additional outcomes**, always within an existing scoring mechanism:
-
-- **Archetype (six operating styles / 36 titles):** A few behaviorally relevant facets adjust the **existing 25% Big Five temperament-fit component** by at most ±6 fit points. Strategist favors conceptual care and order; Steward favors practical care and cooperation; Pathfinder favors exploration; Sentinel favors caution and duty; Catalyst favors energetic initiative; Artisan favors imagination and aesthetic feeling. Enneagram, cognition, role, and the archetype catalog remain unchanged. This is a small preference among close candidates, not a new personality label.
-- **Held item (nine equipment families):** A subset of relevant facets alters the existing **item-family preference** by at most ±4 family-fit points, e.g. Cautiousness favors preparation, Altruism favors support, and Adventurousness favors risk or adaptability. It **cannot override item legality, role fit, move prerequisites, or signature-strategy equipment**. Items remain Pokémon-mechanical, not literal personality badges.
-- **Trainer’s Guide:** Distinctive within-domain contrasts in Emotionality, Friendliness, Gregariousness, Cheerfulness, Trust, Modesty, Self-Consciousness and Immoderation may supply up to two additional gentle, descriptive observations. They do not diagnose, assign virtue, or change any stat.
-
-Each of the 30 facets is accounted for:
-
-| Domain | Individual facet outcomes (beyond its parent-domain contribution) |
+| Stat | Facet-first examples (directly used when those six-facet groups are complete) |
 | --- | --- |
-| O | O1 Imagination: stat/archetype; O2 Artistic Interests: stat/archetype; O3 Emotionality: archetype/Guide; O4 Adventurousness: stat/archetype/item; O5 Intellect: stat/archetype/item; O6 Liberalism: **no independent use** |
-| C | C1 Self-Efficacy: stat; C2 Orderliness: archetype/item; C3 Dutifulness: stat/archetype; C4 Achievement-Striving: stat/item; C5 Self-Discipline: stat/item; C6 Cautiousness: stat/archetype/item |
-| E | E1 Friendliness: archetype/Guide; E2 Gregariousness: Guide; E3 Assertiveness: stat/archetype/item; E4 Activity Level: stat/archetype/item; E5 Excitement-Seeking: stat/archetype/item; E6 Cheerfulness: archetype/Guide |
-| A | A1 Trust: Guide; A2 Morality: **no independent use**; A3 Altruism: archetype/item; A4 Cooperation: archetype/item; A5 Modesty: Guide; A6 Sympathy: archetype/item |
-| N | N1 Anxiety: stat; N2 Anger: stat; N3 Depression: **no independent use**; N4 Self-Consciousness: Guide; N5 Immoderation: Guide; N6 Vulnerability: stat |
+| HP · Resilience | C5 Self-Discipline, C4 Achievement-Striving; N6 Vulnerability, N1 Anxiety; A3 Altruism, A6 Sympathy |
+| Attack · Assertion | E3 Assertiveness, E4 Activity Level; C1 Self-Efficacy, C4 Achievement-Striving; inverse A4 Cooperation/A5 Modesty |
+| Defense · Fortitude | C3 Dutifulness, C6 Cautiousness, C5 Self-Discipline; inverse E5 Excitement-Seeking/E4 Activity; inverse N6 Vulnerability |
+| Sp. Atk · Ingenuity | **O5 Intellect (65%), O1 Imagination (25%), O2 Artistic Interests (10%)** in the existing 60% Openness slot; C5/C1 and low E2/E5 inform other existing slots |
+| Sp. Def · Composure | Inverse N6 Vulnerability, N2 Anger, N1 Anxiety; A4 Cooperation/A1 Trust; C6 Cautiousness/C5 Self-Discipline |
+| Speed · Responsiveness | E4 Activity, E3 Assertiveness, E5 Excitement-Seeking; O4 Adventurousness/O1 Imagination; inverse C2 Orderliness/C6 Cautiousness |
 
-**Safeguards:** O6 Liberalism (political/moral views), A2 Morality (moral conformity), and N3 Depression (depressive affect) have **no independent gameplay or descriptive facet effect**. All 30 facets remain reflected indirectly in their reported five broad domains. A facet difference of less than 18 percentile ranks relative to its parent cannot trigger a standalone Trainer’s Guide quirk. Stat corrections, archetype adjustments, and equipment nudges all remain deterministic and bounded; none adds another framework source or extra BST. Nature and Enneagram typing remain independent of facet-specific rules. A facet may influence role and its derived moves through legitimate changes to the base-stat spread, but cannot bypass mechanical eligibility.
+A facet-first Sp. Atk can therefore be high even if overall Openness is low: **reported Openness is not used in the detailed Openness term**. The implementation is in `src/bigfive-facets.mjs` (`FACET_STAT_COMPONENTS`). Each component coefficient and facet-focused convex weight is explicit and deterministic. Percentile ranks are not raw additive trait quantities; these combinations are **authored game heuristics**, not inferred psychometric factor scores.
 
-No IPIP facet is treated as proof of intelligence, virtue, physical reaction speed, or mental health. The resulting Big Five corrections and additional outcome adjustments are visible in the expandable build calculation; shared card images continue to omit exact scores.
+Other outcomes are facet-aware without introducing a new scoring source:
+
+- **Nature:** uses independently mapped facet combinations within its original **25% temperament** preference evidence. Nature remains separate from stat calculations.
+- **Archetype:** compares meaning-relevant facets to the six authored behavioral prototypes within the existing **25% temperament fit**. No extra +6 bonus is added.
+- **Held items:** each eligible equipment family's and item's target-fit comparison uses selected facets instead of parent domains. The original family/trait/role weighting and compatibility requirements are unchanged, with no extra +4 scoring bonus.
+- **Signature strategies and compact OCEAN summary indicators:** existing whole-profile systems that still require five numbers receive *symbolic facet-context signals*, not manufactured IPIP domain percentiles. They are generated from specified, relevant facets only for the groups that were supplied. Never label these numbers as measured broad scores.
+- **Trainer's Guide:** emphasizes specific facet patterns rather than offering generic high/low Openness claims that might contradict them. Distinctive facet notes are judged against a **neutral game-score reference** rather than an unavailable parent percentile.
+
+**Deliberate exclusions:** O6 Liberalism (political/moral views), A2 Morality (moral conformity), and N3 Depression (depressive affect) have no independent facet gameplay or interpretive effect. When only broad scores are provided, the original domain score still applies normally. The model is neither an intelligence test nor a diagnosis.
+
+Both the unnormalized-affinity display and the downloadable Pokémon cards remain consistent with the current generator. Broad-only stat and item calculations are preserved as a backward-compatible path.
 
 **Big Five base affinities** (O/C/E/A/N are entered domains, Stability=100−N):
 
