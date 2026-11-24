@@ -109,7 +109,38 @@ export const STAT_MEANINGS = Object.freeze({
   spd:Object.freeze({label:'Composure',priority:'steady composure',description:'Regulating reactions and keeping perspective.'}),
   spe:Object.freeze({label:'Responsiveness',priority:'responsive adaptation',description:'Reacting, adapting, and seizing openings quickly.'})
 });
-export const BASE_STAT_WEIGHTS = Object.freeze({bigFive:.50,enneagram:.30,cognition:.20});
+// Weight source relevance separately for each stat, and temper cognitive
+// influence when only categorical MBTI estimates are supplied. These are
+// authored game-design weights, not calibrated psychological probabilities.
+const makeStatWeights=rows=>Object.freeze(Object.fromEntries(STAT_KEYS.map((key,i)=>
+  [key,Object.freeze({bigFive:rows[i][0]/100,enneagram:rows[i][1]/100,cognition:rows[i][2]/100})]
+)));
+export const BASE_STAT_WEIGHTS=Object.freeze({
+  functions:makeStatWeights([
+    [60,30,10], // HP: resilience primarily follows temperament and drive
+    [35,35,30], // Atk: directed action draws on all three
+    [35,45,20], // Def: principled resistance is motivationally driven
+    [25,25,50], // SpA: conceptual style is most informative here
+    [60,25,15], // SpD: composure is better explained by temperament
+    [40,25,35]  // Spe: both responsiveness and cognitive tempo matter
+  ]),
+  percentages:makeStatWeights([
+    [65,30, 5],
+    [45,35,20],
+    [40,45,15],
+    [45,30,25],
+    [65,25,10],
+    [50,25,25]
+  ]),
+  typeOnly:makeStatWeights([
+    [70,25, 5],
+    [50,40,10],
+    [45,45,10],
+    [50,40,10],
+    [70,25, 5],
+    [60,30,10]
+  ])
+});
 export const OCEAN_KEYS = ['openness','conscientiousness','extraversion','agreeableness','neuroticism'];
 export const OCEAN_LABELS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
 
