@@ -208,6 +208,20 @@ export function facetProfileFit(domains,facets,target,focus={}) {
   return clamp(100-Math.sqrt(meanSquared),0,100);
 }
 
+// Held items historically use mean *absolute* target distance, not RMS.
+// Preserve that metric when domains only are available.
+export function facetAbsoluteFit(domains,facets,target,focus={}) {
+  const evidence=resolveBigFiveEvidence(domains,facets);
+  if(!Array.isArray(target)||target.length!==5||target.some(v=>!Number.isFinite(v)))
+    throw new Error('Big Five item fit requires five target values.');
+  const distance=FACET_GROUPS.reduce((sum,g,i)=>{
+    const specific=Object.fromEntries(Object.entries(focus).filter(([key])=>key[0]===g.code));
+    return sum+Math.abs(evidence.forDomain(g.code,
+      Object.keys(specific).length?specific:undefined)-target[i]);
+  },0)/5;
+  return clamp(100-distance,0,100);
+}
+
 // Describe standout self-reported facets against a neutral model reference;
 // avoid claiming measured 'domain deviations' when domains were not supplied.
 export function facetContrastMap(domains,facets) {
