@@ -113,7 +113,7 @@ test('planning and facet evidence affect Snow Bastion preference, not hard eligi
     selectSignatureStrategy({...prepared,bigFiveFacets:low}).score);
   assert.equal(selectSignatureStrategy({...prepared,types:['Steel','Water']}),null,
     'no psychological fit can bypass the Ice-type requirement');
-  assert.equal(selectSignatureStrategy({...prepared,values:{...stats,spd:81}}),null,
+  assert.equal(selectSignatureStrategy({...prepared,stats:{...stats,spd:81}}),null,
     'no planning score can bypass special-defensive viability');
   const source=readFileSync(new URL('../src/strategies.mjs',import.meta.url),'utf8');
   assert.doesNotMatch(source,/classifyArchetype|archetype\.title|archetype\.mode/,
