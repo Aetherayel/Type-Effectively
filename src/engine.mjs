@@ -2,7 +2,7 @@ import {
   ABILITIES, CENTERS, ENNEAGRAM_AFFINITIES, ENNEAGRAM_NAMES, GROWTH_MOVES,
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_AFFINITIES, ROLE_DESCRIPTIONS, ROLE_MOVES, ROLE_NAMES,
-  ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, STAT_KEYS, TYPE_ATTACKS
+  ROLE_CALIBRATED_TEMPLATES, BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS
 } from './data.mjs?v=v2-facet-outcomes-2';
 import { chooseHeldItem } from './held-items.mjs?v=signature-copy-29';
 import { classifyArchetype } from './archetypes.mjs';
@@ -142,7 +142,12 @@ export function enneagramAffinity(scores) {
   // Square the weight above a soft threshold to preserve individual peaks without discarding the other six types.
   const weights = scores.map(s=>Math.pow(Math.max(0,s-20),2)+16);
   const total = weights.reduce((a,b)=>a+b,0);
-  return STAT_KEYS.map((_,i)=>weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total);
+  // Remove unequal nine-type column priors before blending sources. Uniform
+  // motivational scores produce 50 on every stat; deviations retain their
+  // original type-specific distances and meaningful differentiation.
+  return STAT_KEYS.map((_,i)=>clamp(50+
+    weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total-
+    ENNEAGRAM_STAT_BASELINE[i]));
 }
 // Cognitive preferences are not capacities. Resilience and composure have
 // weak cognitive proxies, deliberately shrunk toward 50. 16P A/T is excluded
@@ -450,6 +455,23 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
       why:'This '+tacticRole.toLowerCase()+' tactic reflects its visible typing, stats, and supporting motivations.'},
     {name:growthName,category:'Growth move',why:growth.reason}
   ];
+}
+
+// Rendering a Pokémon requires measured/detailed input for all three major
+// frameworks. Keep the lower-level generator available for legacy/internal
+// scoring tests, but never expose an inferred, incomplete build to visitors.
+export function requireCompletePersonalityInputs(input) {
+  if(!input||typeof input!=='object')throw new Error('Complete all three personality sections before generating.');
+  if(input.mbtiScores==null && input.functionScores==null)
+    throw new Error('Cognitive style is required: enter 16Personalities percentages or all eight cognitive-function results. A four-letter type alone is insufficient.');
+  if(input.enneagramScores==null && input.enneagramRanking==null && input.roweScores==null)
+    throw new Error('Enneagram results are required: enter nine scores, complete a nine-type ranking, or enter nine Rowe totals. A tritype alone is insufficient.');
+  if(input.bigFive==null)
+    throw new Error('Big Five results are required: enter all five domain scores before generating.');
+  return input;
+}
+export function generateCompleteBuild(input) {
+  return generateBuild(requireCompletePersonalityInputs(input));
 }
 
 export function generateBuild(input) {
