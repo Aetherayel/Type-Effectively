@@ -1,6 +1,6 @@
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
 import { ITEM_FACET_FOCI } from './facet-outcomes.mjs';
-import { facetProfileFit } from './bigfive-facets.mjs';
+import { facetAbsoluteFit } from './bigfive-facets.mjs';
 
 const TRAIT_LABELS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Emotional sensitivity'];
 const average = values => values.reduce((sum,value)=>sum+value,0)/values.length;
@@ -95,7 +95,7 @@ export function chooseHeldItem({
     const coreSignal=.54*ennea[core-1]+.23*ennea[second-1]+.13*ennea[third-1]+.10*weighted;
     // Each completed facet group substitutes for its parent within the
     // established temperament share; no extra facet-fit bonus is added.
-    const traits=facetProfileFit(bigFive,facetScores,family.target,ITEM_FACET_FOCI[key]);
+    const traits=facetAbsoluteFit(bigFive,facetScores,family.target,ITEM_FACET_FOCI[key]);
     return [key,.68*coreSignal+.32*traits];
   }));
   // Rank by actual thematic and tactical fit only. Never hash raw survey
@@ -103,7 +103,7 @@ export function chooseHeldItem({
   // reshuffle otherwise identical equipment choices.
   const sorted=HELD_ITEMS.filter(item=>!item.strategyOnly && isHeldItemCompatible(item,{types,moves,ability})).map(item=>{
     const familyScore=familyScores[item.family];
-    const traits=facetProfileFit(bigFive,facetScores,item.targets,ITEM_FACET_FOCI[item.family]);
+    const traits=facetAbsoluteFit(bigFive,facetScores,item.targets,ITEM_FACET_FOCI[item.family]);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
       role.secondary && item.roles.includes(role.secondary.name) ? 75 : 35;
     return {item,score:.47*familyScore+.38*traits+.15*roleScore};
@@ -118,7 +118,7 @@ export function chooseHeldItem({
     family:selected.family,
     familyLabel:family.label,
     // Explained as difference from the coarse theme fit, not an added bonus.
-    facetAdjustment:Math.round(10*(facetProfileFit(bigFive,facetScores,family.target,
+    facetAdjustment:Math.round(10*(facetAbsoluteFit(bigFive,facetScores,family.target,
       ITEM_FACET_FOCI[selected.family])-
       traitFit(bigFive,family.target)))/10,
     effect:selected.effect,
