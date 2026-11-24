@@ -10,6 +10,8 @@
 - Preserve the 535-point base-stat total, 45–140 stat bounds, deterministic behavior, distinct Nature priority scoring, and existing battle mechanics. Expect generated role, ability, moves, and exported cards to change when the base stat shape warrants it.
 - Disclose each stat's source weights in the result explanations, refresh browser module caches, and extend distribution, source-sensitivity, Nature, and end-to-end validation.
 - Add optional IPIP-NEO facet percentiles for up to five complete domain groups (30 facets), with exact reported-domain fallback, bounded stat-specific refinements, shared-link round trips, validation, and per-stat affinity explanation. Facets adjust only the existing Big Five source; no fourth source, extra BST, or unrelated political/moral facet bonuses.
+- Reuse selected facets to make small **within-source** archetype temperament adjustments, nudge eligible held-item family preferences, and give the Trainer’s Guide up to two additional recognizable field observations. Preserve Nature and typing independence; signature strategy prerequisites and equipment remain authoritative.
+- Audit all 30 facets: 27 have a defensible stat, archetype, item, or Trainer’s Guide interpretation; O6 Liberalism, A2 Morality, and N3 Depression have no independent facet effect. They remain represented only within their reported parent domains.
 
 ## 1.4.0 — Whole-profile Nature classification
 
