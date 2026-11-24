@@ -163,7 +163,7 @@ export function normalizeStats(affinities, total = 535, min = 45, max = 140) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
   const mean = average(affinities);
-  const raw = affinities.map(a=>total/6+1.1*(a-mean));
+  const raw = affinities.map(a=>total/6+1.25*(a-mean));
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
