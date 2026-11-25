@@ -77,14 +77,19 @@ test('completed framework affinity bounds and 600 allocation hold across input m
     const input={enneagramScores:vec(9),bigFive:vec(5),...(i%2?{functionScores:vec(8)}:{mbtiScores:vec(5)})};
     if(i%3===0)input.bigFiveFacets=vec(30);
     const b=generateCompleteBuild(input),v=Object.values(b.baseStats);
-    assert.equal(sum(v),600);assert.ok(v.every(x=>Number.isInteger(x)&&x>=50&&x<=157));
+    assert.equal(sum(v),600);assert.ok(v.every(x=>Number.isInteger(x)&&x>=40&&x<=160));
     assert.ok(Object.values(b.rawStatAffinities).every(x=>x>=0&&x<=100));
     assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
     assert.equal(b.statModelVersion,'v3-semantic');
     assert.deepEqual(generateCompleteBuild(input).baseStats,b.baseStats);
     const affinities=Object.values(b.rawStatAffinities);
     const baseline=Object.values(normalizeStats(affinities));
-    const amplified=Object.values(normalizeStats(affinities,600,50,157,SPREAD_GAIN));
+    const amplified=Object.values(normalizeStats(affinities,600,40,160,SPREAD_GAIN));
     assert.ok(sd(amplified)+1>=sd(baseline));
   }
+});
+
+test('40–160 bounds are symmetric and reserve the same 600 BST for extreme shapes',()=>{
+  assert.deepEqual(Object.values(normalizeStats([100,100,100,0,0,0],600,undefined,undefined,SPREAD_GAIN)),[160,160,160,40,40,40]);
+  assert.deepEqual(Object.values(normalizeStats([0,0,0,100,100,100],600,undefined,undefined,SPREAD_GAIN)),[40,40,40,160,160,160]);
 });
