@@ -133,12 +133,12 @@ const makeStatWeights=rows=>Object.freeze(Object.fromEntries(STAT_KEYS.map((key,
 )));
 export const BASE_STAT_WEIGHTS=Object.freeze({
   functions:makeStatWeights([
-    [60,30,10], // HP: resilience primarily follows temperament and drive
-    [35,35,30], // Atk: directed action draws on all three
-    [35,45,20], // Def: principled resistance is motivationally driven
-    [25,25,50], // SpA: conceptual style is most informative here
-    [60,25,15], // SpD: composure is better explained by temperament
-    [40,25,35]  // Spe: both responsiveness and cognitive tempo matter
+    [60,35, 5], // HP: sustained effort and motivation; weak cognitive proxy
+    [45,35,20], // Atk: expressed assertion and directed action
+    [40,45,15], // Def: principled boundaries and maintained commitments
+    [35,25,40], // SpA: conceptual style and intellectual engagement
+    [65,25,10], // SpD: emotional regulation; weak cognitive proxy
+    [45,25,30]  // Spe: responsive adaptation and cognitive tempo
   ]),
   percentages:makeStatWeights([
     [65,30, 5],
