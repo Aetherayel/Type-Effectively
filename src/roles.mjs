@@ -8,12 +8,13 @@ import {
 // abilities, and specialist stat gates downstream.
 // Keep the authored role geometry in its original reference units.
 const STAT_CENTER=REFERENCE_STAT_TOTAL/STAT_KEYS.length;
-const ROLE_SIMILARITY_SIGMA=25;
+export const ROLE_DIRECTION_FULL_SPREAD=15;
+export const ROLE_HYBRID_MIN_MARGIN=5;
+export const ROLE_HYBRID_MAX_MARGIN=7;
 const NEUTRAL_REFERENCE=80;
 
-// Templates do not begin equally distant from the six-stat center. Preserve
-// most of the original geometry while discounting 35% of each role's built-in
-// advantage (or disadvantage) against an entirely neutral Pokémon.
+// Historical V2 constant retained for compatibility. Directional fitting
+// does not require a template-distance compensation.
 export const ROLE_NEUTRAL_COMPENSATION=.35;
 
 // Additional Wall shapes permit physical and special specialization, not
@@ -46,11 +47,20 @@ function roleTargets(role) {
   return targets;
 }
 
-function similarity(stats,targets) {
-  const rms=Math.min(...targets.map(target=>Math.sqrt(mean(
-    stats.map((value,i)=>(value-target[i])**2)
-  ))));
-  return 100*Math.exp(-rms*rms/(2*ROLE_SIMILARITY_SIGMA**2));
+// Compare centered directions, not the distance to a fixed-amplitude point.
+export function directionalRoleFit(stats,targets) {
+  const center=mean(stats), vector=stats.map(v=>v-center);
+  const length=Math.hypot(...vector);
+  if(length<1e-9)return NEUTRAL_REFERENCE;
+  const spread=length/Math.sqrt(stats.length);
+  const reliability=clamp(spread/ROLE_DIRECTION_FULL_SPREAD,0,1);
+  const best=Math.max(...targets.map(target=>{
+    const t=target.map(v=>v-mean(target)), norm=Math.hypot(...t);
+    if(norm<1e-9)return NEUTRAL_REFERENCE;
+    const cosine=clamp(vector.reduce((sum,v,i)=>sum+v*t[i],0)/(length*norm),-1,1);
+    return 50+50*cosine;
+  }));
+  return (1-reliability)*NEUTRAL_REFERENCE+reliability*best;
 }
 
 export function defensiveRoleMetrics(baseStats) {
@@ -84,11 +94,7 @@ export function classifyRole(baseStats,types) {
   const toolkitTypes=types.length===1?[types[0],types[0]]:types;
   const scored=ROLE_NAMES.map((role,idx)=>{
     const targets=roleTargets(role);
-    const rawFit=similarity(normalized,targets);
-    const neutralFit=similarity(STAT_KEYS.map(()=>STAT_CENTER),targets);
-    const neutralAdjusted=clamp(NEUTRAL_REFERENCE+rawFit-neutralFit,0,100);
-    const statFit=(1-ROLE_NEUTRAL_COMPENSATION)*rawFit+
-      ROLE_NEUTRAL_COMPENSATION*neutralAdjusted;
+    const statFit=directionalRoleFit(normalized,targets);
     const toolkit=.55*ROLE_AFFINITIES[toolkitTypes[0]][idx]+
       .45*ROLE_AFFINITIES[toolkitTypes[1]][idx];
     const defensiveAdjustment=adjustments[role]||0;
@@ -102,9 +108,13 @@ export function classifyRole(baseStats,types) {
     ROLE_NAMES.indexOf(a.name)-ROLE_NAMES.indexOf(b.name));
   // Dispersion labels and diagnostics use the same reference units as role fit.
   const spread=Math.sqrt(mean(normalized.map(v=>(v-mean(normalized))**2)));
+  // Near-neutral builds have less role evidence and allow slightly broader hybrids.
+  const hybridMargin=ROLE_HYBRID_MIN_MARGIN+(ROLE_HYBRID_MAX_MARGIN-ROLE_HYBRID_MIN_MARGIN)*
+    (1-clamp(spread/ROLE_DIRECTION_FULL_SPREAD,0,1));
   return {
     primary:scored[0],
-    secondary:scored[1].score>=scored[0].score-5?scored[1]:null,
+    secondary:scored[1].score>=scored[0].score-hybridMargin?scored[1]:null,
+    hybridMargin:Math.round(hybridMargin*10)/10,
     all:scored,
     specialization:spread<15?'Versatile':spread<25?'Focused':'Highly specialized',
     spread:round(spread),
