@@ -5,10 +5,10 @@ import {
   BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS,
   BASE_STAT_TOTAL, BASE_STAT_MIN, BASE_STAT_MAX, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
 } from './data.mjs?v=semantic-v3-1';
-import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
-import { classifyArchetype } from './archetypes.mjs';
+import { chooseHeldItem } from './held-items.mjs?v=semantic-v3-1';
+import { classifyArchetype } from './archetypes.mjs?v=semantic-v3-1';
 import { classifyNature } from './nature.mjs';
-import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
+import { classifyRole } from './roles.mjs?v=semantic-v3-1';
 import { composeFieldReport } from './profile-analysis.mjs?v=semantic-v3-1';
 import { deriveFunctionPreferences } from './functions.mjs';
 import { semanticFunctionAffinities, semanticBigFiveAffinities, semanticPercentageAffinities, SPREAD_GAIN } from './stat-model.mjs?v=semantic-v3-1';
@@ -16,7 +16,7 @@ import {
   facetContrastMap, resolveBigFiveEvidence,
   hasCompleteBigFiveEvidence
 } from './bigfive-facets.mjs';
-import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=v2-600-bst-1';
+import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=semantic-v3-1';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -306,7 +306,7 @@ export function isMoveEligible(name,{types,stats,role=null,ability=null}){
   if(name==='Aurora Veil' &&
     (abilityName!=='Snow Warning'||!types.includes('Ice')))return false;
   // Trick Room reverses Speed order: do not give it to fast Pokémon.
-  if(name==='Trick Room' && stats.spe>85)return false;
+  if(name==='Trick Room' && (stats.spe>85||abilityName==='Speed Boost'))return false;
   // Shed Tail sacrifices half the user's HP and requires enough staying power.
   if(name==='Shed Tail' && stats.hp<92)return false;
   // Charge has a strongly Electric-dependent offensive effect.
@@ -338,7 +338,7 @@ function scoreMove(name,types,stats,second,third) {
     score-=Math.min(48,Math.max(0,stats.spa-stats.atk-12)*1.2);
   if(SPECIAL_SETUP.has(name) && stats.atk>stats.spa)
     score-=Math.min(48,Math.max(0,stats.atk-stats.spa-12)*1.2);
-  if(['Agility','Tailwind','Flame Charge','Dragon Dance'].includes(name))
+  if(['Agility','Flame Charge','Dragon Dance'].includes(name))
     score-=Math.min(24,Math.max(0,65-stats.spe)*.8);
   return score;
 }
@@ -379,8 +379,8 @@ export function isMovePairCompatible(tactic,growth,{strategy=null,attacks=[],abi
   if(growth==='Baton Pass' && !hasBatonPassSetup({moves:[...attacks,tactic],ability}))return false;
   if((tactic==='Aurora Veil' && ['Reflect','Light Screen'].includes(growth)) ||
      (growth==='Aurora Veil' && ['Reflect','Light Screen'].includes(tactic)))return false;
-  if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growth)) ||
-     (growth==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(tactic)))return false;
+  if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge','Quiver Dance'].includes(growth)) ||
+     (growth==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge','Quiver Dance'].includes(tactic)))return false;
   // Repeating an active environment or curing the condition that enables the
   // specialization works against the chosen four-move plan.
   if(strategy?.ability==='Misty Surge' && growth==='Safeguard')return false;
@@ -431,10 +431,10 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
     (!strategy||name===strategy.tactic) &&
     MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[tacticRole]) &&
     isMoveEligible(name,{types:visibleTypes,stats,role:tacticRole,
-      ability:strategy?.ability}));
+      ability:strategy?.ability||standardAbility}));
   const growth=GROWTH_MOVES[core];
   const validGrowth=growth.choices.filter(name=>
-    !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats}));
+    !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats,ability:strategy?.ability||standardAbility}));
   if(!validRole.length || !validGrowth.length)
     throw new Error('No mechanically coherent role/growth moves for the build.');
 
