@@ -123,7 +123,7 @@ export function composeFieldReport(build,{bigFive,mbtiScores,facetContrasts=null
     else if(bigFive[1]>=75 && role.primary.name==='Pivot')
       twist='A structured temperament paired with a Pivot role: it may prefer a plan, yet its best move is knowing when to change positions.';
     else
-      twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 600-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 157.';
+      twist='Its strongest stats are '+join(top)+', but '+bottom.label+' trails behind. A 600-point creature cannot have everything. Train its actual strengths instead of trying to make all six numbers 160.';
   }
   // Distinct facet patterns provide specific field observations, not generic
   // rewards. Most facets are expressed through the stats, archetype or item;
