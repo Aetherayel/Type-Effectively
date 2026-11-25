@@ -376,6 +376,8 @@ export function hasBatonPassSetup({moves=[],ability=null}={}) {
 // The growth slot should add new behavior rather than repeat an existing shield.
 export function isMovePairCompatible(tactic,growth,{strategy=null,attacks=[],ability=null}={}) {
   if(tactic===growth)return false;
+  const activeAbility=typeof ability==='string'?ability:ability?.name;
+  if((tactic==='Trick Room'||growth==='Trick Room')&&activeAbility==='Speed Boost')return false;
   if(growth==='Baton Pass' && !hasBatonPassSetup({moves:[...attacks,tactic],ability}))return false;
   if((tactic==='Aurora Veil' && ['Reflect','Light Screen'].includes(growth)) ||
      (growth==='Aurora Veil' && ['Reflect','Light Screen'].includes(tactic)))return false;
