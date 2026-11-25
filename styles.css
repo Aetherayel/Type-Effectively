@@ -566,3 +566,16 @@ a{color:inherit}
 .score-progress{color:var(--accent);font-variant-numeric:tabular-nums}
 #share-privacy,#build-feedback{overflow-wrap:anywhere}
 @media(max-width:560px){.hero-actions{flex-direction:column}.hero-actions .primary-button,.hero-actions .outline-button{width:100%;text-align:center}}
+
+/* Signature creature workshop: post-build, independent from scoring. */
+.creature-workshop{background:linear-gradient(145deg,#282b39,#19252b 90%);border-color:#52596b}
+.creature-workshop .ev-head .mini-label{color:#c3c9ee}
+.creature-fields{display:grid;gap:12px;margin:16px 0}
+.creature-workshop .field textarea,.creature-preview textarea{display:block;width:100%;min-width:0;box-sizing:border-box;background:#10191d;color:#f1f2ea;border:1px solid #354449;border-radius:9px;padding:12px 11px;font:inherit;font-size:13px;line-height:1.5;resize:vertical}
+.creature-workshop textarea::placeholder{color:#6e8180}
+.creature-guide{border:1px solid #47515d;border-radius:9px;padding:10px 12px;color:#b7c9c0;font-size:12px;line-height:1.65}
+.creature-guide summary{cursor:pointer;font-weight:700;color:#d6dfeb}
+.creature-guide p{margin:8px 0 0}
+.creature-preview{margin-bottom:14px}
+.creature-preview label{display:block;margin:10px 0 5px}
+.creature-workshop .primary-button{width:100%;min-height:44px}

@@ -315,6 +315,10 @@ Once a personality build is generated, a **Train your Pokémon** panel appears *
 
 The feature is playful game training, not a new input to personality interpretation.
 
+## Create your signature Pokémon
+
+Below EV training, the Signature Pokémon Workshop turns the current result into a complete, locally generated creative prompt. Optional creature, natural-material and conceptual inspirations, art style and additional direction personalize the brief. Preview or copy the entire prompt to use with an external assistant or as an artist's brief; no card upload is needed. The prompt includes derived build mechanics and field observations but never raw questionnaire scores or share-link payloads. It does not alter scoring, EVs, exports, or shared links. Preferences are session-only and reset with a new build.
+
 ## Understanding the stats (on-site guide)
 
 A static **Understanding your stats** section appears below the input/results workspace, before the footer. It is available without generating a build, with a short jump link from the results area. It defines HP (resilience), Attack (assertion), Defense (fortitude), Sp. Atk (ingenuity), Sp. Def (composure), and Speed (responsiveness).
