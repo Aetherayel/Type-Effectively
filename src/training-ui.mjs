@@ -10,8 +10,8 @@ const escapeHtml = text => String(text).replace(/[&<>"']/g, c =>
 export function renderTrainingPanel(build, container, { initialEvs = null, onChange = () => {} } = {}) {
   const auto=trainingPlan(build),suggested=auto.evs;
   const reinforce=trainingPlan(build,'reinforce'),compensate=trainingPlan(build,'compensate');
-  const distinct=reinforce.evs.some((v,i)=>v!==compensate.evs[i]);
-  const planCaption=p=>'Suggested '+build.role.primary.name+' spread · '+(p.approach==='reinforce'?'reinforce strengths':'cover weaknesses')+(p.trickRoom?' · preserve low Speed for Trick Room':'')+'. Change anything you like.';
+  const distinct=reinforce.evs.some((v,i)=>Math.abs(v-compensate.evs[i])>=100);
+  const planCaption=p=>'Suggested '+build.role.primary.name+' spread'+(distinct?' · '+(p.approach==='reinforce'?'reinforce strengths':'cover weaknesses'):' · role-led training')+(p.trickRoom?' · preserve low Speed for Trick Room':'')+'. Change anything you like.';
   let evs = validTrainingEvs(initialEvs) ? [...initialEvs] : [...suggested];
   const rows = STAT_KEYS.map((key, index) =>
     '<div class="ev-row" data-ev-row="' + index + '">' +
