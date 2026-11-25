@@ -6,7 +6,7 @@ This is a fictional game scoring calibration, not an assessment of capacity or a
 
 - Eight functions: fixed provisional engineering pivot 64, **not** a confirmed Sakinorva midpoint or population average. For signed deviation d, use d × (1 + 0.5 × (d/50)^2) inside ±50, then linear continuation with slope 2.5 outside that range. Subtract the transformed response of the uniform personal mean before blending; any eight identical scores produce six neutral 50 affinities. This does not assert that uniformly high function totals mean greater general capacity.
 - Alternative pathways: interpolate between the weighted mean of transformed inputs and the stronger transformed input. Peak weight = 0.75 × clamp((max(raw pair) − reference − 10)/30, 0, 1). Equal inputs remain equal. Ni/Ne in Ingenuity use equal alternative weights, with Ti complementary; Se/Ne in Speed and Si/Fi in Defense are additional alternative hypotheses. Fe supplies a small direct Speed contribution; Fi is removed as a direct Attack proxy. HP and SpD retain weak, downweighted cognitive proxies.
-- Big Five: apply the same signed transform around percentile 50; defer clipping to the completed source affinity. Full facet groups replace their own domain terms. Remove low sociability, low agreeableness, low activity and low orderliness as direct evidence of unrelated strengths. Low neuroticism remains a directional proxy for resilience/regulation. See SEMANTIC_FACET_COMPONENTS in src/stat-model.mjs for every coefficient. O5/O1 and O4/O1 have gated alternative aggregation for Ingenuity and responsiveness respectively. Artistic interest remains a small complementary Ingenuity term. The Agreeableness domain still contributes to other outcomes, but not directly to base stats.
+- Big Five: apply the same signed transform around percentile 50; preserve signed signals without clipping. Full facet groups replace their own domain terms. Remove low sociability, low agreeableness, low activity and low orderliness as direct evidence of unrelated strengths. Low neuroticism remains a directional proxy for resilience/regulation. See SEMANTIC_FACET_COMPONENTS in src/stat-model.mjs for every coefficient. O5/O1 and O4/O1 have gated alternative aggregation for Ingenuity and responsiveness respectively. Artistic interest remains a small complementary Ingenuity term. The Agreeableness domain still contributes to other outcomes, but not directly to base stats.
 - Quick path: the same Big Five domain budgets apply without inventing missing facet values. 16Personalities bipolar contrasts retain their prior mapping with nonlinear amplification; A/T is excluded. Percentage and internal type-only framework matrices remain unchanged.
 - Enneagram: retain existing quadratic motivational weighting and centered prototype affinities.
 - Eight-function source matrix (Big Five / Enneagram / cognition):
@@ -33,7 +33,7 @@ Seed 20261125, 2,000 independent 30-facet/8-function/9-Rowe profiles and another
 | Individual stats at hard bounds | 0% | 1.35% | 0% | 3.57% |
 | Invalid BST allocations | 0 | 0 | 0 | 0 |
 
-Independent cohort V3 mean stats: 99.05 / 97.79 / 98.76 / 102.77 / 99.71 / 101.92. Correlated-facet cohort: 101.20 / 98.18 / 100.32 / 99.50 / 100.62 / 100.16. The residual mean shifts and correlated-cohort boundary saturation merit review; no artificial quotas or source-specific offsets were applied. Completed source clipping can still discard extreme differences.
+Independent cohort V3 mean stats: 99.05 / 97.79 / 98.76 / 102.77 / 99.71 / 101.92. Correlated-facet cohort: 101.20 / 98.18 / 100.32 / 99.50 / 100.62 / 100.16. The residual mean shifts and correlated-cohort boundary saturation merit review; no artificial quotas or source-specific offsets were applied. This initial experiment used source clipping; the final V3 removes it.
 
 This report is stat-level evidence, not the full CI result. The integration tests exercise the complete generator. Run npm test, npm run audit:v2 and the browser smoke script; compare the paired audit with the main baseline before merging.
 
@@ -49,7 +49,7 @@ Same 4,000 seeded profiles; only allocation limits changed. All candidates prese
 
 40–160 is the selected V3 boundary: symmetric about neutral 100 and reduces clipping without materially changing the overall distribution. The pre-integration stress test describes the original prototype with 50–157 bounds; final V3 uses 40–160.
 
-## Source affinity cap experiment (not applied)
+## Final source affinity cap audit
 
 With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles found:
 
@@ -59,4 +59,4 @@ With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles 
 | Remove Big Five only | 19.97 | 24.48 | 0.49% | 2.40% |
 | Remove Big Five and functions | 20.06 | 24.55 | 0.52% | 2.48% |
 
-All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. Source-cap changes remain exploratory, not included in this PR revision.
+All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. The final V3 removes the intermediate caps for all stat sources, retaining questionnaire validity checks, finite arithmetic checks, the 600 BST and 40–160 final base-stat limits. The centered Enneagram prototype range makes its former cap redundant. The diagnostic now shows signed uncapped affinities using a shared adaptive axis. Extreme cognitive totals can dominate the blend, deliberately; the fixed budget still limits final stats. No population rarity claim is inferred from the synthetic cohorts.
