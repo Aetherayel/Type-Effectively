@@ -51,7 +51,14 @@ export function buildCreaturePrompt(build, preferences = {}) {
     '- Design a fully developed creature appropriate to its 600 BST. It can be impressive without resembling a Legendary Pokémon. Avoid excessive ornaments, armor strapped on without purpose, or a generic humanoid warrior.',
     '- Keep the visible typing, Nature, base stats, abilities, held item and four moves intact. The held item can inspire symbolism without becoming permanent anatomy. Keep weaknesses and growth opportunities meaningful.',
     '', 'DELIVERABLE',
-    'Provide a memorable species name and its etymology, a concise Pokédex entry, a short explanation connecting its anatomy and behavior to this build, and a full-body illustration with a simple background. If you cannot generate images, provide a ready-to-use illustration prompt instead.',
+    'Complete the following in sequence: build data → finalized species specification → illustration.',
+    '1. Species identity: Provide a memorable species name, its etymology, classification, and a concise Pokédex entry.',
+    '2. Design specification: Establish the creature’s biological inspirations, anatomy (including the number and placement of limbs and distinctive appendages), silhouette, proportions, coloration, signature biological feature, and demeanor. Explain how these reflect the supplied build. Finalize this exact species before generating any illustration.',
+    '3. Illustration: Generate a standalone, full-body illustration of the exact species established above. Use the finalized species specification as the primary visual source of truth, rather than independently reinterpreting the original build. When handing off to an image generator, explicitly include the finalized visual description and the chosen art style.',
+    'Preserve the established species identity, anatomy, silhouette, proportions, coloration and distinguishing features. Do not substitute a different species, rename it, or introduce conflicting anatomical features.',
+    'Show one complete creature in a natural pose against a simple neutral background, with readable anatomy and a distinctive silhouette. Follow the Art style specified in CREATIVE DIRECTION.',
+    'Keep the illustration separate from the written species profile. Do not include text, statistics, typography, labels, type badges, borders, infographic panels, Pokédex cards, stat sheets, character reference sheets, additional poses, or unrelated scenery.',
+    'If image generation is unavailable, provide a self-contained illustration prompt derived from the finalized species specification instead.',
     '', 'Source: Type Effectively — ' + cardVersionFooter(build) + '. Unofficial fan-inspired creative exercise.'
   ].filter(line => line !== null).join('\n');
 }
