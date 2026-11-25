@@ -1,8 +1,8 @@
 import {
   ENNEAGRAM_NAMES, MBTI_TYPES, OCEAN_LABELS,
   ROLE_DESCRIPTIONS, STAT_KEYS, STAT_NAMES, TEST_LINKS, TYPE_COLORS
-} from './data.mjs?v=v2-600-bst-1';
-import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=v2-600-bst-1';
+} from './data.mjs?v=semantic-v3-1';
+import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, normalizeRoweScores } from './engine.mjs?v=semantic-v3-1';
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
@@ -561,7 +561,7 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>600 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 600 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. The six stats are bounded and normalized to exactly 600. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>600 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 600 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. V3 amplifies pronounced signals, recognizes alternative pathways and uses a 1.5× stronger final spread. Cognitive functions use a provisional fixed pivot of 64 and a uniform-response correction; this is a game parameter, not a test average. The six stats are bounded and normalized to exactly 600. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<div class="nature-factors">'+STAT_KEYS.map(key=>{
           const w=build.statWeights[key];
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
@@ -578,7 +578,7 @@ function renderCard(build) {
                     (delta==null?'n/a':(delta>0?'+':'')+delta.toFixed(1))+'</span>';
                 }).join('')+'</div>'
               : '<p>With no broad-domain inputs, no domain-only comparison is calculated.</p>')
-          : '<p><strong>Big Five detail:</strong> Five broad domains only; existing domain scoring remains unchanged.</p>')+
+          : '<p><strong>Big Five detail:</strong> Five broad domains only; V3 applies the same semantic domain budgets and nonlinear contrast, without inventing facet detail.</p>')+
         (build.enneagramSource==='rowe' ? '<p><strong>Rowe source:</strong> Signed raw Enneagram totals were translated into within-profile game affinities with a minimum 50-point reference span. This preserves relative gaps and ties; it is not a percentile or a validated comparison against Find My Nine. Rowe subtype values currently do not alter the build.</p>' : '')+
         '<p><strong>Battle role:</strong> Classified from the 600 base stat points <em>before Nature modifies battle stats</em>. Stat-template similarity supplies 80% and visible-type toolkit fit 20%. Neutral-reference compensation reduces the advantage of role targets closest to the average Pokémon. Walls can specialize in physical, special, or mixed endurance; a small bulk-versus-offense preference distinguishes a Wall from a retaliating Tank. Relative stat thresholds use the original calibration scale; Nature still affects battle performance, signature eligibility, and move mechanics, but not battle-role identity. Slot three is a mechanically eligible role tactic; slot four is a corrective Enneagram growth move.</p>'+
         '<p><strong>Archetype:</strong> 36 authored identities (six operating styles × six battle expressions). Candidates combine 25% Enneagram motivation, 20% cognitive preference, 25% Big Five temperament, and 30% battle-role fit. Facets substitute within the temperament component when present, not as a capped additive bonus. Battle fit already includes stat shape and typing. Best score wins, not a measured personality likelihood.</p>'+
