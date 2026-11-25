@@ -17,13 +17,13 @@ test('Scarlet and Violet type palette includes all 18 standard Pokémon types', 
 });
 
 test('six radar axes are evenly spaced and meet at zero', () => {
-  assert.equal(RADAR_MAX, 160);
+  assert.equal(RADAR_MAX, 180);
   assert.equal(RADAR_RADIUS, 108);
-  assert.deepEqual(radarPoint(0, 160), {x:180, y:56});
-  assert.deepEqual(radarPoint(3, 160), {x:180, y:272});
+  assert.deepEqual(radarPoint(0, 180), {x:180, y:56});
+  assert.deepEqual(radarPoint(3, 180), {x:180, y:272});
   for(let i=0;i<6;i++) assert.deepEqual(radarPoint(i, 0), RADAR_CENTER);
   assert.throws(()=>radarPoint(6,120), /0–5/);
-  assert.throws(()=>radarPoint(0,161), /between 0 and 160/);
+  assert.throws(()=>radarPoint(0,181), /between 0 and 180/);
 });
 
 test('radar shows post-Nature values above the original base numbers', () => {
@@ -97,13 +97,13 @@ test('radar preserves Speed at bottom and Sp. Attack at upper-left', () => {
   assert.ok(upperLeft?.content.includes('>70</text>'));
 });
 
-test('160 base stats permit boosted Nature values above the base cap',()=>{
-  const base={hp:100,atk:160,def:80,spa:70,spd:70,spe:75};
-  const after={...base,atk:176,spe:67};
+test('180 base stats permit boosted Nature values above the base cap',()=>{
+  const base={hp:100,atk:180,def:80,spa:70,spd:70,spe:75};
+  const after={...base,atk:198,spe:67};
   const svg=renderStatRadar(base,after);
-  assert.match(svg,/Attack: after Nature 176, base 160/);
-  assert.match(svg,/>↑176<\/text>/);
-  assert.throws(()=>renderStatRadar(base,{...after,atk:177}),/valid post-Nature stats/);
+  assert.match(svg,/Attack: after Nature 198, base 180/);
+  assert.match(svg,/>↑198<\/text>/);
+  assert.throws(()=>renderStatRadar(base,{...after,atk:199}),/valid post-Nature stats/);
 });
 
 test('result markup keeps compact Nature, Battle Role and standard Ability line with no detailed stat block',()=>{
@@ -119,6 +119,6 @@ test('result markup keeps compact Nature, Battle Role and standard Ability line 
 test('radar polygons reject missing or out-of-range base stats', () => {
   assert.throws(()=>radarPolygon([50,50]),/six stats/);
   assert.throws(()=>renderStatRadar({hp:100}),/six valid base stats/);
-  assert.throws(()=>renderStatRadar({hp:100,atk:100,def:100,spa:100,spd:100,spe:161}),/six valid base stats/);
+  assert.throws(()=>renderStatRadar({hp:100,atk:100,def:100,spa:100,spd:100,spe:181}),/six valid base stats/);
   assert.equal(radarPolygon(Array(6).fill(0)).split(' ').length,6);
 });
