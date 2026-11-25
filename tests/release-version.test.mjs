@@ -40,6 +40,16 @@ test('published V2 releases supersede older minor tags only at the exact revisio
   assert.equal(versionForRevision('b'.repeat(40),updated),null);
 });
 
+test('V3 release lookup accepts v3.0.x only at the exact revision and preserves older tags',()=>{
+  const updated=[...sample,{tag_name:'v2.1.5',target_commitish:published,draft:false},
+    {tag_name:'v3.0.0',target_commitish:published,draft:false},
+    {tag_name:'v3.0.2',target_commitish:published,draft:false},
+    {tag_name:'v3.0.99',target_commitish:previous,draft:true}];
+  assert.equal(versionForRevision(published,updated),'3.0.2');
+  assert.equal(versionForRevision(previous,updated),'1.1.2');
+  assert.equal(versionForRevision('b'.repeat(40),updated),null);
+});
+
 test('v1.1.0 baseline works before any release tag exists', async () => {
   const version = await fetchPublishedVersion(async () => ({
     ok: true, json: async () => ({ revision: baseline })
@@ -93,6 +103,10 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(workflow.includes('tag=v2.0.0'));
   assert.ok(workflow.includes('if [ "$PR_NUMBER" = "39" ]; then'));
   assert.ok(workflow.includes('tag=v2.1.0'));
+  assert.ok(workflow.includes('if [ "$PR_NUMBER" = "45" ]; then'));
+  assert.ok(workflow.includes('tag=v3.0.0'));
+  assert.ok(workflow.includes('tag="v3.0.$patch"'));
+  assert.ok(workflow.indexOf('tag=v3.0.0')<workflow.indexOf('tag=v2.1.0'));
   assert.ok(workflow.includes('tag="v2.1.$patch"'));
   assert.ok(workflow.indexOf('tag=v2.1.0')<workflow.indexOf('tag=v2.0.0'));
   assert.ok(workflow.includes('tag="v2.0.$patch"'));
@@ -109,5 +123,5 @@ test('release workflow tracks merged PRs, not arbitrary new main commits', () =>
   assert.ok(template.includes('{{ site.github.build_revision }}'));
   assert.match(html, /id="release-version"/);
   assert.match(html, /id="footer-version"/);
-  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=2\.1\.0"/);
+  assert.match(html, /src="\.\/src\/release-version\.mjs\?v=3\.0\.0"/);
 });

@@ -150,7 +150,7 @@ test('facet detail has deterministic 600 BST, valid role coverage and no fourth 
       bigFiveFacets:facets
     });
     assert.equal(sum(Object.values(build.baseStats)),600);
-    assert.ok(Object.values(build.baseStats).every(n=>n>=50&&n<=157));
+    assert.ok(Object.values(build.baseStats).every(n=>n>=20&&n<=180));
     assert.equal(build.statWeights.spa.bigFive,.45);
     const spread=STAT_KEYS.map(k=>build.baseStats[k]);
     tops[spread.indexOf(Math.max(...spread))]++;

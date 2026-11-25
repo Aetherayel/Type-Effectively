@@ -57,7 +57,7 @@ test('function input yields a coherent 600-point build without fabricated A/T',(
   const build=generateBuild(input);
   assert.equal(build.cognitiveSource,'functions');
   assert.equal(build.statWeightMode,'functions');
-  assert.equal(build.statWeights.spa.cognition,.5);
+  assert.equal(build.statWeights.spa.cognition,.4);
   assert.equal(build.mbti,'INTJ');
   assert.equal(build.identity,'INTJ');
   assert.equal(build.identityPreference,null);

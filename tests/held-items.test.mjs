@@ -142,7 +142,8 @@ test('a held item is selected from the complete build and can be independently c
     enneagramScores:architectInput.enneagramScores,
     bigFive:architectInput.bigFive,
     mbtiScores:architectInput.mbtiScores,
-    role:b.role,types:b.types,moves:b.moves,ability:b.ability
+    role:b.role,types:b.types,moves:b.moves,ability:b.ability,
+    stats:Object.fromEntries(Object.entries(b.effectiveStats).map(([k,v])=>[k,Math.round(v*535/600)]))
   });
   if(b.signatureStrategy){
     assert.equal(b.heldItem.name,b.signatureStrategy.item,

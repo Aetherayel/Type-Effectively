@@ -301,7 +301,7 @@ try{
   assert.ok(html.includes('data-affinity-row-count="6"')&&
     html.includes('data-affinity-source-count="6"'),
     'all six raw affinities and three-framework source rows must render');
-  assert.match(html,/data-affinity-raw-spa="[0-9]+\.[0-9] \s*\/ 100"/,
+  assert.match(html,/data-affinity-raw-spa="-?[0-9]+\.[0-9]\s+affinity"/,
     'Special Attack must expose its actual unnormalized game affinity');
   assert.ok(html.includes('data-facet-count="30"'),'all thirty optional IPIP facet fields must render');
   assert.ok(html.includes('data-facet-partial-error="Complete all six Openness facets'),
@@ -319,7 +319,7 @@ try{
     'all thirty facets must satisfy Big Five without reported broad domains');
   assert.ok(html.includes('data-facet-only-status="All 30 facets complete.'),
     'facet-only status must confirm that domain inputs are optional');
-  assert.ok(html.includes('data-card-version="CREATED v2.1.0"'),
+  assert.ok(html.includes('data-card-version="CREATED v3.0.0"'),
     'Card footer must show the bundled version when the build is generated');
   assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),
     'Card footer must update when the published release is verified');

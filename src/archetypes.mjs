@@ -155,17 +155,21 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
       ARCHETYPE_WEIGHTS.battle*battle;
     return {candidate,mode,index,score,breakdown,facetAdjustment};
   }).sort((a,b)=>b.score-a.score || a.index-b.index);
-  const winner=scored[0];
+  // Operating style remains evidence-driven; the battle expression cannot
+  // contradict the already classified primary role. All 36 names remain reachable.
+  const primary=role.primary?.name??[...role.all].sort((a,b)=>b.score-a.score)[0].name;
+  const compatible=scored.filter(x=>x.candidate.role===primary);
+  const winner=compatible[0];
   return {
     ...winner.candidate,
     modeLabel:winner.mode.label,modeGift:winner.mode.gift,
     modeSnag:winner.mode.snag,modeJoke:winner.mode.joke,
     score:Math.round(winner.score),breakdown:winner.breakdown,
     facetAdjustment:Math.round(winner.facetAdjustment*10)/10,
-    alternatives:scored.slice(1,4).map(item=>({
+    alternatives:compatible.slice(1,4).map(item=>({
       title:item.candidate.title,score:Math.round(item.score)
     })),
-    margin:Math.round((winner.score-scored[1].score)*10)/10,
-    method:'36 curated identities · motivation 25 / cognition 20 / temperament 25 / battle 30'
+    margin:Math.round((winner.score-compatible[1].score)*10)/10,
+    method:'36 curated identities · role-matched operating styles · motivation 25 / cognition 20 / temperament 25 / battle 30'
   };
 }

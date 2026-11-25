@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { BASE_STAT_WEIGHTS, ENNEAGRAM_AFFINITIES, STAT_KEYS, STAT_MEANINGS } from '../src/data.mjs';
 import { oceanAffinity, mbtiAffinity, enneagramAffinity, normalizeStats, generateBuild } from '../src/engine.mjs';
+import { semanticBigFiveAffinities, semanticPercentageAffinities } from '../src/stat-model.mjs';
 import { NATURE_DIMENSIONS } from '../src/nature.mjs';
 
 const sum=xs=>xs.reduce((a,b)=>a+b,0);
@@ -33,7 +34,7 @@ test('calibration retains six valid stat prototypes and distinguishes signals',(
       assert.ok(Object.values(row).every(x=>x>=0&&x<=1));
     }
   }
-  assert.equal(BASE_STAT_WEIGHTS.functions.spa.cognition,.5);
+  assert.equal(BASE_STAT_WEIGHTS.functions.spa.cognition,.4);
   assert.equal(BASE_STAT_WEIGHTS.functions.def.enneagram,.45);
   assert.ok(BASE_STAT_WEIGHTS.functions.spa.cognition>
     BASE_STAT_WEIGHTS.percentages.spa.cognition);
@@ -69,7 +70,7 @@ test('A/T cannot leak into cognition-based capacity; normalization preserves 600
   });
   const stats=normalizeStats(blended);
   assert.equal(sum(Object.values(stats)),600);
-  assert.ok(Object.values(stats).every(n=>n>=50&&n<=157));
+  assert.ok(Object.values(stats).every(n=>n>=20&&n<=180));
 });
 
 test('seeded defensive correlations are not near-duplicates; each stat can lead',()=>{
@@ -97,7 +98,7 @@ test('seeded defensive correlations are not near-duplicates; each stat can lead'
 test('build uses audited source blend and propagates it through the results',()=>{
   const input={mbtiScores:[76,93,14,21,36],enneagramScores:[96,48,62,84,95,52,31,70,40],bigFive:[91,87,20,44,26]};
   const build=generateBuild(input);
-  const o=oceanAffinity(input.bigFive),e=enneagramAffinity(input.enneagramScores),m=mbtiAffinity(input.mbtiScores);
+  const o=semanticBigFiveAffinities(input.bigFive,null).affinities,e=enneagramAffinity(input.enneagramScores),m=semanticPercentageAffinities(input.mbtiScores);
   assert.equal(build.statWeightMode,'percentages');
   assert.deepEqual(build.statWeights,BASE_STAT_WEIGHTS.percentages);
   for(let i=0;i<STAT_KEYS.length;i++){

@@ -3,19 +3,20 @@ import {
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
   BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS,
-  BASE_STAT_TOTAL, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
-} from './data.mjs?v=v2-600-bst-1';
-import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
-import { classifyArchetype } from './archetypes.mjs';
+  BASE_STAT_TOTAL, BASE_STAT_MIN, BASE_STAT_MAX, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
+} from './data.mjs?v=semantic-v3-1';
+import { chooseHeldItem } from './held-items.mjs?v=semantic-v3-1';
+import { classifyArchetype } from './archetypes.mjs?v=semantic-v3-1';
 import { classifyNature } from './nature.mjs';
-import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
-import { composeFieldReport } from './profile-analysis.mjs?v=v2-600-bst-1';
-import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
+import { classifyRole } from './roles.mjs?v=semantic-v3-1';
+import { composeFieldReport } from './profile-analysis.mjs?v=semantic-v3-1';
+import { deriveFunctionPreferences } from './functions.mjs';
+import { semanticFunctionAffinities, semanticBigFiveAffinities, semanticPercentageAffinities, SPREAD_GAIN } from './stat-model.mjs?v=semantic-v3-1';
 import {
-  refineBigFiveAffinities, facetContrastMap, resolveBigFiveEvidence,
+  facetContrastMap, resolveBigFiveEvidence,
   hasCompleteBigFiveEvidence
 } from './bigfive-facets.mjs';
-import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=v2-600-bst-1';
+import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=semantic-v3-1';
 
 const clamp = (n, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, n));
 const average = xs => xs.reduce((a,b) => a+b, 0) / xs.length;
@@ -150,9 +151,9 @@ export function enneagramAffinity(scores) {
   // Remove unequal nine-type column priors before blending sources. Uniform
   // motivational scores produce 50 on every stat; deviations retain their
   // original type-specific distances and meaningful differentiation.
-  return STAT_KEYS.map((_,i)=>clamp(50+
+  return STAT_KEYS.map((_,i)=>50+
     weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total-
-    ENNEAGRAM_STAT_BASELINE[i]));
+    ENNEAGRAM_STAT_BASELINE[i]);
 }
 // Cognitive preferences are not capacities. Resilience and composure have
 // weak cognitive proxies, deliberately shrunk toward 50. 16P A/T is excluded
@@ -170,11 +171,13 @@ export function mbtiAffinity(s) {
   ];
 }
 
-export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(45*total/REFERENCE_STAT_TOTAL), max = Math.round(140*total/REFERENCE_STAT_TOTAL)) {
+export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(BASE_STAT_MIN*total/BASE_STAT_TOTAL), max = Math.round(BASE_STAT_MAX*total/BASE_STAT_TOTAL), spreadGain = 1) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
+  if (!Number.isFinite(spreadGain) || spreadGain <= 0) throw new Error('Positive finite spread gain required.');
   const mean = average(affinities);
-  const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*(a-mean));
+  const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*spreadGain*(a-mean));
+  if(raw.some(n=>!Number.isFinite(n))) throw new Error('Affinity arithmetic exceeds the numeric range.');
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
@@ -228,13 +231,23 @@ const ABILITY_HINTS={
   9:['Regenerator','Sturdy','Unaware']
 };
 
-function abilityStatFit(item,stats) {
-  if(item.name==='Analytic' && stats.spe<80)return 15;
-  if(item.name==='Sturdy' && stats.def+stats.spd>=185)return 12;
-  if(item.name==='Technician' && stats.spe>=90)return 12;
-  if(item.name==='Speed Boost' && stats.spe>=100)return 12;
-  if(item.name==='Ice Scales' && stats.spd>=95)return 12;
-  return 0;
+// Continuous, capped ranking bonuses: preserve personality/type fit but
+// distinguish exceptional strengths from barely passing the old thresholds.
+export function abilityStatFit(item,stats) {
+  const ramp=(v,start,span=35)=>clamp((v-start)/span,0,1)*20;
+  const offense=Math.max(stats.atk,stats.spa);
+  const bulk=(stats.hp+stats.def+stats.spd)/3;
+  switch(item.name){
+    case 'Analytic': return ramp(100-stats.spe,10,40);
+    case 'Sturdy': return ramp((stats.def+stats.spd)/2,80);
+    case 'Speed Boost': return ramp(stats.spe,85);
+    case 'Ice Scales': return ramp(stats.spd,80);
+    case 'Adaptability': return ramp(offense,90);
+    case 'Guts': return stats.atk>=stats.spa?ramp(stats.atk,90):-10;
+    case 'Sheer Force': return ramp(offense,90);
+    case 'Regenerator': case 'Multiscale': return ramp(bulk,90);
+    default: return 0; // Technician depends on move power, not Speed.
+  }
 }
 
 function chooseAbility(role,types,stats,secondFix) {
@@ -293,7 +306,7 @@ export function isMoveEligible(name,{types,stats,role=null,ability=null}){
   if(name==='Aurora Veil' &&
     (abilityName!=='Snow Warning'||!types.includes('Ice')))return false;
   // Trick Room reverses Speed order: do not give it to fast Pokémon.
-  if(name==='Trick Room' && stats.spe>85)return false;
+  if(name==='Trick Room' && (stats.spe>85||abilityName==='Speed Boost'))return false;
   // Shed Tail sacrifices half the user's HP and requires enough staying power.
   if(name==='Shed Tail' && stats.hp<92)return false;
   // Charge has a strongly Electric-dependent offensive effect.
@@ -313,12 +326,20 @@ function scoreMove(name,types,stats,second,third) {
     (affinity.fixes.includes(second)?21:0)+
     (affinity.fixes.includes(third)?11:0);
   for(const [key,moves] of Object.entries(MOVE_STAT_FIT)){
-    if(moves.includes(name) && stats[key]>=100)score+=12;
+    if(moves.includes(name))score+=clamp((stats[key]-85)*.65,0,24);
   }
   if(PHYSICAL_ATTACKS.has(name) && stats.spa>stats.atk)
-    score-=Math.min(35,Math.round((stats.spa-stats.atk)*.9));
+    score-=Math.min(45,Math.round((stats.spa-stats.atk)*.9));
   if(SPECIAL_ATTACKS.has(name) && stats.atk>stats.spa)
-    score-=Math.min(35,Math.round((stats.atk-stats.spa)*.9));
+    score-=Math.min(45,Math.round((stats.atk-stats.spa)*.9));
+  // A growth lesson remains selected from the core's curated choices, but
+  // strongly mismatched attack setup loses to mechanically useful alternatives.
+  if(PHYSICAL_SETUP.has(name) && stats.spa>stats.atk)
+    score-=Math.min(48,Math.max(0,stats.spa-stats.atk-12)*1.2);
+  if(SPECIAL_SETUP.has(name) && stats.atk>stats.spa)
+    score-=Math.min(48,Math.max(0,stats.atk-stats.spa-12)*1.2);
+  if(['Agility','Flame Charge','Dragon Dance'].includes(name))
+    score-=Math.min(24,Math.max(0,65-stats.spe)*.8);
   return score;
 }
 
@@ -355,11 +376,13 @@ export function hasBatonPassSetup({moves=[],ability=null}={}) {
 // The growth slot should add new behavior rather than repeat an existing shield.
 export function isMovePairCompatible(tactic,growth,{strategy=null,attacks=[],ability=null}={}) {
   if(tactic===growth)return false;
+  const activeAbility=typeof ability==='string'?ability:ability?.name;
+  if((tactic==='Trick Room'||growth==='Trick Room')&&activeAbility==='Speed Boost')return false;
   if(growth==='Baton Pass' && !hasBatonPassSetup({moves:[...attacks,tactic],ability}))return false;
   if((tactic==='Aurora Veil' && ['Reflect','Light Screen'].includes(growth)) ||
      (growth==='Aurora Veil' && ['Reflect','Light Screen'].includes(tactic)))return false;
-  if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(growth)) ||
-     (growth==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge'].includes(tactic)))return false;
+  if((tactic==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge','Quiver Dance'].includes(growth)) ||
+     (growth==='Trick Room' && ['Agility','Tailwind','Dragon Dance','Flame Charge','Quiver Dance'].includes(tactic)))return false;
   // Repeating an active environment or curing the condition that enables the
   // specialization works against the chosen four-move plan.
   if(strategy?.ability==='Misty Surge' && growth==='Safeguard')return false;
@@ -410,10 +433,10 @@ function chooseMoves(attackTypes,visibleTypes,role,stats,core,second,third,strat
     (!strategy||name===strategy.tactic) &&
     MOVE_PURPOSES[name]?.includes(ROLE_PURPOSES[tacticRole]) &&
     isMoveEligible(name,{types:visibleTypes,stats,role:tacticRole,
-      ability:strategy?.ability}));
+      ability:strategy?.ability||standardAbility}));
   const growth=GROWTH_MOVES[core];
   const validGrowth=growth.choices.filter(name=>
-    !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats}));
+    !selected.has(name) && isMoveEligible(name,{types:visibleTypes,stats,ability:strategy?.ability||standardAbility}));
   if(!validRole.length || !validGrowth.length)
     throw new Error('No mechanically coherent role/growth moves for the build.');
 
@@ -540,11 +563,9 @@ export function generateBuild(input) {
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  // Facet-first calculation: each available full facet group REPLACES the
-  // corresponding broad-domain term in the Big Five stat formula.
-  const facetScoring=refineBigFiveAffinities(
-    reportedOcean??(input.bigFiveFacets?null:ocean),
-    oceanAffinity(reportedOcean??ocean),input.bigFiveFacets
+  // V3: semantic facet-first affinities, nonlinear contrast, domain fallback.
+  const facetScoring=semanticBigFiveAffinities(
+    reportedOcean??(input.bigFiveFacets?null:ocean),input.bigFiveFacets
   );
   const facetContrasts=facetContrastMap(
     reportedOcean??(input.bigFiveFacets?null:ocean),input.bigFiveFacets
@@ -552,8 +573,8 @@ export function generateBuild(input) {
   const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
-  const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
-    mbtiAffinity(mbtiScores);
+  const ma=usingFunctions?semanticFunctionAffinities(input.functionScores):
+    semanticPercentageAffinities(mbtiScores);
   // Stat-specific evidence strength. Functions retain eight distinct signals,
   // percentage inputs retain four measured contrasts, and type-only inputs
   // receive conservative cognitive weights because they use 75/25 proxies.
@@ -564,7 +585,7 @@ export function generateBuild(input) {
     const w=statWeights[key];
     return w.bigFive*oa[i]+w.enneagram*ea[i]+w.cognition*ma[i];
   });
-  const baseStats=normalizeStats(blend);
+  const baseStats=normalizeStats(blend,BASE_STAT_TOTAL,undefined,undefined,SPREAD_GAIN);
   const effectiveStats=applyNature(baseStats,nature);
   // Ability/move/strategy thresholds were calibrated in 535-BST units.
   // Use the equivalent relative battle shape, not an across-the-board buff
@@ -604,7 +625,7 @@ export function generateBuild(input) {
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-      role,types,moves,ability,hasBigFive,facetContrasts,
+      role,types,moves,ability,stats:referenceEffectiveStats,hasBigFive,facetContrasts,
       facetScores:input.bigFiveFacets??null
     });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
@@ -621,7 +642,7 @@ export function generateBuild(input) {
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
-    baseStats,effectiveStats,statWeightMode,statWeights,
+    baseStats,effectiveStats,statWeightMode,statWeights,statModelVersion:'v3-semantic',
     // Preserve the precise, unnormalized blend separately from the original
     // rounded affinities. Raw affinities are game scores, not percentiles,
     // and never alter the fixed 600-BST allocation or downstream mechanics.

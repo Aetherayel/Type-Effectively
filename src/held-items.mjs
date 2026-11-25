@@ -77,9 +77,35 @@ export function heldItemRationale({core,role,bigFive,hasBigFive=true,family,face
     ', and '+role.primary.name+' role point toward '+family.insight+'.';
 }
 
+// Small mechanical preference, deliberately subordinate to the item's
+// personality family. Missing stats (legacy direct calls) add no bonus.
+export function heldItemStatFit(item,stats,moves=[],ability=null) {
+  if(!stats)return 0;
+  const ramp=(v,start,span=35)=>Math.max(0,Math.min(1,(v-start)/span))*6;
+  const names=moves.map(m=>typeof m==='string'?m:m.name);
+  const abilityName=typeof ability==='string'?ability:ability?.name;
+  const offense=Math.max(stats.atk,stats.spa);
+  const bulk=(stats.hp+stats.def+stats.spd)/3;
+  switch(item.name){
+    case 'Muscle Band': return stats.atk>=stats.spa?ramp(stats.atk,85):-6;
+    case 'Wise Glasses': case 'Throat Spray': return stats.spa>=stats.atk?ramp(stats.spa,85):-6;
+    case 'Rocky Helmet': case 'Kee Berry': return ramp(stats.def,85);
+    case 'Maranga Berry': return ramp(stats.spd,85);
+    case 'Leftovers': case 'Black Sludge': return ramp(bulk,85);
+    case 'Shell Bell': case 'Expert Belt': case 'Life Orb': return ramp(offense,85);
+    case 'Weakness Policy': return Math.min(ramp(bulk,80),ramp(offense,85));
+    case 'Zoom Lens': return ramp(100-stats.spe,10,35);
+    case "King's Rock": case 'Razor Fang': return names.includes('Trick Room')?ramp(100-stats.spe,15):ramp(stats.spe,85);
+    case 'Quick Claw': return names.includes('Trick Room')?-4:ramp(100-stats.spe,15);
+    case 'Iron Ball': return names.includes('Trick Room')?ramp(100-stats.spe,10):-6;
+    case 'Room Service': return ramp(100-stats.spe,10);
+    case 'Eject Pack': return abilityName==='Clear Body'?-6:0;
+    default: return 0;
+  }
+}
 export function chooseHeldItem({
   tritype,core,second,third,wing,enneagramScores,bigFive,mbtiScores,
-  role,types,moves,ability,hasBigFive=true,facetContrasts=null,facetScores=null
+  role,types,moves,ability,stats=null,hasBigFive=true,facetContrasts=null,facetScores=null
 }) {
   if(!Array.isArray(enneagramScores)||enneagramScores.length!==9 ||
       !Array.isArray(bigFive)||bigFive.length!==5 ||
@@ -106,7 +132,7 @@ export function chooseHeldItem({
     const traits=facetAbsoluteFit(bigFive,facetScores,item.targets,ITEM_FACET_FOCI[item.family]);
     const roleScore=item.roles.includes(role.primary.name) ? 100 :
       role.secondary && item.roles.includes(role.secondary.name) ? 75 : 35;
-    return {item,score:.47*familyScore+.38*traits+.15*roleScore};
+    return {item,score:.47*familyScore+.38*traits+.15*roleScore+heldItemStatFit(item,stats,moves,ability)};
   }).sort((a,b)=>b.score-a.score || a.item.name.localeCompare(b.item.name)); // stable exact ties
   if(!sorted.length)throw new Error('No compatible thematic held item.');
   const selected=sorted[0].item;

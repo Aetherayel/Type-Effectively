@@ -1,4 +1,4 @@
-import { STAT_KEYS, STAT_NAMES, BASE_STAT_MAX } from './data.mjs';
+import { STAT_KEYS, STAT_NAMES, BASE_STAT_MAX } from './data.mjs?v=semantic-v3-1';
 
 // Six evenly spaced axes. Chart positions can differ from the stat table order.
 // Round the actual base cap up to a clean four-ring display scale.

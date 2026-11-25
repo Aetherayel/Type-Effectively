@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { generateBuild, normalizeStats } from '../src/engine.mjs';
+import { SPREAD_GAIN } from '../src/stat-model.mjs';
 import { DEMOS, STAT_KEYS } from '../src/data.mjs';
 import { affinityViewData, renderAffinityComparison } from '../src/stat-affinity-ui.mjs';
 
@@ -18,7 +19,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
     assert.equal(total(b),600);
     const {mean,rows}=affinityViewData(b);
     assert.equal(rows.length,6);
-    assert.ok(mean>=0&&mean<=100);
+    assert.ok(Number.isFinite(mean));
     for(const row of rows){
       const weights=row.weights,values=row.sources;
       const expected=weights.bigFive*values.bigFive+
@@ -27,11 +28,11 @@ test('raw pre-normalization affinities and source values are returned alongside 
         row.key+' raw score must be the unnormalized weighted source blend');
       assert.ok(Math.abs(row.affinity-b.affinities[row.key])<=.5,
         'legacy integer compatibility affinity must remain the same signal');
-      assert.ok(row.affinity>=0&&row.affinity<=100);
+      assert.ok(Number.isFinite(row.affinity));
     }
     assert.ok(Math.abs(rows.reduce((sum,row)=>sum+row.distance,0))<1e-8,
       'distance from own mean must sum to zero');
-    const recomputed=normalizeStats(rows.map(row=>row.affinity));
+    const recomputed=normalizeStats(rows.map(row=>row.affinity),600,20,180,SPREAD_GAIN);
     for(const key of STAT_KEYS)assert.ok(Math.abs(recomputed[key]-b.baseStats[key])<=1,
       'display rounding must not disguise a different base build');
   }
@@ -92,4 +93,16 @@ test('invalid/incomplete raw affinity objects are rejected rather than inventing
     /Six unnormalized affinities/);
   assert.throws(()=>renderAffinityComparison({...b,sourceStatAffinities:{}}),
     /requires a complete scored build/);
+});
+
+test('diagnostic shows uncapped signed affinities on a shared adaptive axis',()=>{
+  const b=generateBuild({...full,mbtiScores:null,functionScores:[0,200,0,0,0,200,0,0]});
+  const raw={...b.rawStatAffinities,hp:-15,spa:175};
+  const markup=renderAffinityComparison({...b,rawStatAffinities:raw});
+  assert.match(markup,/-15\.0 <small>affinity/);
+  assert.match(markup,/175\.0 <small>affinity/);
+  assert.match(markup,/shared axis -15\.0 to 175\.0/);
+  assert.doesNotMatch(markup,/\/ 100<\/small>/);
+  for(const m of markup.matchAll(/(?:left|width):(-?[\d.]+)%/g))
+    assert.ok(+m[1]>=0&&+m[1]<=100);
 });

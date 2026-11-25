@@ -10,7 +10,7 @@ and is never a gate or a scoring input for it.
 1. The full generator has complete cognition, Enneagram and Big Five test evidence.
 2. The Pokémon has the required **visible** type and none of the forbidden visible types.
 3. **Primary or close secondary role** matches a listed qualifying role. A secondary
-   role exists only when within the established **five role-fit points** of primary.
+   role exists only when within the adaptive **five-to-seven role-fit points** of primary.
    The qualifying role's score supplies the strategy-role fit.
 4. Nature-adjusted **effective stats**, converted to the original 535-BST reference scale (`round(actual × 535/600)`), meet each minimum and maximum, if specified.
    This is distinct from battle-role classification, which uses **pre-Nature base stats**.
@@ -58,8 +58,8 @@ All twelve strategies retain their established reference gates after the 600-BST
 - **14%** fit to its O/C/E/A/N temperament target
 
 The targeted effective-stat similarity is
-`clamp(100 - 1.25 × average(|effective_stat - target_stat|), 0, 100)`
-over only the stats listed in the strategy's `targets` object.
+`clamp(100 - 1.25 × average(max(0, target_stat - effective_stat)), 0, 100)`
+over the strategy’s applicable targets, with the Solar Engine attack alternative and omitted Speed targets described below.
 
 Big Five similarity is
 `clamp(100 - 0.9 × average(|temperament_value - target_value|), 0, 100)`
@@ -135,3 +135,7 @@ this Veil with unsupported Baton Pass setup.
 
 All scoring remains deterministic, fictional and authored for game-design
 coherence; these are not validated personality measurements.
+
+### V3 directional stat fit
+
+The target values are desirable lower targets, not exact silhouettes. Score = 100 − 1.25 × mean positive shortfall, bounded to 0–100. Exceeding a desirable strength does not reduce fit. Solar Engine accepts either attack channel as the offensive target. Regenerative Scout and Sandbound Citadel no longer score Speed as a target: switching order and sand do not require a particular Speed. Existing hard minimum/maximum gates, motivation, typing, role and acceptance thresholds remain authoritative.

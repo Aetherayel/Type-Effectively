@@ -4,12 +4,11 @@ import { STAT_KEYS, STAT_MEANINGS, STAT_NAMES } from './data.mjs';
 // allocates relative strengths. Neither score is a respondent percentile.
 // Keep this alternate view separate from the canonical export/EV/radar data.
 const one=n=>Number(n).toFixed(1);
-const clamp=n=>Math.max(0,Math.min(100,n));
 
 export function affinityViewData(build) {
   const values=STAT_KEYS.map(key=>build?.rawStatAffinities?.[key]);
-  if(values.some(n=>!Number.isFinite(n)||n<0||n>100))
-    throw new Error('Six unnormalized affinities from 0–100 are required.');
+  if(values.some(n=>!Number.isFinite(n)))
+    throw new Error('Six unnormalized affinities must be finite.');
   const mean=values.reduce((sum,n)=>sum+n,0)/values.length;
   if(STAT_KEYS.some(key=>!Number.isFinite(build?.baseStats?.[key]) ||
       !Number.isFinite(build?.sourceStatAffinities?.[key]?.bigFive) ||
@@ -29,17 +28,21 @@ export function affinityViewData(build) {
 }
 export function renderAffinityComparison(build) {
   const {mean,rows}=affinityViewData(build);
+  const min=Math.min(0,...rows.map(row=>row.affinity));
+  const max=Math.max(100,...rows.map(row=>row.affinity));
+  const position=n=>100*((n-min)/(max-min));
+  const zero=position(0);
   const bars=rows.map(row=>{
     const sign=row.distance>=0?'+':'−';
     const relative=sign+one(Math.abs(row.distance));
     return '<div class="affinity-row" data-affinity-stat="'+row.key+'">'+
       '<div class="affinity-row-heading"><div><strong>'+row.label+'</strong>'+
         '<span>'+row.meaning+'</span></div>'+
-        '<strong class="affinity-number">'+one(row.affinity)+' <small>/ 100</small></strong></div>'+
+        '<strong class="affinity-number">'+one(row.affinity)+' <small>affinity</small></strong></div>'+
       '<div class="affinity-meter" role="img" aria-label="'+row.label+' modeled affinity '+one(row.affinity)+
-        ' out of 100, '+relative+' from this profile’s affinity mean">'+
-        '<span class="affinity-meter-fill" style="width:'+one(clamp(row.affinity))+'%"></span>'+
-        '<span class="affinity-meter-mean" style="left:'+one(clamp(mean))+'%" aria-hidden="true"></span></div>'+
+        ', '+relative+' from this profile’s affinity mean">'+
+        '<span class="affinity-meter-fill" style="left:'+one(Math.min(zero,position(row.affinity)))+'%;width:'+one(Math.abs(position(row.affinity)-zero))+'%"></span>'+
+        '<span class="affinity-meter-mean" style="left:'+one(position(mean))+'%" aria-hidden="true"></span></div>'+
       '<div class="affinity-row-foot"><span>'+relative+' versus your own affinity mean</span>'+
         '<span>Pokémon base stat: '+row.baseStat+'</span></div>'+
       '</div>';
@@ -53,11 +56,11 @@ export function renderAffinityComparison(build) {
     '<p class="affinity-intro">These are <strong>modeled personality affinities before stat normalization</strong>, '+
     'not Pokémon base stats, test percentiles, or estimates of ability.</p>'+
     '<p class="affinity-mean-note">Your six-affinity mean: <strong>'+one(mean)+'</strong> '+
-      '<span>· dotted markers show this mean in every bar</span></p>'+
+      '<span>· markers show this mean; shared axis '+one(min)+' to '+one(max)+'</span></p>'+
     '<div class="affinity-bars">'+bars+'</div>'+
     '<p class="affinity-method">The game converts each affinity’s difference from your own average '+
       'into a share of the same <strong>fixed 600 BST</strong>. This is why a high affinity '+
-      'can still produce a below-average Pokémon stat. The 0–100 scale is an authored game score, '+
+      'can still produce a below-average Pokémon stat. Affinities can fall below 0 or above 100. This is an authored game score, '+
       'not a population ranking; 50 is a neutral model reference.</p>'+
     '<details class="affinity-source-detail"><summary>Show Big Five, Enneagram and cognition contributions</summary>'+
       '<div class="affinity-table-wrap"><table class="affinity-source-table">'+

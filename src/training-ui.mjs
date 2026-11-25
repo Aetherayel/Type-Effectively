@@ -1,14 +1,17 @@
 import { STAT_KEYS, STAT_NAMES } from './data.mjs';
 import {
-  emptyTrainingEvs, level100Stats, MAX_EV_PER_STAT, suggestTrainingEvs,
+  emptyTrainingEvs, level100Stats, MAX_EV_PER_STAT, trainingPlan,
   TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs
-} from './ev-training.mjs';
+} from './ev-training.mjs?v=semantic-v3-1';
 
 const escapeHtml = text => String(text).replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 export function renderTrainingPanel(build, container, { initialEvs = null, onChange = () => {} } = {}) {
-  const suggested = suggestTrainingEvs(build);
+  const auto=trainingPlan(build),suggested=auto.evs;
+  const reinforce=trainingPlan(build,'reinforce'),compensate=trainingPlan(build,'compensate');
+  const distinct=reinforce.evs.some((v,i)=>Math.abs(v-compensate.evs[i])>=100);
+  const planCaption=p=>'Suggested '+build.role.primary.name+' spread'+(distinct?' · '+(p.approach==='reinforce'?'reinforce strengths':'cover weaknesses'):' · role-led training')+(p.trickRoom?' · preserve low Speed for Trick Room':'')+'. Change anything you like.';
   let evs = validTrainingEvs(initialEvs) ? [...initialEvs] : [...suggested];
   const rows = STAT_KEYS.map((key, index) =>
     '<div class="ev-row" data-ev-row="' + index + '">' +
@@ -35,13 +38,14 @@ export function renderTrainingPanel(build, container, { initialEvs = null, onCha
         '<span>EVs</span><span>LV. 100</span></div>' + rows + '</div>' +
       '<div class="ev-actions">' +
         '<button type="button" id="ev-suggest" class="outline-button">Suggested training</button>' +
+        (distinct?'<button type="button" id="ev-reinforce" class="outline-button">Reinforce strengths</button>'+
+          '<button type="button" id="ev-compensate" class="outline-button">Cover weakness</button>':'') +
         '<button type="button" id="ev-reset" class="outline-button">Reset EVs</button></div>' +
-      '<p class="ev-caption" id="ev-caption">Suggested ' + escapeHtml(build.role.primary.name) +
-        ' spread. Change anything you like.</p>' +
+      '<p class="ev-caption" id="ev-caption">'+escapeHtml(planCaption(auto))+'</p>' +
       '<p class="ev-caveat">All IVs fixed at ' + TRAINING_IV +
         '. Each 4 EVs contribute 1 stat point before Nature; a Pokémon can hold 510 EVs, ' +
         'but only 508 matter in 4-point steps. Nature is applied once, after IVs and EVs. ' +
-        'This training does not affect the original 535 BST or the exported personality card.</p>' +
+        'This training does not affect the original 600 BST or the exported personality card.</p>' +
     '</section>'
   );
   const panel = container.querySelector('#ev-trainer');
@@ -67,12 +71,14 @@ export function renderTrainingPanel(build, container, { initialEvs = null, onCha
     panel.querySelector('#ev-caption').textContent = 'Custom training spread · still the same Pokémon.';
     update();
   }));
-  panel.querySelector('#ev-suggest').addEventListener('click', () => {
-    evs = [...suggested];
-    panel.querySelector('#ev-caption').textContent =
-      'Suggested ' + build.role.primary.name + ' spread. Change anything you like.';
+  const applyPlan=p=>{
+    evs=[...p.evs];
+    panel.querySelector('#ev-caption').textContent=planCaption(p);
     update();
-  });
+  };
+  panel.querySelector('#ev-suggest').addEventListener('click',()=>applyPlan(auto));
+  panel.querySelector('#ev-reinforce')?.addEventListener('click',()=>applyPlan(reinforce));
+  panel.querySelector('#ev-compensate')?.addEventListener('click',()=>applyPlan(compensate));
   panel.querySelector('#ev-reset').addEventListener('click', () => {
     evs = emptyTrainingEvs();
     panel.querySelector('#ev-caption').textContent = 'Untrained spread · allocate EVs to begin.';
