@@ -7,6 +7,10 @@
 - Replace unrelated Big Five absence-based stat proxies, preserve facet fallback, correct uniform cognitive endorsement and revise eight-function weights.
 - Retain 600 BST; widen stat bounds symmetrically to 40–160 and remove intermediate affinity clipping; existing shared profiles recalculate with the new model.
 
+- Classify tactical direction independently of intensity, add tempo/utility role variants and adaptive hybrids, and keep archetype role consistent.
+- Score signature target shortfalls instead of penalizing excess strength; improve continuous ability, move and held-item synergy.
+- Add adaptive EV training with selectable reinforcement and compensation approaches.
+
 ## Unreleased — Held-item creative flavor
 - Keep held items in the written personality and battle interpretation, but exclude them and item-derived visual motifs from species anatomy and illustration.
 
