@@ -135,3 +135,7 @@ this Veil with unsupported Baton Pass setup.
 
 All scoring remains deterministic, fictional and authored for game-design
 coherence; these are not validated personality measurements.
+
+### V3 directional stat fit
+
+The target values are desirable lower targets, not exact silhouettes. Score = 100 − 1.25 × mean positive shortfall, bounded to 0–100. Exceeding a desirable strength does not reduce fit. Solar Engine accepts either attack channel as the offensive target. Regenerative Scout and Sandbound Citadel no longer score Speed as a target: switching order and sand do not require a particular Speed. Existing hard minimum/maximum gates, motivation, typing, role and acceptance thresholds remain authoritative.
