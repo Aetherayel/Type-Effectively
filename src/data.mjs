@@ -109,8 +109,8 @@ export const STAT_KEYS = ['hp','atk','def','spa','spd','spe'];
 // Public power budget versus the stable role/move/strategy calibration scale.
 export const REFERENCE_STAT_TOTAL = 535;
 export const BASE_STAT_TOTAL = 600;
-export const BASE_STAT_MIN = Math.round(45*BASE_STAT_TOTAL/REFERENCE_STAT_TOTAL);
-export const BASE_STAT_MAX = Math.round(140*BASE_STAT_TOTAL/REFERENCE_STAT_TOTAL);
+export const BASE_STAT_MIN = 40;
+export const BASE_STAT_MAX = 160;
 export const STAT_AFFINITY_SCALE = 1.25;
 export const toReferenceStats = stats => Object.fromEntries(
   STAT_KEYS.map(key=>[key,Math.round(stats[key]*REFERENCE_STAT_TOTAL/BASE_STAT_TOTAL)])
