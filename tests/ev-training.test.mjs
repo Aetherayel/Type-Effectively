@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { DEMOS, STAT_KEYS } from '../src/data.mjs';
 import { generateBuild } from '../src/engine.mjs';
 import {
-  emptyTrainingEvs, level100Stats, suggestTrainingEvs,
+  emptyTrainingEvs, level100Stats, suggestTrainingEvs, trainingPlan,
   TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs
 } from '../src/ev-training.mjs';
 
@@ -57,7 +57,8 @@ test('all six tactical roles get deterministic, legal suggestions without changi
     }
     if (role === 'Sweeper') {
       assert.equal(evs[1], 252);
-      assert.equal(evs[5], 252);
+      assert.equal(evs[5], 0, 'very slow Sweepers can reinforce their offense instead of forcing Speed');
+      assert.equal(evs[0],252);
     }
     if (role === 'Controller') assert.equal(evs[5], 0, 'do not interfere with Trick Room speed');
   }
@@ -82,4 +83,20 @@ test('EV training operates downstream and leaves engine-computed characteristics
     role: build.role, nature: build.nature, types: build.types, archetype: build.archetype
   }, unchanged);
   assert.equal(STAT_KEYS.reduce((total, key) => total + build.baseStats[key], 0), 600);
+});
+
+test('V3 training differentiates a dedicated wall from a mixed wall, and supports both plans',()=>{
+  const build={role:{primary:{name:'Wall'}},effectiveStats:{hp:125,atk:55,def:155,spa:60,spd:80,spe:45}};
+  assert.deepEqual(trainingPlan(build).evs,[252,0,252,0,4,0]);
+  assert.deepEqual(trainingPlan(build,'compensate').evs,[252,0,4,0,252,0]);
+  assert.equal(trainingPlan(build).approach,'reinforce');
+  const slow={...build,role:{primary:{name:'Pivot'}}};
+  assert.equal(trainingPlan(slow).evs[5],0);
+  const fast={...build,role:{primary:{name:'Controller'}},effectiveStats:{...build.effectiveStats,spe:120}};
+  assert.equal(trainingPlan(fast).evs[5],252);
+  for(const mode of ['auto','reinforce','compensate']){
+    const trick={...fast,moves:[{name:'Trick Room'}]};
+    assert.equal(trainingPlan(trick,mode).evs[5],0);
+    assert.ok(validTrainingEvs(trainingPlan(trick,mode).evs));
+  }
 });
