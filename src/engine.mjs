@@ -3,7 +3,7 @@ import {
   MOVE_SYNERGIES, MOVE_PURPOSES, ROLE_PURPOSES, MBTI_TYPES, NATURE_EFFECTS, OCEAN_KEYS,
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
   BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS,
-  BASE_STAT_TOTAL, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
+  BASE_STAT_TOTAL, BASE_STAT_MIN, BASE_STAT_MAX, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
 } from './data.mjs?v=semantic-v3-1';
 import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
 import { classifyArchetype } from './archetypes.mjs';
@@ -171,7 +171,7 @@ export function mbtiAffinity(s) {
   ];
 }
 
-export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(45*total/REFERENCE_STAT_TOTAL), max = Math.round(140*total/REFERENCE_STAT_TOTAL), spreadGain = 1) {
+export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(BASE_STAT_MIN*total/BASE_STAT_TOTAL), max = Math.round(BASE_STAT_MAX*total/BASE_STAT_TOTAL), spreadGain = 1) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
   if (!Number.isFinite(spreadGain) || spreadGain <= 0) throw new Error('Positive finite spread gain required.');
