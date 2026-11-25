@@ -7,7 +7,7 @@ import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
 import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
-import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=v2-600-bst-1';
+import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=semantic-v3-1';
 import { renderRelatives } from './relatives-ui.mjs?v=v2-600-bst-1';
 import { getDefensiveMatchups } from './matchups.mjs';
 import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=community-beta-1';
@@ -561,7 +561,7 @@ function renderCard(build) {
         'Hidden affinity '+escapeHtml(build.hiddenType)+' comes chiefly from fix '+build.third+
         ', with support from fix '+build.second+(build.typingWing!=null?' and the wing. ':'; no wing is assumed. ')+
         'It differs from the visible type(s) and provides monotype move coverage. Your Hidden Ability is chosen separately from abilities compatible with your visible typing, role, stats and supporting motivations.</p>'+
-        '<p><strong>600 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled 0–100 affinities with the fixed 600 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. V3 amplifies pronounced signals, recognizes alternative pathways and uses a 1.5× stronger final spread. Cognitive functions use a provisional fixed pivot of 64 and a uniform-response correction; this is a game parameter, not a test average. The six stats are bounded and normalized to exactly 600. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
+        '<p><strong>600 base points:</strong> Each stat blends Big Five, all nine Enneagram motivations, and cognition with its own weights. Use the <em>Before normalization</em> toggle above to compare modeled, uncapped affinities with the fixed 600 BST allocation. Cognition uses '+(build.statWeightMode==='functions'?'all eight entered functions':build.statWeightMode==='percentages'?'entered 16Personalities percentages':'a lower-weight estimate from four MBTI letters')+'. V3 amplifies pronounced signals, recognizes alternative pathways and uses a 1.5× stronger final spread. Cognitive functions use a provisional fixed pivot of 64 and a uniform-response correction; this is a game parameter, not a test average. Intermediate affinities are not clipped; only the final six stats are bounded to 40–160 and normalized to exactly 600. Nature is scored independently from preference priorities; '+escapeHtml(build.nature)+' then applies ±10% to two non-HP stats.</p>'+
         '<div class="nature-factors">'+STAT_KEYS.map(key=>{
           const w=build.statWeights[key];
           return '<span>'+escapeHtml(STAT_NAMES[STAT_KEYS.indexOf(key)])+': '+Math.round(w.bigFive*100)+'% Big Five · '+Math.round(w.enneagram*100)+'% Enneagram · '+Math.round(w.cognition*100)+'% cognition</span>';
