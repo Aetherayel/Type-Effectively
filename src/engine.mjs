@@ -9,7 +9,7 @@ import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
-import { composeFieldReport } from './profile-analysis.mjs?v=v2-600-bst-1';
+import { composeFieldReport } from './profile-analysis.mjs?v=semantic-v3-1';
 import { deriveFunctionPreferences } from './functions.mjs';
 import { semanticFunctionAffinities, semanticBigFiveAffinities, semanticPercentageAffinities, SPREAD_GAIN } from './stat-model.mjs?v=semantic-v3-1';
 import {
