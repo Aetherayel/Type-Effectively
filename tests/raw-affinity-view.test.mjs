@@ -32,7 +32,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
     }
     assert.ok(Math.abs(rows.reduce((sum,row)=>sum+row.distance,0))<1e-8,
       'distance from own mean must sum to zero');
-    const recomputed=normalizeStats(rows.map(row=>row.affinity),600,40,160,SPREAD_GAIN);
+    const recomputed=normalizeStats(rows.map(row=>row.affinity),600,20,180,SPREAD_GAIN);
     for(const key of STAT_KEYS)assert.ok(Math.abs(recomputed[key]-b.baseStats[key])<=1,
       'display rounding must not disguise a different base build');
   }
