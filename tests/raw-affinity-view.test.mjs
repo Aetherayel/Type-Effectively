@@ -19,7 +19,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
     assert.equal(total(b),600);
     const {mean,rows}=affinityViewData(b);
     assert.equal(rows.length,6);
-    assert.ok(mean>=0&&mean<=100);
+    assert.ok(Number.isFinite(mean));
     for(const row of rows){
       const weights=row.weights,values=row.sources;
       const expected=weights.bigFive*values.bigFive+
@@ -28,7 +28,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
         row.key+' raw score must be the unnormalized weighted source blend');
       assert.ok(Math.abs(row.affinity-b.affinities[row.key])<=.5,
         'legacy integer compatibility affinity must remain the same signal');
-      assert.ok(row.affinity>=0&&row.affinity<=100);
+      assert.ok(Number.isFinite(row.affinity));
     }
     assert.ok(Math.abs(rows.reduce((sum,row)=>sum+row.distance,0))<1e-8,
       'distance from own mean must sum to zero');
@@ -93,4 +93,16 @@ test('invalid/incomplete raw affinity objects are rejected rather than inventing
     /Six unnormalized affinities/);
   assert.throws(()=>renderAffinityComparison({...b,sourceStatAffinities:{}}),
     /requires a complete scored build/);
+});
+
+test('diagnostic shows uncapped signed affinities on a shared adaptive axis',()=>{
+  const b=generateBuild({...full,mbtiScores:null,functionScores:[0,200,0,0,0,200,0,0]});
+  const raw={...b.rawStatAffinities,hp:-15,spa:175};
+  const markup=renderAffinityComparison({...b,rawStatAffinities:raw});
+  assert.match(markup,/-15\.0 <small>affinity/);
+  assert.match(markup,/175\.0 <small>affinity/);
+  assert.match(markup,/shared axis -15\.0 to 175\.0/);
+  assert.doesNotMatch(markup,/\/ 100<\/small>/);
+  for(const m of markup.matchAll(/(?:left|width):(-?[\d.]+)%/g))
+    assert.ok(+m[1]>=0&&+m[1]<=100);
 });
