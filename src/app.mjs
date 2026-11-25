@@ -16,7 +16,7 @@ import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 import { cardVersionFooter, normalizeBuildVersion } from './build-version.mjs';
 import { renderTrainingPanel } from './training-ui.mjs?v=1.3.0';
-import { renderCreatureWorkshop } from './creature-workshop.mjs?v=signature-workshop-1';
+import { renderCreatureWorkshop } from './creature-workshop.mjs?v=signature-workshop-2';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
