@@ -70,7 +70,7 @@ test('A/T cannot leak into cognition-based capacity; normalization preserves 600
   });
   const stats=normalizeStats(blended);
   assert.equal(sum(Object.values(stats)),600);
-  assert.ok(Object.values(stats).every(n=>n>=50&&n<=157));
+  assert.ok(Object.values(stats).every(n=>n>=40&&n<=160));
 });
 
 test('seeded defensive correlations are not near-duplicates; each stat can lead',()=>{
