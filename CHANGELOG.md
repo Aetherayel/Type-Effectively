@@ -5,7 +5,7 @@
 ## 3.0.0 — V3 semantic stat scoring
 - Separate reference calibration, nonlinear trait contrast, complementary/alternative pathways and final fixed-budget allocation.
 - Replace unrelated Big Five absence-based stat proxies, preserve facet fallback, correct uniform cognitive endorsement and revise eight-function weights.
-- Retain 600 BST; widen stat bounds symmetrically to 40–160 and remove intermediate affinity clipping; existing shared profiles recalculate with the new model.
+- Retain 600 BST; widen stat bounds symmetrically to 20–180 and remove intermediate affinity clipping; existing shared profiles recalculate with the new model.
 
 - Classify tactical direction independently of intensity, add tempo/utility role variants and adaptive hybrids, and keep archetype role consistent.
 - Score signature target shortfalls instead of penalizing excess strength; improve continuous ability, move and held-item synergy.
