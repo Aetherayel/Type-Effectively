@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { generateBuild, normalizeStats } from '../src/engine.mjs';
+import { SPREAD_GAIN } from '../src/stat-model.mjs';
 import { DEMOS, STAT_KEYS } from '../src/data.mjs';
 import { affinityViewData, renderAffinityComparison } from '../src/stat-affinity-ui.mjs';
 
@@ -31,7 +32,7 @@ test('raw pre-normalization affinities and source values are returned alongside 
     }
     assert.ok(Math.abs(rows.reduce((sum,row)=>sum+row.distance,0))<1e-8,
       'distance from own mean must sum to zero');
-    const recomputed=normalizeStats(rows.map(row=>row.affinity));
+    const recomputed=normalizeStats(rows.map(row=>row.affinity),600,50,157,SPREAD_GAIN);
     for(const key of STAT_KEYS)assert.ok(Math.abs(recomputed[key]-b.baseStats[key])<=1,
       'display rounding must not disguise a different base build');
   }
