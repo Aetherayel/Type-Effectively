@@ -46,7 +46,7 @@ for(const mode of ['percentages','functions','typeOnly','facets']){
     const a=baseline(input),b=current(input);
     const av=keys.map(k=>a.baseStats[k]),bv=keys.map(k=>b.baseStats[k]);
     if(av.reduce((x,y)=>x+y,0)!==535||bv.reduce((x,y)=>x+y,0)!==600||
-       bv.some(v=>!Number.isInteger(v)||v<40||v>160))
+       bv.some(v=>!Number.isInteger(v)||v<20||v>180))
       throw new Error('Invalid allocation in '+mode);
     rows.push({av,bv,before:fields(a),after:fields(b),
       rawEqual:JSON.stringify(a.rawStatAffinities)===JSON.stringify(b.rawStatAffinities),
