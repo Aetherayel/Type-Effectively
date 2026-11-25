@@ -88,7 +88,7 @@ test('self-contained downloadable card includes typing, base stats, role and abi
 });
 
 test('export card calls out primary or hybrid battle role without a duplicate subtitle',()=>{
-  const singleSvg=buildCardSvg(sample);
+  const singleSvg=buildCardSvg({...sample,role:{...sample.role,secondary:null}});
   assert.match(singleSvg,/>BATTLE ROLE<\/text>/);
   assert.match(singleSvg,new RegExp('>'+sample.role.primary.name+'<\\/text>'));
   assert.ok(!singleSvg.includes(sample.nature+' Nature · '+sample.ability.name+' Ability'));
@@ -98,8 +98,8 @@ test('export card calls out primary or hybrid battle role without a duplicate su
     ...sample,
     role:{...sample.role,secondary:{name:'Controller'}}
   });
-  assert.match(hybrid,/>Tank \/ Controller<\/text>/);
-  assert.doesNotMatch(hybrid,/>Quiet · Tank \/ Controller · Analytic<\/text>/);
+  assert.match(hybrid,new RegExp('>'+sample.role.primary.name+' / Controller<\\/text>'));
+  assert.doesNotMatch(hybrid,/>Quiet · [^<]+ · Analytic<\/text>/);
   assert.match(hybrid,/viewBox="0 0 960 1700"/);
 });
 
