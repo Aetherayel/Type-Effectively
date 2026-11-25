@@ -1,7 +1,7 @@
 import { ABILITIES, ROLE_MOVES, ROLE_PURPOSES, MOVE_PURPOSES } from './data.mjs';
 import { resolveBigFiveEvidence } from './bigfive-facets.mjs';
 import { HELD_ITEMS, ITEM_FAMILIES } from './held-items-data.mjs';
-import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs?v=signature-copy-29';
+import { isHeldItemCompatible, heldItemRationale } from './held-items.mjs?v=semantic-v3-1';
 
 const clamp=value=>Math.max(0,Math.min(100,value));
 const mean=values=>values.reduce((sum,n)=>sum+n,0)/values.length;
