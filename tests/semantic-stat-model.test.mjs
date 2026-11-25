@@ -77,21 +77,21 @@ test('finite uncapped framework affinities and 600 allocation hold across input 
     const input={enneagramScores:vec(9),bigFive:vec(5),...(i%2?{functionScores:vec(8)}:{mbtiScores:vec(5)})};
     if(i%3===0)input.bigFiveFacets=vec(30);
     const b=generateCompleteBuild(input),v=Object.values(b.baseStats);
-    assert.equal(sum(v),600);assert.ok(v.every(x=>Number.isInteger(x)&&x>=40&&x<=160));
+    assert.equal(sum(v),600);assert.ok(v.every(x=>Number.isInteger(x)&&x>=20&&x<=180));
     assert.ok(Object.values(b.rawStatAffinities).every(Number.isFinite));
     assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
     assert.equal(b.statModelVersion,'v3-semantic');
     assert.deepEqual(generateCompleteBuild(input).baseStats,b.baseStats);
     const affinities=Object.values(b.rawStatAffinities);
     const baseline=Object.values(normalizeStats(affinities));
-    const amplified=Object.values(normalizeStats(affinities,600,40,160,SPREAD_GAIN));
+    const amplified=Object.values(normalizeStats(affinities,600,20,180,SPREAD_GAIN));
     assert.ok(sd(amplified)+1>=sd(baseline));
   }
 });
 
-test('40–160 bounds are symmetric and reserve the same 600 BST for extreme shapes',()=>{
-  assert.deepEqual(Object.values(normalizeStats([100,100,100,0,0,0],600,undefined,undefined,SPREAD_GAIN)),[160,160,160,40,40,40]);
-  assert.deepEqual(Object.values(normalizeStats([0,0,0,100,100,100],600,undefined,undefined,SPREAD_GAIN)),[40,40,40,160,160,160]);
+test('20–180 bounds are symmetric and reserve the same 600 BST for extreme shapes',()=>{
+  assert.deepEqual(Object.values(normalizeStats([100,100,100,0,0,0],600,undefined,undefined,SPREAD_GAIN)),[180,180,180,20,20,20]);
+  assert.deepEqual(Object.values(normalizeStats([0,0,0,100,100,100],600,undefined,undefined,SPREAD_GAIN)),[20,20,20,180,180,180]);
 });
 
 test('source affinities preserve exceptional positive and negative signals before allocation',()=>{
@@ -106,7 +106,7 @@ test('source affinities preserve exceptional positive and negative signals befor
   assert.ok(b.sourceStatAffinities.spa.cognition>100);
   assert.ok(b.rawStatAffinities.spa>100);
   assert.equal(sum(Object.values(b.baseStats)),600);
-  assert.ok(Object.values(b.baseStats).every(x=>x>=40&&x<=160));
-  assert.equal(b.baseStats.spa,160);
+  assert.ok(Object.values(b.baseStats).every(x=>x>=20&&x<=180));
+  assert.equal(b.baseStats.spa,180);
   assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
 });
