@@ -2,6 +2,9 @@
 
 **Live release numbering:** PR #39 establishes **v2.1.0**, with subsequent merged PRs incrementing v2.1.x. PR #33 retains the historical v2.0.0 baseline. PR #32 retains the historical v1.4.0 baseline; earlier v1.1.x, v1.2.x and v1.3.x releases remain intact. Version tags are created only after the exact merge commit is confirmed live on GitHub Pages. See [Publishing via GitHub Pages](README.md#publishing-via-github-pages).
 
+## Unreleased — Illustration continuity
+- Make the finalized species specification the source of truth for standalone creature illustrations; preserve selected art styles and explicitly exclude cards, infographics and extra poses.
+
 ## Unreleased — Signature Pokémon Workshop
 - Add a post-training creature-design guide and one-click, self-contained prompt with optional inspirations and art direction. No scoring changes or AI integration.
 

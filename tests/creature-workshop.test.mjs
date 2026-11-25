@@ -32,3 +32,23 @@ test('workshop appears after training, before relatives, and uses clipboard hand
   assert.ok(app.indexOf("renderCreatureWorkshop(build,$('result-container')")<app.indexOf("renderRelatives(build,$('result-container')"));
   assert.match(app,/onCopy:prompt=>copyText\(prompt,/);
 });
+
+test('illustration follows the finalized species, not a separate interpretation of the build',()=>{
+  const p=buildCreaturePrompt(b,{style:'Classic pixel-art battle sprite'});
+  const deliverable=p.slice(p.indexOf('DELIVERABLE'));
+  const identity=deliverable.indexOf('1. Species identity:');
+  const design=deliverable.indexOf('2. Design specification:');
+  const illustration=deliverable.indexOf('3. Illustration:');
+  assert.ok(identity>=0 && identity<design && design<illustration);
+  assert.match(deliverable,/Finalize this exact species before generating any illustration/);
+  assert.match(deliverable,/finalized species specification as the primary visual source of truth/);
+  assert.match(deliverable,/explicitly include the finalized visual description and the chosen art style/);
+  assert.match(deliverable,/Do not substitute a different species, rename it, or introduce conflicting anatomical features/);
+  assert.match(deliverable,/one complete creature in a natural pose against a simple neutral background/);
+  assert.match(deliverable,/Keep the illustration separate from the written species profile/);
+  assert.match(deliverable,/Do not include text, statistics, typography, labels, type badges, borders, infographic panels, Pokédex cards/);
+  assert.match(deliverable,/additional poses, or unrelated scenery/);
+  assert.match(deliverable,/Follow the Art style specified in CREATIVE DIRECTION/);
+  assert.match(p,/Art style: Classic pixel-art battle sprite/);
+  assert.match(deliverable,/self-contained illustration prompt derived from the finalized species specification instead/);
+});
