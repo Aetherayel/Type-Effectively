@@ -1,5 +1,5 @@
 import { STAT_KEYS, STAT_NAMES, TYPE_COLORS } from './data.mjs';
-import { level100Stats, TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs } from './ev-training.mjs';
+import { level100Stats, TRAINING_IV, USABLE_EV_BUDGET, validTrainingEvs } from './ev-training.mjs?v=semantic-v3-1';
 import { renderStatRadar } from './radar.mjs?v=semantic-v3-1';
 import { loadItemSprite } from './item-sprites.mjs';
 import { cardArtDefinitions, renderTypeCornerArtwork, renderRoleWatermark } from './card-art.mjs?v=role-emblems-1';
