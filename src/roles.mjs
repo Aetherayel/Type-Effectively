@@ -24,6 +24,21 @@ export const WALL_VARIANTS=Object.freeze([
   Object.freeze([120,55,90,55,135,80])  // special bulwark
 ]);
 
+// Different tactical expressions of the same role. Each prototype totals
+// 535; its amplitude is irrelevant to the directional classifier.
+export const ROLE_DIRECTION_VARIANTS=Object.freeze({
+  Pivot:Object.freeze([
+    Object.freeze([105,65,95,65,90,115]), // fast, durable repositioning
+    Object.freeze([135,90,85,85,85,55])   // slow, HP-led safe switches
+  ]),
+  Support:Object.freeze([
+    Object.freeze([95,50,85,75,110,120]), // fast ally protection
+    Object.freeze([130,50,95,80,125,55])  // sustained ally protection
+  ]),
+  Controller:Object.freeze([
+    Object.freeze([85,60,95,120,125,50])  // slow disruption / Trick Room
+  ])
+});
 // Small differentiators on the *same base-stat shape*.
 // A Wall spends more on resilience than offense; a Tank requires both some
 // bulk and threatening offense. 100 and +15 are soft reference signals,
@@ -44,6 +59,7 @@ function roleTargets(role) {
         STAT_CENTER+ROLE_TEMPLATE_SCALE*(value-STAT_CENTER)));
     }
   }
+  targets.push(...(ROLE_DIRECTION_VARIANTS[role]||[]));
   return targets;
 }
 
