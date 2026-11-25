@@ -1,6 +1,6 @@
 # V3 semantic base-stat model
 
-This is a fictional game scoring calibration, not an assessment of capacity or a validated psychological model. Existing inputs and share links remain readable; recalculation intentionally changes stats and may change downstream role, ability, item, moves and archetype. Nature preferences and Enneagram typing are unchanged directly. The software release series remains independent of the stat model version.
+This is a fictional game scoring calibration, not an assessment of capacity or a validated psychological model. Existing inputs and share links remain readable; recalculation intentionally changes stats and may change downstream role, ability, item, moves and archetype. Nature preferences and Enneagram typing are unchanged directly. PR #45 establishes v3.0.0 as the release baseline; later merged PRs increment v3.0.x after verified publication.
 
 ## Pipeline and exact decisions
 
@@ -36,3 +36,15 @@ Seed 20261125, 2,000 independent 30-facet/8-function/9-Rowe profiles and another
 Independent cohort V3 mean stats: 99.05 / 97.79 / 98.76 / 102.77 / 99.71 / 101.92. Correlated-facet cohort: 101.20 / 98.18 / 100.32 / 99.50 / 100.62 / 100.16. The residual mean shifts and correlated-cohort boundary saturation merit review; no artificial quotas or source-specific offsets were applied. Completed source clipping can still discard extreme differences.
 
 This report is stat-level evidence, not the full CI result. The integration tests exercise the complete generator. Run npm test, npm run audit:v2 and the browser smoke script; compare the paired audit with the main baseline before merging.
+
+## Candidate boundary audit (not applied)
+
+Same 4,000 seeded profiles; only allocation limits changed. All candidates preserve exact 600 BST with zero invalid allocations. Individual-stat boundary frequency:
+
+| Bounds | Independent | Correlated facets | Correlated SD |
+|---|---:|---:|---:|
+| 50–157 (current) | 1.35% | 3.57% | 23.34 |
+| 40–160 | 0.44% | 1.63% | 23.68 |
+| 40–150 | 1.07% | 3.51% | 23.39 |
+
+40–160 is the recommended candidate: symmetric about neutral 100 and reduces clipping without materially changing the overall distribution. Bound change remains separate from the approved release numbering.
