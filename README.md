@@ -1,6 +1,6 @@
 # Type Effectively
 
-**Version 2.1.0 — Community Beta**
+**Version 3.0.0 — Semantic Stat Scoring**
 
 > **Know yourself. Know your weaknesses. Blame type matchups.**
 
@@ -371,9 +371,9 @@ The repository's [GitHub Actions workflow](.github/workflows/pages.yml) runs `np
 
 **Preview an open PR:** Branches do not automatically receive Pages URLs. For a temporary preview of the v2.0 scoring changes, use [the third-party RawGitHack development viewer for PR #33](https://raw.githack.com/Aetherayel/Type-Effectively/feature/personality-stat-recalibration/index.html). It serves the PR branch with correct web Content-Types; expect a few minutes of CDN cache delay after commits. It is not the official production origin or an independently deployed GitHub Pages preview. Check the PR's green GitHub Actions test before evaluating mechanics; do not treat its live-version marker as a published release number.
 
-**Automatic live releases (v2.1.x):** PR **#39** establishes **v2.1.0** upon merge and successful publication. Each later merged PR increments **v2.1.x** by merged-PR history, not arbitrary pushes or commits. PR #33 retains its historical v2.0.0 baseline. PR #32 retains its historical **v1.4.0** baseline. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
+**Automatic live releases (v3.0.x):** PR **#45** establishes **v3.0.0** upon merge and successful publication. Each later merged PR increments **v3.0.x** by merged-PR history, not arbitrary pushes or commits. PR #39 retains the historical v2.1.0 baseline and its v2.1.x releases. PR #33 retains its historical v2.0.0 baseline. PR #32 retains its historical **v1.4.0** baseline. Earlier v1.1.x, v1.2.x, and v1.3.x releases retain their historical tags. [The release workflow](.github/workflows/version-release.yml) waits until the **exact merge commit** is successfully published by GitHub Pages before creating its GitHub Release/tag. A failed publication does not count as a verified release.
 
-The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x, v1.4.x, v2.0.x and v2.1.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v2.1.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v2.1.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
+The small **version marker in the site header** and footer matches the commit SHA produced by GitHub Pages in `deploy-revision.json` against **v1.1.x, v1.2.x, v1.3.x, v1.4.x, v2.0.x, v2.1.x and v3.0.x** GitHub Releases. In local preview or when GitHub's API is unavailable, the page retains its bundled **v3.0.0** baseline marker. The lookup is non-blocking and sends no personality inputs. `package.json`, the HTML metadata, README, and changelog identify the **v3.0.0 feature baseline**; later published merges increment the live patch version without write-back version commits or a second deployment workflow.
 
 ## Project structure
 
