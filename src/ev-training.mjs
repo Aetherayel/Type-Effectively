@@ -29,36 +29,37 @@ export function level100Stats(baseStats, natureBoost, natureDrop, evs) {
   }));
 }
 
-// Deterministic, role-informed starting point rather than another personality score.
-// Weakest defense is favored for resilience; offensives use the actual Nature-adjusted shape.
-// A Controller keeps its Speed free for potential Trick Room tactics.
-export function suggestTrainingEvs(build) {
-  const role = build.role.primary.name;
-  const stats = build.effectiveStats;
-  const offense = stats.atk >= stats.spa ? 'atk' : 'spa';
-  const weakDefense = stats.def <= stats.spd ? 'def' : 'spd';
-  const otherDefense = weakDefense === 'def' ? 'spd' : 'def';
-  let primary, secondary, leftover;
-  switch (role) {
+// Training is post-result and never changes identity. A pronounced defensive
+// split reinforces the stronger side by default; mixed builds compensate.
+// Users can request either approach explicitly and can still edit every EV.
+export function trainingPlan(build,mode='auto') {
+  if(!['auto','reinforce','compensate'].includes(mode))throw new Error('Unknown training approach.');
+  const role=build.role.primary.name, stats=build.effectiveStats;
+  const offense=stats.atk>=stats.spa?'atk':'spa';
+  const weakDefense=stats.def<=stats.spd?'def':'spd';
+  const strongDefense=weakDefense==='def'?'spd':'def';
+  const trickRoom=(build.moves||[]).some(m=>(typeof m==='string'?m:m.name)==='Trick Room');
+  const split=Math.abs(stats.def-stats.spd);
+  const resolved=mode==='auto'?(split>=35?'reinforce':'compensate'):mode;
+  const defense=resolved==='reinforce'?strongDefense:weakDefense;
+  const other=defense==='def'?'spd':'def';
+  let primary,secondary,leftover;
+  switch(role){
     case 'Sweeper':
-      [primary, secondary, leftover] = [offense, 'spe', 'hp'];
-      break;
+      [primary,secondary,leftover]=[offense,trickRoom?'hp':'spe',trickRoom?defense:'hp'];break;
     case 'Tank':
-      [primary, secondary, leftover] = ['hp', offense, weakDefense];
-      break;
+      [primary,secondary,leftover]=['hp',offense,defense];break;
     case 'Pivot':
-      [primary, secondary, leftover] = ['spe', 'hp', offense];
-      break;
-    case 'Wall':
-    case 'Support':
-    case 'Controller':
+      // Slow switching can protect the incoming teammate; don't automatically
+      // spend 252 EVs trying to repair an extreme low-Speed silhouette.
+      [primary,secondary,leftover]=trickRoom||stats.spe<70?['hp',defense,offense]:['spe','hp',offense];break;
     default:
-      [primary, secondary, leftover] = ['hp', weakDefense, otherDefense];
-      break;
+      [primary,secondary,leftover]=['hp',defense,other];break;
   }
-  const result = emptyTrainingEvs();
-  for (const [key, points] of [[primary, 252], [secondary, 252], [leftover, 4]]) {
-    result[STAT_KEYS.indexOf(key)] = points;
-  }
-  return result;
+  const evs=emptyTrainingEvs();
+  for(const [key,points] of [[primary,252],[secondary,252],[leftover,4]])evs[STAT_KEYS.indexOf(key)]=points;
+  return {evs,approach:resolved,defensiveSplit:split,trickRoom};
+}
+export function suggestTrainingEvs(build,mode='auto') {
+  return trainingPlan(build,mode).evs;
 }
