@@ -231,13 +231,23 @@ const ABILITY_HINTS={
   9:['Regenerator','Sturdy','Unaware']
 };
 
-function abilityStatFit(item,stats) {
-  if(item.name==='Analytic' && stats.spe<80)return 15;
-  if(item.name==='Sturdy' && stats.def+stats.spd>=185)return 12;
-  if(item.name==='Technician' && stats.spe>=90)return 12;
-  if(item.name==='Speed Boost' && stats.spe>=100)return 12;
-  if(item.name==='Ice Scales' && stats.spd>=95)return 12;
-  return 0;
+// Continuous, capped ranking bonuses: preserve personality/type fit but
+// distinguish exceptional strengths from barely passing the old thresholds.
+export function abilityStatFit(item,stats) {
+  const ramp=(v,start,span=35)=>clamp((v-start)/span,0,1)*20;
+  const offense=Math.max(stats.atk,stats.spa);
+  const bulk=(stats.hp+stats.def+stats.spd)/3;
+  switch(item.name){
+    case 'Analytic': return ramp(100-stats.spe,10,40);
+    case 'Sturdy': return ramp((stats.def+stats.spd)/2,80);
+    case 'Speed Boost': return ramp(stats.spe,85);
+    case 'Ice Scales': return ramp(stats.spd,80);
+    case 'Adaptability': return ramp(offense,90);
+    case 'Guts': return stats.atk>=stats.spa?ramp(stats.atk,90):-10;
+    case 'Sheer Force': return ramp(offense,90);
+    case 'Regenerator': case 'Multiscale': return ramp(bulk,90);
+    default: return 0; // Technician depends on move power, not Speed.
+  }
 }
 
 function chooseAbility(role,types,stats,secondFix) {
@@ -316,12 +326,20 @@ function scoreMove(name,types,stats,second,third) {
     (affinity.fixes.includes(second)?21:0)+
     (affinity.fixes.includes(third)?11:0);
   for(const [key,moves] of Object.entries(MOVE_STAT_FIT)){
-    if(moves.includes(name) && stats[key]>=100)score+=12;
+    if(moves.includes(name))score+=clamp((stats[key]-85)*.65,0,24);
   }
   if(PHYSICAL_ATTACKS.has(name) && stats.spa>stats.atk)
-    score-=Math.min(35,Math.round((stats.spa-stats.atk)*.9));
+    score-=Math.min(45,Math.round((stats.spa-stats.atk)*.9));
   if(SPECIAL_ATTACKS.has(name) && stats.atk>stats.spa)
-    score-=Math.min(35,Math.round((stats.atk-stats.spa)*.9));
+    score-=Math.min(45,Math.round((stats.atk-stats.spa)*.9));
+  // A growth lesson remains selected from the core's curated choices, but
+  // strongly mismatched attack setup loses to mechanically useful alternatives.
+  if(PHYSICAL_SETUP.has(name) && stats.spa>stats.atk)
+    score-=Math.min(48,Math.max(0,stats.spa-stats.atk-12)*1.2);
+  if(SPECIAL_SETUP.has(name) && stats.atk>stats.spa)
+    score-=Math.min(48,Math.max(0,stats.atk-stats.spa-12)*1.2);
+  if(['Agility','Tailwind','Flame Charge','Dragon Dance'].includes(name))
+    score-=Math.min(24,Math.max(0,65-stats.spe)*.8);
   return score;
 }
 
@@ -605,7 +623,7 @@ export function generateBuild(input) {
     chooseHeldItem({
       tritype,core,second,third,wing:selectedWing,
       enneagramScores:enneaScores,bigFive:ocean,mbtiScores,
-      role,types,moves,ability,hasBigFive,facetContrasts,
+      role,types,moves,ability,stats:referenceEffectiveStats,hasBigFive,facetContrasts,
       facetScores:input.bigFiveFacets??null
     });
   const identity=mbti + (usingFunctions ? (identityPreference?'-'+identityPreference:'') :
