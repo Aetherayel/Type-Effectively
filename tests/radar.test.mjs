@@ -97,13 +97,13 @@ test('radar preserves Speed at bottom and Sp. Attack at upper-left', () => {
   assert.ok(upperLeft?.content.includes('>70</text>'));
 });
 
-test('157 base stats permit boosted Nature values above the base cap',()=>{
-  const base={hp:100,atk:157,def:80,spa:70,spd:70,spe:75};
-  const after={...base,atk:172,spe:67};
+test('160 base stats permit boosted Nature values above the base cap',()=>{
+  const base={hp:100,atk:160,def:80,spa:70,spd:70,spe:75};
+  const after={...base,atk:176,spe:67};
   const svg=renderStatRadar(base,after);
-  assert.match(svg,/Attack: after Nature 172, base 157/);
-  assert.match(svg,/>↑172<\/text>/);
-  assert.throws(()=>renderStatRadar(base,{...after,atk:173}),/valid post-Nature stats/);
+  assert.match(svg,/Attack: after Nature 176, base 160/);
+  assert.match(svg,/>↑176<\/text>/);
+  assert.throws(()=>renderStatRadar(base,{...after,atk:177}),/valid post-Nature stats/);
 });
 
 test('result markup keeps compact Nature, Battle Role and standard Ability line with no detailed stat block',()=>{
@@ -119,6 +119,6 @@ test('result markup keeps compact Nature, Battle Role and standard Ability line 
 test('radar polygons reject missing or out-of-range base stats', () => {
   assert.throws(()=>radarPolygon([50,50]),/six stats/);
   assert.throws(()=>renderStatRadar({hp:100}),/six valid base stats/);
-  assert.throws(()=>renderStatRadar({hp:100,atk:100,def:100,spa:100,spd:100,spe:158}),/six valid base stats/);
+  assert.throws(()=>renderStatRadar({hp:100,atk:100,def:100,spa:100,spd:100,spe:161}),/six valid base stats/);
   assert.equal(radarPolygon(Array(6).fill(0)).split(' ').length,6);
 });
