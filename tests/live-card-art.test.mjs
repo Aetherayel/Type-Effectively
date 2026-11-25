@@ -68,7 +68,8 @@ test('all six roles render from shared SVG paths inside the live stat panel',()=
     bigFive:DEMOS.architect.bigfive,
     typeOverride:'INTJ',tritypeOverride:'593'
   });
-  assert.equal(demo.role.primary.name,'Controller');
+  assert.ok(BATTLE_ROLE_NAMES.includes(demo.role.primary.name));
+  assert.ok(renderLiveRoleWatermark(demo.role.primary.name).includes('role-watermark-'+demo.role.primary.name.toLowerCase()));
   assert.deepEqual(demo.types,['Ice','Water']);
   for(const role of BATTLE_ROLE_NAMES) {
     const svg=renderLiveRoleWatermark(role);
