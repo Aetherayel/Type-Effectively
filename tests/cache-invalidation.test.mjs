@@ -11,7 +11,7 @@ test('application and scoring engine share a deliberate cache invalidation key',
   const scoring=app.match(/from '\.\/engine\.mjs\?v=([^']+)'/)?.[1];
   assert.ok(entry,'entry script needs a versioned module URL');
   assert.ok(scoring,'app must version the engine import');
-  assert.equal(entry,'signature-workshop-3','UI assets use the signature workshop cache key');
+  assert.equal(entry,'signature-workshop-4','UI assets use the signature workshop cache key');
   assert.equal(scoring,'v2-600-bst-1','unchanged engine retains the V2 scoring cache key');
   assert.notEqual(entry,'1.2.0','scoring engine must not reuse the pre-PR #27 cache key');
   assert.match(engine,/if\(growth==='Baton Pass' && !hasBatonPassSetup/);

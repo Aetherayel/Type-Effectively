@@ -62,3 +62,13 @@ test('written species profile is visibly delivered before image generation',()=>
   assert.match(deliverable,/The illustration supplements the written profile; it does not replace it/);
   assert.match(deliverable,/present the complete written profile and that illustration prompt first; do not silently omit the written deliverables/);
 });
+
+test('held item informs written personality and strategy but never creature appearance',()=>{
+  const p=buildCreaturePrompt(b);
+  assert.ok(p.includes(b.heldItem.name));
+  assert.match(p,/Held item \(personality flavor and battle mechanics only; not a visual design element\)/);
+  assert.match(p,/Use the held item only to inform personality, habits, motivations, and written battle strategy/);
+  assert.match(p,/Do not derive anatomy, coloration, markings, or visual motifs from the held item/);
+  assert.match(p,/Do not depict it as equipment, clothing, an accessory, a carried object, or part of the creature/);
+  assert.match(p,/Depict the creature itself without its held item or item-inspired visual elements/);
+});
