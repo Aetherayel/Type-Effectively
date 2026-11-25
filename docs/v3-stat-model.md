@@ -20,7 +20,7 @@ This is a fictional game scoring calibration, not an assessment of capacity or a
 | Sp. Def | 65 | 25 | 10 |
 | Speed | 45 | 25 | 30 |
 
-- Final allocation: center six blended affinities at 100 and multiply their deviations by 1.25 × 600/535 × 1.5. Preserve the bounded simplex and integer largest-remainder allocation, exact 600 BST and 50–157 bounds. The legacy normalizeStats helper's default scale remains unchanged for backwards comparison; the live generator explicitly passes SPREAD_GAIN.
+- Final allocation: center six blended affinities at 100 and multiply their deviations by 1.25 × 600/535 × 1.5. Preserve the bounded simplex and integer largest-remainder allocation, exact 600 BST and 40–160 bounds. The legacy normalizeStats helper's default scale remains unchanged for backwards comparison; the live generator explicitly passes SPREAD_GAIN.
 
 ## Numerical pre-integration stress test
 
@@ -37,14 +37,26 @@ Independent cohort V3 mean stats: 99.05 / 97.79 / 98.76 / 102.77 / 99.71 / 101.9
 
 This report is stat-level evidence, not the full CI result. The integration tests exercise the complete generator. Run npm test, npm run audit:v2 and the browser smoke script; compare the paired audit with the main baseline before merging.
 
-## Candidate boundary audit (not applied)
+## Final V3 boundary audit
 
 Same 4,000 seeded profiles; only allocation limits changed. All candidates preserve exact 600 BST with zero invalid allocations. Individual-stat boundary frequency:
 
 | Bounds | Independent | Correlated facets | Correlated SD |
 |---|---:|---:|---:|
-| 50–157 (current) | 1.35% | 3.57% | 23.34 |
+| 50–157 (initial prototype) | 1.35% | 3.57% | 23.34 |
 | 40–160 | 0.44% | 1.63% | 23.68 |
 | 40–150 | 1.07% | 3.51% | 23.39 |
 
-40–160 is the recommended candidate: symmetric about neutral 100 and reduces clipping without materially changing the overall distribution. Bound change remains separate from the approved release numbering.
+40–160 is the selected V3 boundary: symmetric about neutral 100 and reduces clipping without materially changing the overall distribution. The pre-integration stress test describes the original prototype with 50–157 bounds; final V3 uses 40–160.
+
+## Source affinity cap experiment (not applied)
+
+With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles found:
+
+| Source caps | Independent SD | Correlated SD | Independent boundary frequency | Correlated boundary frequency |
+|---|---:|---:|---:|---:|
+| Retained | 19.90 | 23.68 | 0.44% | 1.63% |
+| Remove Big Five only | 19.97 | 24.48 | 0.49% | 2.40% |
+| Remove Big Five and functions | 20.06 | 24.55 | 0.52% | 2.48% |
+
+All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. Source-cap changes remain exploratory, not included in this PR revision.
