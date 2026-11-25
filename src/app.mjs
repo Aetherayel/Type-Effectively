@@ -6,11 +6,11 @@ import { deriveMbti, deriveTritype, generateCompleteBuild, isValidTritype, norma
 import { FUNCTION_KEYS, deriveFunctionPreferences } from './functions.mjs';
 import { FACET_GROUPS, FACET_KEYS, validateFacetScores } from './bigfive-facets.mjs';
 import { NATURE_DIMENSIONS } from './nature.mjs';
-import { renderStatRadar } from './radar.mjs?v=v2-600-bst-1';
+import { renderStatRadar } from './radar.mjs?v=semantic-v3-1';
 import { renderAffinityComparison } from './stat-affinity-ui.mjs?v=semantic-v3-1';
 import { renderRelatives } from './relatives-ui.mjs?v=v2-600-bst-1';
 import { getDefensiveMatchups } from './matchups.mjs';
-import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=community-beta-1';
+import { downloadCardPng, downloadTrainedCardPng } from './export-card.mjs?v=semantic-v3-1';
 import { itemSpriteUrl } from './item-sprites.mjs';
 import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
