@@ -70,7 +70,7 @@ test('removed proxies cannot directly raise unrelated Big Five affinities',()=>{
   const next=semanticBigFiveAffinities(null,set(blank,'O5',95)).affinities;
   assert.ok(next[3]>base[3]);
 });
-test('completed framework affinity bounds and 600 allocation hold across input modes',()=>{
+test('finite uncapped framework affinities and 600 allocation hold across input modes',()=>{
   let seed=20261125;const rand=()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
   const vec=n=>Array.from({length:n},()=>Math.floor(rand()*101));
   for(let i=0;i<400;i++){
@@ -78,7 +78,7 @@ test('completed framework affinity bounds and 600 allocation hold across input m
     if(i%3===0)input.bigFiveFacets=vec(30);
     const b=generateCompleteBuild(input),v=Object.values(b.baseStats);
     assert.equal(sum(v),600);assert.ok(v.every(x=>Number.isInteger(x)&&x>=40&&x<=160));
-    assert.ok(Object.values(b.rawStatAffinities).every(x=>x>=0&&x<=100));
+    assert.ok(Object.values(b.rawStatAffinities).every(Number.isFinite));
     assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
     assert.equal(b.statModelVersion,'v3-semantic');
     assert.deepEqual(generateCompleteBuild(input).baseStats,b.baseStats);
@@ -92,4 +92,21 @@ test('completed framework affinity bounds and 600 allocation hold across input m
 test('40–160 bounds are symmetric and reserve the same 600 BST for extreme shapes',()=>{
   assert.deepEqual(Object.values(normalizeStats([100,100,100,0,0,0],600,undefined,undefined,SPREAD_GAIN)),[160,160,160,40,40,40]);
   assert.deepEqual(Object.values(normalizeStats([0,0,0,100,100,100],600,undefined,undefined,SPREAD_GAIN)),[40,40,40,160,160,160]);
+});
+
+test('source affinities preserve exceptional positive and negative signals before allocation',()=>{
+  const high=semanticBigFiveAffinities([100,100,100,100,0],null).affinities;
+  const low=semanticBigFiveAffinities([0,0,0,0,100],null).affinities;
+  high.forEach(x=>approx(x,125));low.forEach(x=>approx(x,-25));
+  const strong=semanticFunctionAffinities([0,200,0,0,0,200,0,0]);
+  assert.ok(strong[3]>100);assert.ok(strong.some(x=>x<0));
+  const stronger=semanticFunctionAffinities([0,220,0,0,0,220,0,0]);
+  assert.ok(stronger[3]>strong[3]);
+  const b=generateCompleteBuild({...profile,functionScores:[0,200,0,0,0,200,0,0]});
+  assert.ok(b.sourceStatAffinities.spa.cognition>100);
+  assert.ok(b.rawStatAffinities.spa>100);
+  assert.equal(sum(Object.values(b.baseStats)),600);
+  assert.ok(Object.values(b.baseStats).every(x=>x>=40&&x<=160));
+  assert.equal(b.baseStats.spa,160);
+  assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
 });
