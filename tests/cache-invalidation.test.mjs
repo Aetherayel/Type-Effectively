@@ -11,8 +11,8 @@ test('application and scoring engine share a deliberate cache invalidation key',
   const scoring=app.match(/from '\.\/engine\.mjs\?v=([^']+)'/)?.[1];
   assert.ok(entry,'entry script needs a versioned module URL');
   assert.ok(scoring,'app must version the engine import');
-  assert.equal(entry,'signature-workshop-4','UI assets use the signature workshop cache key');
-  assert.equal(scoring,'v2-600-bst-1','unchanged engine retains the V2 scoring cache key');
+  assert.equal(entry,'semantic-v3-1','UI assets use the V3 cache key');
+  assert.equal(scoring,'semantic-v3-1','changed engine uses the V3 scoring cache key');
   assert.notEqual(entry,'1.2.0','scoring engine must not reuse the pre-PR #27 cache key');
   assert.match(engine,/if\(growth==='Baton Pass' && !hasBatonPassSetup/);
 });
@@ -36,5 +36,6 @@ test('Nature engine, source data and new explanation styling cannot reuse old br
   assert.equal(entry,style);
   assert.equal(dataKey(app),dataKey(engine));
   assert.equal(dataKey(app),dataKey(nature));
-  assert.equal(dataKey(engine),'v2-600-bst-1');
+  assert.equal(dataKey(engine),'semantic-v3-1');
+  assert.match(engine,/stat-model\.mjs\?v=semantic-v3-1/);
 });
