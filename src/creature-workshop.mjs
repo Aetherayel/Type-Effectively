@@ -54,11 +54,12 @@ export function buildCreaturePrompt(build, preferences = {}) {
     'Complete the following in sequence: build data → finalized species specification → illustration.',
     '1. Species identity: Provide a memorable species name, its etymology, classification, and a concise Pokédex entry.',
     '2. Design specification: Establish the creature’s biological inspirations, anatomy (including the number and placement of limbs and distinctive appendages), silhouette, proportions, coloration, signature biological feature, and demeanor. Explain how these reflect the supplied build. Finalize this exact species before generating any illustration.',
+    'Before invoking image generation, present the complete written species identity and finalized design specification visibly to the user as ordinary response text. Do not fulfill the written deliverables solely within image-generation instructions or an image. The illustration supplements the written profile; it does not replace it.',
     '3. Illustration: Generate a standalone, full-body illustration of the exact species established above. Use the finalized species specification as the primary visual source of truth, rather than independently reinterpreting the original build. When handing off to an image generator, explicitly include the finalized visual description and the chosen art style.',
     'Preserve the established species identity, anatomy, silhouette, proportions, coloration and distinguishing features. Do not substitute a different species, rename it, or introduce conflicting anatomical features.',
     'Show one complete creature in a natural pose against a simple neutral background, with readable anatomy and a distinctive silhouette. Follow the Art style specified in CREATIVE DIRECTION.',
     'Keep the illustration separate from the written species profile. Do not include text, statistics, typography, labels, type badges, borders, infographic panels, Pokédex cards, stat sheets, character reference sheets, additional poses, or unrelated scenery.',
-    'If image generation is unavailable, provide a self-contained illustration prompt derived from the finalized species specification instead.',
+    'If image generation is unavailable, provide a self-contained illustration prompt derived from the finalized species specification instead. If the platform cannot present the written profile before invoking its image tool in the same response, present the complete written profile and that illustration prompt first; do not silently omit the written deliverables.' ,
     '', 'Source: Type Effectively — ' + cardVersionFooter(build) + '. Unofficial fan-inspired creative exercise.'
   ].filter(line => line !== null).join('\n');
 }
