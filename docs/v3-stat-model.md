@@ -60,3 +60,34 @@ With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles 
 | Remove Big Five and functions | 20.06 | 24.55 | 0.52% | 2.48% |
 
 All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. The final V3 removes the intermediate caps for all stat sources, retaining questionnaire validity checks, finite arithmetic checks, the 600 BST and 40–160 final base-stat limits. The centered Enneagram prototype range makes its former cap redundant. The diagnostic now shows signed uncapped affinities using a shared adaptive axis. Extreme cognitive totals can dominate the blend, deliberately; the fixed budget still limits final stats. No population rarity claim is inferred from the synthetic cohorts.
+
+## V3 downstream recalibration
+
+The 600 BST, 40–160 bounds, Nature, typing and stat-source formulas remain unchanged in this pass. All role calculations still use pre-Nature 535-reference units. Role shape is now centered cosine similarity mapped to 0–100; interpolate from neutral fit 80 to full directional evidence as reference SD rises from 0 to 15. Above 15, increasing amplitude along a direction no longer reduces fit. Retain the 80/20 shape/toolkit blend and small Wall/Tank adjustments. The hybrid margin decreases continuously from seven to five points over that same evidence range; specialization labels retain the 15 and 25 SD thresholds. Original role directions, physical/special Wall variants, fast and slow Pivot, fast and bulky Support, and slow Controller variants all remain authored tactical interpretations, not population quotas.
+
+Signature packages use mean positive stat shortfall, with existing hard stat, type, role and motivation gates preserved. Solar Engine requires one strong attacking channel, not both; remove unjustified Speed fit targets from Regenerative Scout and Sandbound Citadel. Ordinary abilities use continuous, at-most-20-point relevant-stat bonuses; Technician no longer receives a Speed bonus unrelated to its move-power effect. Tactical and growth moves receive continuous relevant-stat bonuses and bounded mismatch penalties; preserve the core's growth pool, role purpose and pair compatibility. Trick Room rejects Speed Boost and incompatible Speed-boosting moves. Ordinary held items gain a small, bounded six-point mechanical preference/penalty on top of their existing personality and role fit. Explicit signature equipment stays fixed.
+
+Archetype identity selects one of six operating styles matching the actual primary battle role; all 36 identities remain reachable. Role fit remains an input to the reported score, not another opportunity to override the battle role. Training remains post-result: defense split >=35 favors reinforcing specialization; mixed defenses favor compensation. Fast utility builds can invest in Speed, slow Pivots and very slow Sweepers can invest elsewhere, and Trick Room keeps Speed free. Explicit reinforcement and compensation plans remain legal, editable 252/252/4 starting spreads; the UI offers separate buttons only when the plans materially differ.
+
+### Paired 1,200-profile downstream audit
+
+Seed 20261125, 300 profiles per input mode (percentages/domain, functions/domain, percentages/facets, functions/facets), independent uniform integer domain/Enneagram/cognition inputs and facets with uniform ±30 noise around their parent domain. Compare uncapped V3 before this pass (commit 364777c) with final V3. This is a synthetic design stress test, not a prevalence estimate.
+
+| Metric | Prior V3 | Recalibrated V3 |
+|---|---:|---:|
+| Sweeper | 398 | 367 |
+| Wall | 329 | 254 |
+| Tank | 177 | 126 |
+| Pivot | 66 | 108 |
+| Support | 76 | 107 |
+| Controller | 154 | 238 |
+| Hybrid roles | 485 | 594 |
+| Signature packages | 177 | 261 |
+| Distinct signature packages | 11 | 12 |
+| Mean primary directional/template fit | 81.64 | 87.65 |
+| Primary fit below 50 | 4 | 0 |
+| Distinct held items | 59 | 55 |
+| Distinct standard abilities | 31 | 32 |
+| Generator/compatibility failures | 0 | 0 |
+
+The fit metrics use different scoring geometries and are not directly interchangeable psychological measurements. More Pivots and Supports are reachable; Controller also grows and Tank contracts. These are not equal-frequency targets. The post-change audit checks all four input modes, four unique moves, compatible items and move pairs, 600 BST, 40–160 limits, role-consistent archetypes, all three legal EV plans, and zero Speed EVs for Trick Room. 734/1,200 builds have different reinforcement/compensation allocations (including differences of just four EVs); the UI only exposes materially different alternatives. Held-item variety declines modestly, a known tradeoff of greater mechanical fit. The new regression file tests the full cohort and reachability, plus targeted invariants.
