@@ -20,7 +20,7 @@ This is a fictional game scoring calibration, not an assessment of capacity or a
 | Sp. Def | 65 | 25 | 10 |
 | Speed | 45 | 25 | 30 |
 
-- Final allocation: center six blended affinities at 100 and multiply their deviations by 1.25 × 600/535 × 1.5. Preserve the bounded simplex and integer largest-remainder allocation, exact 600 BST and 40–160 bounds. The legacy normalizeStats helper's default scale remains unchanged for backwards comparison; the live generator explicitly passes SPREAD_GAIN.
+- Final allocation: center six blended affinities at 100 and multiply their deviations by 1.25 × 600/535 × 1.5. Preserve the bounded simplex and integer largest-remainder allocation, exact 600 BST and 20–180 bounds. The legacy normalizeStats helper's default scale remains unchanged for backwards comparison; the live generator explicitly passes SPREAD_GAIN.
 
 ## Numerical pre-integration stress test
 
@@ -47,11 +47,11 @@ Same 4,000 seeded profiles; only allocation limits changed. All candidates prese
 | 40–160 | 0.44% | 1.63% | 23.68 |
 | 40–150 | 1.07% | 3.51% | 23.39 |
 
-40–160 is the selected V3 boundary: symmetric about neutral 100 and reduces clipping without materially changing the overall distribution. The pre-integration stress test describes the original prototype with 50–157 bounds; final V3 uses 40–160.
+40–160 was the intermediate V3 boundary. The final V3 uses 20–180, as audited below. The pre-integration stress test describes the original prototype with 50–157 bounds.
 
 ## Final source affinity cap audit
 
-With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles found:
+With intermediate 40–160 bounds, a paired stat-level test on the same 4,000 profiles found:
 
 | Source caps | Independent SD | Correlated SD | Independent boundary frequency | Correlated boundary frequency |
 |---|---:|---:|---:|---:|
@@ -59,7 +59,7 @@ With final 40–160 bounds, a paired stat-level test on the same 4,000 profiles 
 | Remove Big Five only | 19.97 | 24.48 | 0.49% | 2.40% |
 | Remove Big Five and functions | 20.06 | 24.55 | 0.52% | 2.48% |
 
-All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. The final V3 removes the intermediate caps for all stat sources, retaining questionnaire validity checks, finite arithmetic checks, the 600 BST and 40–160 final base-stat limits. The centered Enneagram prototype range makes its former cap redundant. The diagnostic now shows signed uncapped affinities using a shared adaptive axis. Extreme cognitive totals can dominate the blend, deliberately; the fixed budget still limits final stats. No population rarity claim is inferred from the synthetic cohorts.
+All cases preserved 600 BST. Amplified Big Five inputs have a natural affinity envelope of −25 to 125; eight-function raw totals have no equivalent enforced scale, so removing their cap can disproportionately magnify extreme input values. The final V3 removes the intermediate caps for all stat sources, retaining questionnaire validity checks, finite arithmetic checks, the 600 BST and then-current 40–160 base-stat limits. The centered Enneagram prototype range makes its former cap redundant. The diagnostic now shows signed uncapped affinities using a shared adaptive axis. Extreme cognitive totals can dominate the blend, deliberately; the fixed budget still limits final stats. No population rarity claim is inferred from the synthetic cohorts.
 
 ## V3 downstream recalibration
 
@@ -91,3 +91,16 @@ Seed 20261125, 300 profiles per input mode (percentages/domain, functions/domain
 | Generator/compatibility failures | 0 | 0 |
 
 The fit metrics use different scoring geometries and are not directly interchangeable psychological measurements. More Pivots and Supports are reachable; Controller also grows and Tank contracts. These are not equal-frequency targets. The post-change audit checks all four input modes, four unique moves, compatible items and move pairs, 600 BST, 40–160 limits, role-consistent archetypes, all three legal EV plans, and zero Speed EVs for Trick Room. 734/1,200 builds have different reinforcement/compensation allocations (including differences of just four EVs); the UI only exposes materially different alternatives. Held-item variety declines modestly, a known tradeoff of greater mechanical fit. The new regression file tests the full cohort and reachability, plus targeted invariants.
+
+## Final V3 expanded boundary audit
+
+After downstream recalibration, 4,000 paired synthetic complete builds (1,000 per quick/functions/facets/full input mode, seed 20261125) were tested while changing only the final allocation limits. All other scoring rules, Nature and typing remain unchanged. These are stress-test frequencies, not population estimates.
+
+| Bounds | Mean within-build SD | Builds at a boundary | Stats at a boundary |
+|---|---:|---:|---:|
+| 40–160 | 24.09 | 519/4000 | 607/24000 |
+| 30–170 | 24.37 | 195/4000 | 203/24000 |
+| 20–180 (selected) | 24.46 | 53/4000 | 54/24000 |
+| 1–595 | 24.49 | 1/4000 | 1/24000 |
+
+20–180 changes 464 base spreads, 26 primary roles, 14 signature assignments and 35 movesets versus 40–160. All 4,000 builds preserved exact 600 BST, four unique moves, compatible held items and legal suggested EVs. Extreme cognitive stress cases can yield 263 SpA or 332 Speed under unrestricted allocation; zero base stats also violate level-100 training's positive-stat contract. The selected symmetric limits preserve exceptional profiles without allowing one stat to consume nearly the whole budget. The live and exported radar use the shared 180 cap and allow post-Nature labels up to 198. The earlier downstream audit used 40–160; those historical results are retained above.
