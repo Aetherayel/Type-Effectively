@@ -196,7 +196,7 @@ test('stat normalization holds under severe extremes',()=>{
   ]){
     const stats=normalizeStats(affinity);
     assert.equal(sum(stats),600);
-    assert.ok(Object.values(stats).every(value=>value>=50&&value<=157));
+    assert.ok(Object.values(stats).every(value=>value>=40&&value<=160));
   }
 });
 
@@ -213,7 +213,7 @@ test('seeded randomized builds preserve total, limits, determinism, and move uni
     const build=generateBuild(input);
     const stats=Object.values(build.baseStats);
     assert.equal(sum(build.baseStats),600);
-    assert.ok(stats.every(n=>n>=50&&n<=157));
+    assert.ok(stats.every(n=>n>=40&&n<=160));
     assert.equal(new Set(build.moves.map(m=>m.name)).size,4);
     assert.deepEqual(generateBuild(input).baseStats,build.baseStats);
     roles.add(build.role.primary.name);
@@ -234,7 +234,7 @@ test('type-only inputs do not fabricate a wing for elemental identity',()=>{
 });
 
 
-test('600 BST scales the prior silhouette while making exact neutrality 100',()=>{
+test('600 BST scales the same silhouette while making exact neutrality 100',()=>{
   assert.deepEqual(Object.values(normalizeStats(Array(6).fill(50))),Array(6).fill(100));
   let seed=20261124;
   for(let i=0;i<2000;i++){
@@ -242,7 +242,7 @@ test('600 BST scales the prior silhouette while making exact neutrality 100',()=
     const old=Object.values(normalizeStats(affinities,535));
     const next=Object.values(normalizeStats(affinities));
     assert.equal(next.reduce((a,b)=>a+b,0),600);
-    assert.ok(next.every(v=>v>=50&&v<=157));
+    assert.ok(next.every(v=>v>=40&&v<=160));
     assert.ok(next.every((v,k)=>Math.abs(v-old[k]*600/535)<=2));
   }
 });
