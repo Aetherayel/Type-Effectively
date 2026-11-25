@@ -5,7 +5,7 @@
 ## 3.0.0 — V3 semantic stat scoring
 - Separate reference calibration, nonlinear trait contrast, complementary/alternative pathways and final fixed-budget allocation.
 - Replace unrelated Big Five absence-based stat proxies, preserve facet fallback, correct uniform cognitive endorsement and revise eight-function weights.
-- Retain the 600 BST and stat bounds; existing shared profiles recalculate with the new model.
+- Retain 600 BST; widen stat bounds symmetrically to 40–160; existing shared profiles recalculate with the new model.
 
 ## Unreleased — Held-item creative flavor
 - Keep held items in the written personality and battle interpretation, but exclude them and item-derived visual motifs from species anatomy and illustration.
