@@ -40,13 +40,18 @@ export function trainingPlan(build,mode='auto') {
   const strongDefense=weakDefense==='def'?'spd':'def';
   const trickRoom=(build.moves||[]).some(m=>(typeof m==='string'?m:m.name)==='Trick Room');
   const split=Math.abs(stats.def-stats.spd);
-  const resolved=mode==='auto'?(split>=35?'reinforce':'compensate'):mode;
+  const fastUtility=['Support','Controller'].includes(role)&&stats.spe>=115&&!trickRoom;
+  const slowOffense=role==='Sweeper'&&stats.spe<70;
+  const resolved=mode==='auto'?((split>=35||fastUtility||slowOffense)?'reinforce':'compensate'):mode;
   const defense=resolved==='reinforce'?strongDefense:weakDefense;
   const other=defense==='def'?'spd':'def';
   let primary,secondary,leftover;
   switch(role){
     case 'Sweeper':
-      [primary,secondary,leftover]=[offense,trickRoom?'hp':'spe',trickRoom?defense:'hp'];break;
+      {
+        const preserveSpeed=trickRoom||(slowOffense&&resolved==='reinforce');
+        [primary,secondary,leftover]=[offense,preserveSpeed?'hp':'spe',preserveSpeed?defense:'hp'];break;
+      }
     case 'Tank':
       [primary,secondary,leftover]=['hp',offense,defense];break;
     case 'Pivot':
@@ -54,7 +59,7 @@ export function trainingPlan(build,mode='auto') {
       // spend 252 EVs trying to repair an extreme low-Speed silhouette.
       [primary,secondary,leftover]=trickRoom||stats.spe<70?['hp',defense,offense]:['spe','hp',offense];break;
     default:
-      [primary,secondary,leftover]=['hp',defense,other];break;
+      [primary,secondary,leftover]=fastUtility&&resolved==='reinforce'?['hp','spe',defense]:['hp',defense,other];break;
   }
   const evs=emptyTrainingEvs();
   for(const [key,points] of [[primary,252],[secondary,252],[leftover,4]])evs[STAT_KEYS.indexOf(key)]=points;
