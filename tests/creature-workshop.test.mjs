@@ -52,3 +52,13 @@ test('illustration follows the finalized species, not a separate interpretation 
   assert.match(p,/Art style: Classic pixel-art battle sprite/);
   assert.match(deliverable,/self-contained illustration prompt derived from the finalized species specification instead/);
 });
+
+test('written species profile is visibly delivered before image generation',()=>{
+  const p=buildCreaturePrompt(b);
+  const deliverable=p.slice(p.indexOf('DELIVERABLE'));
+  const visible=deliverable.indexOf('Before invoking image generation, present the complete written species identity and finalized design specification visibly to the user as ordinary response text.');
+  assert.ok(visible>deliverable.indexOf('2. Design specification:') && visible<deliverable.indexOf('3. Illustration:'));
+  assert.match(deliverable,/Do not fulfill the written deliverables solely within image-generation instructions or an image/);
+  assert.match(deliverable,/The illustration supplements the written profile; it does not replace it/);
+  assert.match(deliverable,/present the complete written profile and that illustration prompt first; do not silently omit the written deliverables/);
+});
