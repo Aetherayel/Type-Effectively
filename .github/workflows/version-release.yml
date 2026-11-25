@@ -78,7 +78,30 @@ jobs:
               v21_after=true
             fi
           fi
-          if [ "$PR_NUMBER" = "39" ]; then
+          # PR #45 establishes the semantic scoring baseline.
+          v30_at=$(gh api "repos/$GITHUB_REPOSITORY/pulls/45" --jq '.merged_at // empty')
+          v30_after=false
+          if [ -n "$v30_at" ]; then
+            if [[ "$MERGED_AT" > "$v30_at" ]] || \
+              { [[ "$MERGED_AT" == "$v30_at" ]] && [ "$PR_NUMBER" -gt 45 ]; }; then
+              v30_after=true
+            fi
+          fi
+          if [ "$PR_NUMBER" = "45" ]; then
+            tag=v3.0.0
+          elif [ "$v30_after" = true ]; then
+            patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" | \
+              jq -s --arg baseline "$v30_at" \
+                --arg merged "$MERGED_AT" --argjson number "$PR_NUMBER" \
+                '[.[][] | select(.merged_at != null and
+                  (.merged_at > $baseline or (.merged_at == $baseline and .number > 45)) and
+                  (.merged_at < $merged or (.merged_at == $merged and .number <= $number)))] | length')
+            if [ "$patch" -lt 1 ]; then
+              echo "::error::Could not count merged PRs since the v3.0.0 baseline."
+              exit 1
+            fi
+            tag="v3.0.$patch"
+          elif [ "$PR_NUMBER" = "39" ]; then
             tag=v2.1.0
           elif [ "$v21_after" = true ]; then
             patch=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=main&per_page=100" | \
