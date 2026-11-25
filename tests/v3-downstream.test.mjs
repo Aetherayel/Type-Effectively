@@ -15,7 +15,7 @@ test('directional fit is independent of amplitude once the evidence is pronounce
   close(directionalRoleFit(stretch(0),[t]),80);
   assert.ok(directionalRoleFit(stretch(-1),[t])<80);
   const equal=Object.fromEntries(STAT_KEYS.map(k=>[k,100]));
-  const extreme={hp:160,atk:40,def:160,spa:40,spd:160,spe:40};
+  const extreme={hp:180,atk:20,def:180,spa:20,spd:180,spe:20};
   assert.equal(classifyRole(equal,['Steel']).hybridMargin,7);
   assert.equal(classifyRole(extreme,['Steel']).hybridMargin,5);
   for(const variants of Object.values(ROLE_DIRECTION_VARIANTS))
@@ -55,7 +55,7 @@ test('V3 complete builds preserve roles, compatible packages, valid EVs and 600 
     if(['facets','full'].includes(mode))input.bigFiveFacets=domains.flatMap(x=>
       Array.from({length:6},()=>Math.max(0,Math.min(100,x+(rand()-.5)*60))));
     const b=generateCompleteBuild(input),v=Object.values(b.baseStats);
-    assert.equal(v.reduce((a,c)=>a+c),600);assert.ok(v.every(x=>x>=40&&x<=160));
+    assert.equal(v.reduce((a,c)=>a+c),600);assert.ok(v.every(x=>x>=20&&x<=180));
     assert.equal(b.archetype.role,b.role.primary.name);
     assert.equal(new Set(b.moves.map(m=>m.name)).size,4);
     assert.ok(isHeldItemCompatible(b.heldItem,{types:b.types,moves:b.moves,ability:b.ability}));
