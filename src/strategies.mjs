@@ -124,10 +124,17 @@ function motivationFit(strategy,{core,second,third}) {
     (strategy.motivations.includes(second)?25:0)+
     (strategy.motivations.includes(third)?15:0));
 }
-function statFit(strategy,stats) {
-  const deviations=Object.entries(strategy.targets).map(([stat,target])=>
-    Math.abs(stats[stat]-target));
-  return clamp(100-1.25*mean(deviations));
+// Targets are desirable minimums, not exact silhouettes. True upper-bound
+// requirements still live in maximum gates; no current package requires an
+// exact stat value. Solar Engine can use either attacking channel.
+export function signatureStatFit(strategy,stats) {
+  const targets=Object.entries(strategy.targets).filter(([stat])=>
+    !(strategy.id==='solar-engine' && ['atk','spa'].includes(stat)) &&
+    !(['regenerative-scout','sandbound-citadel'].includes(strategy.id) && stat==='spe'));
+  const shortfalls=targets.map(([stat,target])=>Math.max(0,target-stats[stat]));
+  if(strategy.id==='solar-engine')
+    shortfalls.push(Math.max(0,Math.max(strategy.targets.atk,strategy.targets.spa)-Math.max(stats.atk,stats.spa)));
+  return clamp(100-1.25*mean(shortfalls));
 }
 function traitFit(strategy,bigFive) {
   return clamp(100-.9*mean(bigFive.map((value,i)=>
@@ -166,7 +173,7 @@ export function selectSignatureStrategy({
   if(!Array.isArray(types)||!role?.primary?.name||!stats||
       !Array.isArray(bigFive)||bigFive.length!==5)return null;
   const eligible=SIGNATURE_STRATEGIES.flatMap(strategy=>{
-    // A classified secondary role is a close hybrid (within five role points).
+    // A classified secondary role is a close hybrid under the role evidence margin.
     // Prefer the primary role if both match a package's eligible roles.
     const matchedRole=[role.primary,role.secondary].find(candidate=>
       candidate && strategy.roles.includes(candidate.name));
@@ -182,7 +189,7 @@ export function selectSignatureStrategy({
       throw new Error('Signature strategy has an invalid tactic/role mapping: '+strategy.id);
     const motive=motivationFit(strategy,{core,second,third});
     if(motive<55)return []; // A thematic match alone cannot force a specialist.
-    const tacticalFit=statFit(strategy,stats);
+    const tacticalFit=signatureStatFit(strategy,stats);
     const temperament=hasBigFive?traitFit(strategy,bigFive):55;
     const planningFit=strategy.planningStyle==='prepared-protection'
       ? protectivePlanningFit({mbtiScores,bigFive,bigFiveFacets})
