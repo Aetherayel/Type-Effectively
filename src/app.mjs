@@ -16,6 +16,7 @@ import { generateRandomBuildInput } from './random-build.mjs';
 import { renderLiveCornerArtwork, renderLiveRoleWatermark } from './card-art.mjs?v=role-emblems-1';
 import { cardVersionFooter, normalizeBuildVersion } from './build-version.mjs';
 import { renderTrainingPanel } from './training-ui.mjs?v=1.3.0';
+import { renderCreatureWorkshop } from './creature-workshop.mjs?v=signature-workshop-1';
 
 const $ = id => document.getElementById(id);
 const mbtiAxes=[
@@ -652,6 +653,7 @@ function renderCard(build) {
     initialEvs:state.lastTrainingEvs,
     onChange:evs=>{state.lastTrainingEvs=evs;}
   });
+  renderCreatureWorkshop(build,$('result-container'),{onCopy:prompt=>copyText(prompt,'Creature prompt copied. Ready to paste.')});
   // Optional real-Pokémon comparisons load only after the base build is complete.
   void renderRelatives(build,$('result-container'));
 }
