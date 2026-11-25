@@ -4,15 +4,16 @@ import {
   GENERATED_TYPES, TYPE_AFFINITY, ROLE_MOVES,
   BASE_STAT_WEIGHTS, ENNEAGRAM_STAT_BASELINE, STAT_KEYS, TYPE_ATTACKS,
   BASE_STAT_TOTAL, REFERENCE_STAT_TOTAL, STAT_AFFINITY_SCALE, toReferenceStats
-} from './data.mjs?v=v2-600-bst-1';
+} from './data.mjs?v=semantic-v3-1';
 import { chooseHeldItem } from './held-items.mjs?v=v2-600-bst-1';
 import { classifyArchetype } from './archetypes.mjs';
 import { classifyNature } from './nature.mjs';
 import { classifyRole } from './roles.mjs?v=v2-600-bst-1';
 import { composeFieldReport } from './profile-analysis.mjs?v=v2-600-bst-1';
-import { deriveFunctionPreferences, deriveFunctionStatAffinities } from './functions.mjs';
+import { deriveFunctionPreferences } from './functions.mjs';
+import { semanticFunctionAffinities, semanticBigFiveAffinities, semanticPercentageAffinities, SPREAD_GAIN } from './stat-model.mjs?v=semantic-v3-1';
 import {
-  refineBigFiveAffinities, facetContrastMap, resolveBigFiveEvidence,
+  facetContrastMap, resolveBigFiveEvidence,
   hasCompleteBigFiveEvidence
 } from './bigfive-facets.mjs';
 import { selectSignatureStrategy, signatureAbility, signatureHeldItem } from './strategies.mjs?v=v2-600-bst-1';
@@ -170,11 +171,12 @@ export function mbtiAffinity(s) {
   ];
 }
 
-export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(45*total/REFERENCE_STAT_TOTAL), max = Math.round(140*total/REFERENCE_STAT_TOTAL)) {
+export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.round(45*total/REFERENCE_STAT_TOTAL), max = Math.round(140*total/REFERENCE_STAT_TOTAL), spreadGain = 1) {
   if (affinities.length !== 6 || affinities.some(n=>!Number.isFinite(n))) throw new Error('Six numeric affinities required.');
   if (6*min > total || 6*max < total) throw new Error('Impossible stat bounds.');
+  if (!Number.isFinite(spreadGain) || spreadGain <= 0) throw new Error('Positive finite spread gain required.');
   const mean = average(affinities);
-  const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*(a-mean));
+  const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*spreadGain*(a-mean));
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
@@ -540,11 +542,9 @@ export function generateBuild(input) {
     hasMeasuredCognition:usingFunctions||input.mbtiScores!=null
   });
   const nature=natureScoring.name;
-  // Facet-first calculation: each available full facet group REPLACES the
-  // corresponding broad-domain term in the Big Five stat formula.
-  const facetScoring=refineBigFiveAffinities(
-    reportedOcean??(input.bigFiveFacets?null:ocean),
-    oceanAffinity(reportedOcean??ocean),input.bigFiveFacets
+  // V3: semantic facet-first affinities, nonlinear contrast, domain fallback.
+  const facetScoring=semanticBigFiveAffinities(
+    reportedOcean??(input.bigFiveFacets?null:ocean),input.bigFiveFacets
   );
   const facetContrasts=facetContrastMap(
     reportedOcean??(input.bigFiveFacets?null:ocean),input.bigFiveFacets
@@ -552,8 +552,8 @@ export function generateBuild(input) {
   const oa=facetScoring.affinities,ea=enneagramAffinity(enneaScores);
   // Use all eight measured functions when provided. The four contrasts remain
   // useful for Nature/identity, but are a lossy representation for base stats.
-  const ma=usingFunctions?deriveFunctionStatAffinities(input.functionScores):
-    mbtiAffinity(mbtiScores);
+  const ma=usingFunctions?semanticFunctionAffinities(input.functionScores):
+    semanticPercentageAffinities(mbtiScores);
   // Stat-specific evidence strength. Functions retain eight distinct signals,
   // percentage inputs retain four measured contrasts, and type-only inputs
   // receive conservative cognitive weights because they use 75/25 proxies.
@@ -564,7 +564,7 @@ export function generateBuild(input) {
     const w=statWeights[key];
     return w.bigFive*oa[i]+w.enneagram*ea[i]+w.cognition*ma[i];
   });
-  const baseStats=normalizeStats(blend);
+  const baseStats=normalizeStats(blend,BASE_STAT_TOTAL,undefined,undefined,SPREAD_GAIN);
   const effectiveStats=applyNature(baseStats,nature);
   // Ability/move/strategy thresholds were calibrated in 535-BST units.
   // Use the equivalent relative battle shape, not an across-the-board buff
@@ -621,7 +621,7 @@ export function generateBuild(input) {
     core, second, third, coreName:ENNEAGRAM_NAMES[core],title:'',
     types,hiddenType,monotype:types.length===1,ability,hiddenAbility,moves,role,heldItem,
     signatureStrategy,
-    baseStats,effectiveStats,statWeightMode,statWeights,
+    baseStats,effectiveStats,statWeightMode,statWeights,statModelVersion:'v3-semantic',
     // Preserve the precise, unnormalized blend separately from the original
     // rounded affinities. Raw affinities are game scores, not percentiles,
     // and never alter the fixed 600-BST allocation or downstream mechanics.
