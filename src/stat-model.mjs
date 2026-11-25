@@ -31,11 +31,11 @@ export function semanticFunctionAffinities(scores,reference=COGNITIVE_REFERENCE)
     50+.74*intuit+.26*ti,
     50+.45*mix([ti,fi,si],[.40,.35,.25]),
     50+.75*perception+.15*te+.10*fe
-  ].map(x=>clamp(x));
+  ];
 }
 const signal=x=>amplifyDeviation(x-50);
-// Preserve domain fallback, remove unrelated absence-based proxies. Bound
-// completed framework affinities, not individual amplified inputs.
+// Preserve domain fallback and remove unrelated absence-based proxies.
+// Keep signed, amplified source affinities intact until final BST allocation.
 export const SEMANTIC_FACET_COMPONENTS=Object.freeze({
   hp:[{d:'C',w:.65,keys:['C5','C4'],mix:[.65,.35]},{d:'N',w:.35,keys:['N6','N1'],mix:[.70,.30],reverse:true}],
   atk:[{d:'E',w:.55,keys:['E3','E4'],mix:[.80,.20]},{d:'C',w:.45,keys:['C1','C4'],mix:[.65,.35]}],
@@ -48,7 +48,7 @@ export function semanticBigFiveAffinities(domains,facets) {
   const evidence=resolveBigFiveEvidence(domains,facets);
   const active=new Set(evidence.activeDomains);
   function calculate(useFacets) {
-    return Object.values(SEMANTIC_FACET_COMPONENTS).map(parts=>clamp(50+parts.reduce((sum,p)=>{
+    return Object.values(SEMANTIC_FACET_COMPONENTS).map(parts=>50+parts.reduce((sum,p)=>{
       let v;
       if(useFacets&&active.has(p.d)) {
         const vals=p.keys.map(key=>evidence.facets[FACET_KEYS.indexOf(key)]).map(x=>p.reverse?100-x:x);
@@ -62,7 +62,7 @@ export function semanticBigFiveAffinities(domains,facets) {
         v=signal(p.reverse?100-raw:raw);
       }
       return sum+p.w*v;
-    },0)));
+    },0));
   }
   const affinities=calculate(true),baseline=domains?calculate(false):null;
   return {affinities,activeDomains:evidence.activeDomains,corrections:affinities.map((x,i)=>baseline?x-baseline[i]:null)};
@@ -72,5 +72,5 @@ export function semanticBigFiveAffinities(domains,facets) {
 export function semanticPercentageAffinities(scores) {
   const [i,n,f,p]=scores.slice(0,4).map(signal);
   return [50-.35*p+.20*i,50-.45*i-.35*f-.20*p,50-.45*p+.30*i-.25*f,
-    50+.60*n-.25*f+.15*i,50+.35*i-.30*p,50-.45*i+.35*p-.20*n].map(x=>clamp(x));
+    50+.60*n-.25*f+.15*i,50+.35*i-.30*p,50-.45*i+.35*p-.20*n];
 }
