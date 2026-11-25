@@ -157,7 +157,8 @@ export function classifyArchetype({enneagramScores,mbtiScores,bigFive,mbti,core,
   }).sort((a,b)=>b.score-a.score || a.index-b.index);
   // Operating style remains evidence-driven; the battle expression cannot
   // contradict the already classified primary role. All 36 names remain reachable.
-  const compatible=scored.filter(x=>x.candidate.role===role.primary.name);
+  const primary=role.primary?.name??[...role.all].sort((a,b)=>b.score-a.score)[0].name;
+  const compatible=scored.filter(x=>x.candidate.role===primary);
   const winner=compatible[0];
   return {
     ...winner.candidate,
