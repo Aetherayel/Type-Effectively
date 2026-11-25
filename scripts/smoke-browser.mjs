@@ -319,7 +319,7 @@ try{
     'all thirty facets must satisfy Big Five without reported broad domains');
   assert.ok(html.includes('data-facet-only-status="All 30 facets complete.'),
     'facet-only status must confirm that domain inputs are optional');
-  assert.ok(html.includes('data-card-version="CREATED v2.1.0"'),
+  assert.ok(html.includes('data-card-version="CREATED v3.0.0"'),
     'Card footer must show the bundled version when the build is generated');
   assert.ok(html.includes('data-verified-version="CREATED v2.0.8"'),
     'Card footer must update when the published release is verified');
