@@ -151,9 +151,9 @@ export function enneagramAffinity(scores) {
   // Remove unequal nine-type column priors before blending sources. Uniform
   // motivational scores produce 50 on every stat; deviations retain their
   // original type-specific distances and meaningful differentiation.
-  return STAT_KEYS.map((_,i)=>clamp(50+
+  return STAT_KEYS.map((_,i)=>50+
     weights.reduce((sum,w,j)=>sum+w*ENNEAGRAM_AFFINITIES[j+1][i],0)/total-
-    ENNEAGRAM_STAT_BASELINE[i]));
+    ENNEAGRAM_STAT_BASELINE[i]);
 }
 // Cognitive preferences are not capacities. Resilience and composure have
 // weak cognitive proxies, deliberately shrunk toward 50. 16P A/T is excluded
@@ -177,6 +177,7 @@ export function normalizeStats(affinities, total = BASE_STAT_TOTAL, min = Math.r
   if (!Number.isFinite(spreadGain) || spreadGain <= 0) throw new Error('Positive finite spread gain required.');
   const mean = average(affinities);
   const raw = affinities.map(a=>total/6+STAT_AFFINITY_SCALE*(total/REFERENCE_STAT_TOTAL)*spreadGain*(a-mean));
+  if(raw.some(n=>!Number.isFinite(n))) throw new Error('Affinity arithmetic exceeds the numeric range.');
   // Project onto the fixed-total, bounded six-stat simplex. Unlike one-way
   // clipping, this handles cases where several bounds are hit together.
   let low=min-Math.max(...raw)-1;
