@@ -216,7 +216,7 @@
         <div class="stat-guide-note">
           <h3>How the numbers work</h3>
           <p>Every build receives exactly <strong>600 base stat points</strong>. The spread emphasizes relative tendencies, not overall worth: higher Attack is not inherently better than lower Attack.</p>
-          <p>Each stat uses its own <strong>Big Five / Enneagram / cognition</strong> weights. With eight cognitive functions, cognition contributes <strong>10% to 50%</strong> depending on the stat. Entered 16Personalities percentages have less influence, and four-letter-only estimates less still. Expand the generated build explanation to see all six blends. Optional <strong>IPIP-NEO facets</strong> refine the existing Big Five contribution within entered domain groups; they never add a fourth source or extra stat points. The final stats are bounded and normalized, so they are not direct psychological test scores. Resilience is staying power, Fortitude resistance to disruption, and Composure emotional regulation: related, not interchangeable.</p>
+          <p>Each stat uses its own <strong>Big Five / Enneagram / cognition</strong> weights. With eight cognitive functions, cognition contributes <strong>5% to 40%</strong> depending on the stat; with entered 16Personalities percentages, it contributes <strong>5% to 25%</strong>. Expand the generated build explanation to see all six blends. Optional <strong>IPIP-NEO facets</strong> refine the existing Big Five contribution within entered domain groups; they never add a fourth source or extra stat points. The final stats are bounded and normalized, so they are not direct psychological test scores. Resilience is staying power, Fortitude resistance to disruption, and Composure emotional regulation: related, not interchangeable.</p>
         </div>
         <div class="stat-guide-note">
           <h3>Nature, OCEAN &amp; modifiers</h3>
@@ -224,6 +224,57 @@
           <p><strong>OCEAN</strong> stands for <strong>Openness, Conscientiousness, Extraversion, Agreeableness,</strong> and <strong>Neuroticism</strong> (emotional sensitivity). On shared cards, <strong>H</strong> means a score of 50 or higher and <strong>L</strong> means below 50; all 30 facets may also supply these indicators through the model's contextual scores.</p>
         </div>
       </div>
+      <details class="facet-panel" id="scoring-lab">
+        <summary>The scoring lab — for the stat nerds who stayed after class</summary>
+        <div class="stat-guide-note">
+          <p>You could have gone outside. Instead, you're investigating the mathematics of becoming a fictional creature. Excellent. Here's what's actually happening under the Poké Ball.</p>
+        </div>
+        <div class="stat-guide-notes">
+          <div class="stat-guide-note">
+            <h3>01 / Three instruments, three jobs</h3>
+            <p>Enneagram describes <strong>motivation</strong>, cognitive scores describe <strong>preferred ways of processing</strong>, and Big Five describes <strong>temperament</strong>. Each supplies evidence for different outcomes. All three are required; a four-letter label alone cannot carry the team.</p>
+            <p>Elemental typing uses an authored 9 × 17 Enneagram affinity matrix. Primary type is 88% core + 12% wing (100% core without a wing); secondary is 65% second fix + 30% third fix + 5% core. Both can independently pick the same element. Hidden affinity uses 60% third + 30% second + 10% wing (70/30 without a wing), excluding visible types. No dice rolls, and no mandatory second type just because it looks cooler.</p>
+            <p>For stats, all nine Enneagram scores matter. Each receives a weight of <code>max(0, score − 20)² + 16</code>. Strong motivations get a louder vote, but the rest are not evicted. The weighted stat affinities are centered against their nine-type prototype averages, so nine equal scores contribute 50 to every stat. Signed Rowe totals first undergo a relative-range conversion; ranking mode substitutes authored scores for ranks.</p>
+          </div>
+          <div class="stat-guide-note">
+            <h3>02 / The parts are more interesting than the labels</h3>
+            <p>Big Five uses domain scores or complete six-facet groups. Facets <strong>replace</strong> their parent domain's contribution rather than stacking another bonus. Ingenuity, for example, draws on Intellect, Imagination and Artistic Interests when Openness facets are supplied; enjoying conceptual puzzles needn't require an enthusiasm for spontaneous backpacking. Agreeableness affects other outcomes but is not a direct V3 base-stat input.</p>
+            <p>The eight-function route uses the actual function totals, not just the inferred letters. It contrasts scores around a provisional pivot of 64 and subtracts the transformed response of the person's own mean. Eight identical totals therefore produce neutral cognitive affinities, not eight simultaneous superpowers. The 64 is an engineering reference, <strong>not</strong> a measured average.</p>
+            <p>For a signed deviation <code>d</code>, both the Big Five (pivot 50) and cognitive models amplify contrast using <code>d × (1 + 0.5 × (d/50)²)</code> within ±50, then continue linearly at slope 2.5. The percentage cognition route uses its first four bipolar contrasts; A/T is excluded from base stats to avoid counting emotional sensitivity twice. Selected alternative pathways, such as Ni or Ne for Ingenuity, increasingly favor the stronger route when evidence is sufficiently high. Being good at one kind of conceptual thinking needn't require being good at every kind.</p>
+          </div>
+          <div class="stat-guide-note">
+            <h3>03 / The weighting committee</h3>
+            <p>Each framework produces six game affinities, with 50 as neutral. Each stat blends its three affinities using its own weights. The following triples are <strong>Big Five / Enneagram / cognition</strong>, in percent. They are design judgments, not statistical estimates of test reliability.</p>
+            <div class="stat-guide-grid" aria-label="Stat framework weights">
+              <div class="stat-guide-stat"><span class="stat-guide-code">HP</span><p>Functions: 60 / 35 / 5<br />Percentages: 65 / 30 / 5</p></div>
+              <div class="stat-guide-stat"><span class="stat-guide-code">ATK</span><p>Functions: 45 / 35 / 20<br />Percentages: 45 / 35 / 20</p></div>
+              <div class="stat-guide-stat"><span class="stat-guide-code">DEF</span><p>Functions: 40 / 45 / 15<br />Percentages: 40 / 45 / 15</p></div>
+              <div class="stat-guide-stat"><span class="stat-guide-code">SP. ATK</span><p>Functions: 35 / 25 / 40<br />Percentages: 45 / 30 / 25</p></div>
+              <div class="stat-guide-stat"><span class="stat-guide-code">SP. DEF</span><p>Functions: 65 / 25 / 10<br />Percentages: 65 / 25 / 10</p></div>
+              <div class="stat-guide-stat"><span class="stat-guide-code">SPEED</span><p>Functions: 45 / 25 / 30<br />Percentages: 50 / 25 / 25</p></div>
+            </div>
+            <p>For example, function-path Sp. Atk affinities of 70, 60 and 90 blend to <strong>75.5</strong> (0.35 × 70 + 0.25 × 60 + 0.40 × 90). That's an intermediate game score, not the final stat or a percentile. Source affinities are not clipped to 0–100; unusually strong evidence is allowed to remain unusually strong.</p>
+          </div>
+          <div class="stat-guide-note">
+            <h3>04 / The 600-point problem</h3>
+            <p>Once blended, the six affinities compete for a fixed budget. Let <code>a</code> be an affinity and <code>m</code> the mean of all six. The provisional base stat is <code>100 + (1.25 × 600/535 × 1.5) × (a − m)</code>. The multiplier is about 2.103: 1.25 is the reference spread, 600/535 rescales the old budget, and 1.5 amplifies V3 specialization.</p>
+            <p>A bounded allocation finds a shared adjustment so that every stat stays between <strong>20 and 180</strong> and the sum remains 600. Values are rounded down, then leftover points go to the largest fractional remainders, respecting the bounds. Simply clipping each stat independently would break the budget. The accountant in the lab coat insisted.</p>
+            <p>Example (HP / Atk / Def / Sp. Atk / Sp. Def / Speed): blended affinities <strong>60 / 50 / 50 / 70 / 40 / 30</strong> have a mean of 50. They become <strong>121 / 100 / 100 / 142 / 79 / 58</strong>. Total: 600. If all six affinities are equal, every stat is 100, even if the affinities themselves are high. You cannot min-max everything. That is called max-maxing, and the budget objects.</p>
+            <p>In results, switch the stat panel to <strong>Before normalization</strong> and expand its source breakdown to inspect your actual affinities and weights. A low final stat can reflect competition from stronger stats, not weak underlying evidence. A base stat of 100 is the budget midpoint, not a population average.</p>
+          </div>
+          <div class="stat-guide-note">
+            <h3>05 / Nature and the job interview</h3>
+            <p>Nature is a separate priority tradeoff: the model ranks 20 non-neutral Natures using motivation, cognitive preferences and temperament. The winning Nature multiplies one non-HP stat by 1.1 and another by 0.9, rounding down. The underlying 600 BST is unchanged; the modified sum need not equal 600.</p>
+            <p>Battle roles use <strong>pre-Nature</strong> stats. The engine compares centered stat shapes with role templates via cosine similarity, blending toward neutral fit when specialization is weak. Direction fit supplies 80% of the role score and elemental toolkit supplies 20%, before small Wall/Tank adjustments. Close scores can produce a hybrid role. A large number alone does not get you hired as a Sweeper.</p>
+          </div>
+          <div class="stat-guide-note">
+            <h3>06 / Why your moveset isn't just four attacks</h3>
+            <p>Abilities, signature strategies, moves and held items use the typing, role, relevant stats and personality evidence, with mechanical compatibility checks. Your four moves cover primary STAB, secondary STAB or coverage, role tactic and a core-motivation growth lesson. The last two are selected together so the growth move doesn't sabotage the game plan. Some builds qualify for coordinated signature packages.</p>
+            <p>The 36 archetypes combine six operating styles with six battle roles; V3 keeps the archetype's battle role aligned with the primary role. Archetypes and field reports interpret the completed build, not the other way around. Same inputs and same scoring version, same build. A random sample simply generates different inputs.</p>
+            <p>These numbers are inspectable, reproducible <strong>game-design heuristics</strong>, not fitted psychometric models or measurements of human worth. For the full equations and audit results, see the <a href="https://github.com/Aetherayel/Type-Effectively/blob/main/docs/v3-stat-model.md" target="_blank" rel="noopener noreferrer">V3 technical model</a> and <a href="https://github.com/Aetherayel/Type-Effectively/blob/main/src/stat-model.mjs" target="_blank" rel="noopener noreferrer">scoring source</a>. Congratulations on voluntarily opening the documentation. Your hidden ability may be Curiosity.</p>
+          </div>
+        </div>
+      </details>
       <p class="stat-guide-footnote">These are authored, game-inspired interpretations—not validated measures of resilience, intelligence, character, or mental health.</p>
     </section>
     <footer class="footer">
