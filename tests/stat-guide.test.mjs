@@ -20,7 +20,8 @@ test('interpretation guide is a static site section after results, before footer
 });
 
 test('all six Pokémon stats have clear human-facing interpretations',()=>{
-  const guide=page.slice(page.indexOf('<section class="stat-guide"'),page.indexOf('<footer class="footer">'));
+  const guide=page.slice(page.indexOf('<section class="stat-guide"'),page.indexOf('<details class="facet-panel" id="scoring-lab">'));
+  const footnote=page.match(/<p class="stat-guide-footnote">[^<]*<\/p>/)?.[0] ?? '';
   for(const [code,interpretation] of [
     ['HP','Resilience'],
     ['ATK','Assertion'],
@@ -35,12 +36,12 @@ test('all six Pokémon stats have clear human-facing interpretations',()=>{
   assert.equal((guide.match(/class="stat-guide-stat"/g)||[]).length,6);
   assert.ok(guide.includes('600 base stat points'));
   assert.ok(guide.includes('Big Five / Enneagram / cognition'));
-  assert.ok(guide.includes('10% to 50%'));
-  assert.ok(guide.includes('four-letter-only'));
+  assert.ok(guide.includes('5% to 40%'));
+  assert.ok(guide.includes('5% to 25%'));
   assert.ok(guide.includes('raises one non-HP stat by 10%'));
   assert.ok(guide.includes('Neuroticism'));
   assert.ok(guide.includes('score of 50 or higher'));
-  assert.ok(guide.includes('not validated measures'));
+  assert.ok(footnote.includes('not validated measures'));
 });
 
 test('guide is responsive and not included in downloadable PNG',()=>{
@@ -49,4 +50,14 @@ test('guide is responsive and not included in downloadable PNG',()=>{
   assert.ok(stylesheet.includes('@media(max-width:560px)'));
   assert.ok(!exportModule.includes('Understanding your stats'));
   assert.ok(!exportModule.includes('stat-guide'));
+});
+
+test('scoring lab is a closed-by-default disclosure within the field guide',()=>{
+  const section=page.indexOf('<section class="stat-guide" id="understanding-stats"');
+  const lab=page.match(/<details class="facet-panel" id="scoring-lab">([\s\S]*?)<\/details>/);
+  assert.ok(lab,'expected a native details element without the open attribute');
+  assert.ok(lab.index>section && lab.index<page.indexOf('<footer class="footer">'));
+  assert.match(lab[1],/^\s*<summary>[^<]+<\/summary>/);
+  assert.equal((lab[1].match(/<h3>0[1-6] \//g)||[]).length,6);
+  assert.equal((page.match(/id="scoring-lab"/g)||[]).length,1);
 });
