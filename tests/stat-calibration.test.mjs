@@ -116,6 +116,21 @@ test('user-facing score explanations match the weights',()=>{
   const index=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(app,/Each stat blends Big Five/);
   assert.match(app,/build\.statWeights\[key\]/);
-  assert.match(index,/10% to 50%/);
-  assert.match(index,/four-letter-only/);
+  for(const mode of ['functions','percentages']) {
+    const values=Object.values(BASE_STAT_WEIGHTS[mode]).map(row=>Math.round(row.cognition*100));
+    assert.ok(index.includes(Math.min(...values)+'% to '+Math.max(...values)+'%'),mode+' range differs from scoring source');
+  }
+  const lab=index.match(/<details class="facet-panel" id="scoring-lab">([\s\S]*?)<\/details>/)?.[1];
+  assert.ok(lab,'scoring lab missing');
+  const codes=['HP','ATK','DEF','SP. ATK','SP. DEF','SPEED'];
+  for(const [i,key] of STAT_KEYS.entries()) {
+    const cards=lab.split('<div class="stat-guide-stat">');
+    const card=cards.find(s=>s.includes('>'+codes[i]+'</span>'));
+    assert.ok(card,key+' weighting card missing');
+    for(const [mode,label] of [['functions','Functions'],['percentages','Percentages']]) {
+      const row=BASE_STAT_WEIGHTS[mode][key];
+      const expected=[row.bigFive,row.enneagram,row.cognition].map(n=>Math.round(n*100)).join(' / ');
+      assert.ok(card.includes(label+': '+expected),key+' '+mode+' weight mismatch');
+    }
+  }
 });
